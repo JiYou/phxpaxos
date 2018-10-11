@@ -7,3 +7,4 @@ RUN cd /opt && git clone https://github.com/JiYou/phxpaxos.git && cd phxpaxos &&
     ./autoinstall.sh
 RUN cd /opt/phxpaxos && ./autoinstall.sh && make && make install
 RUN cd /opt/phxpaxos && cd plugin && make && make install
+RUN cd /opt/phxpaxos && cd sample && make
