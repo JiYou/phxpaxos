@@ -32,15 +32,15 @@ using namespace std;
 
 namespace phxecho {
 
-PhxEchoServer :: PhxEchoServer(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
+PhxEchoServer::PhxEchoServer(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
   : m_oMyNode(oMyNode), m_vecNodeList(vecNodeList), m_poPaxosNode(nullptr) {
 }
 
-PhxEchoServer :: ~PhxEchoServer() {
+PhxEchoServer::~PhxEchoServer() {
   delete m_poPaxosNode;
 }
 
-int PhxEchoServer :: MakeLogStoragePath(std::string & sLogStoragePath) {
+int PhxEchoServer::MakeLogStoragePath(std::string & sLogStoragePath) {
   char sTmp[128] = {0};
   snprintf(sTmp, sizeof(sTmp), "./logpath_%s_%d", m_oMyNode.GetIP().c_str(), m_oMyNode.GetPort());
 
@@ -56,7 +56,7 @@ int PhxEchoServer :: MakeLogStoragePath(std::string & sLogStoragePath) {
   return 0;
 }
 
-int PhxEchoServer :: RunPaxos() {
+int PhxEchoServer::RunPaxos() {
   Options oOptions;
 
   int ret = MakeLogStoragePath(oOptions.sLogStoragePath);
@@ -79,7 +79,7 @@ int PhxEchoServer :: RunPaxos() {
 
   //use logger_google to print log
   LogFunc pLogFunc;
-  ret = LoggerGoogle :: GetLogger("phxecho", "./log", 3, pLogFunc);
+  ret = LoggerGoogle::GetLogger("phxecho", "./log", 3, pLogFunc);
   if (ret != 0) {
     printf("get logger_google fail, ret %d\n", ret);
     return ret;
@@ -98,7 +98,7 @@ int PhxEchoServer :: RunPaxos() {
   return 0;
 }
 
-int PhxEchoServer :: Echo(const std::string & sEchoReqValue, std::string & sEchoRespValue) {
+int PhxEchoServer::Echo(const std::string & sEchoReqValue, std::string & sEchoRespValue) {
   SMCtx oCtx;
   PhxEchoSMCtx oEchoSMCtx;
   //smid must same to PhxEchoSM.SMID().

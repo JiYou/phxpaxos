@@ -24,7 +24,7 @@ See the AUTHORS file for names of contributors.
 namespace phxpaxos {
 
 
-Group :: Group(LogStorage * poLogStorage,
+Group::Group(LogStorage * poLogStorage,
                NetWork * poNetWork,
                InsideSM * poMasterSM,
                const int iGroupIdx,
@@ -38,15 +38,15 @@ Group :: Group(LogStorage * poLogStorage,
   m_oConfig.SetMasterSM(poMasterSM);
 }
 
-Group :: ~Group() {
+Group::~Group() {
 }
 
-void Group :: StartInit() {
+void Group::StartInit() {
   m_poThread = new std::thread(&Group::Init, this);
   assert(m_poThread != nullptr);
 }
 
-void Group :: Init() {
+void Group::Init() {
   m_iInitRet = m_oConfig.Init();
   if (m_iInitRet != 0) {
     return;
@@ -59,42 +59,42 @@ void Group :: Init() {
   m_iInitRet = m_oInstance.Init();
 }
 
-int Group :: GetInitRet() {
+int Group::GetInitRet() {
   m_poThread->join();
   delete m_poThread;
 
   return m_iInitRet;
 }
 
-void Group :: Start() {
+void Group::Start() {
   m_oInstance.Start();
 }
 
-void Group :: Stop() {
+void Group::Stop() {
   m_oInstance.Stop();
 }
 
-Config * Group :: GetConfig() {
+Config * Group::GetConfig() {
   return &m_oConfig;
 }
 
-Instance * Group :: GetInstance() {
+Instance * Group::GetInstance() {
   return &m_oInstance;
 }
 
-Committer * Group :: GetCommitter() {
+Committer * Group::GetCommitter() {
   return m_oInstance.GetCommitter();
 }
 
-Cleaner * Group :: GetCheckpointCleaner() {
+Cleaner * Group::GetCheckpointCleaner() {
   return m_oInstance.GetCheckpointCleaner();
 }
 
-Replayer * Group :: GetCheckpointReplayer() {
+Replayer * Group::GetCheckpointReplayer() {
   return m_oInstance.GetCheckpointReplayer();
 }
 
-void Group :: AddStateMachine(StateMachine * poSM) {
+void Group::AddStateMachine(StateMachine * poSM) {
   m_oInstance.AddStateMachine(poSM);
 }
 

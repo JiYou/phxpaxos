@@ -25,20 +25,20 @@ using namespace phxpaxos;
 
 namespace phxkv {
 
-LoggerGuard :: LoggerGuard()
+LoggerGuard::LoggerGuard()
   : m_pLogFunc(nullptr) {
 }
 
-LoggerGuard :: ~LoggerGuard() {
+LoggerGuard::~LoggerGuard() {
 }
 
-LoggerGuard * LoggerGuard :: Instance() {
+LoggerGuard * LoggerGuard::Instance() {
   static LoggerGuard oLoggerGuard;
   return &oLoggerGuard;
 }
 
-int LoggerGuard :: Init(const std::string & sModuleName, const std::string & sLogPath, const int iLogLevel) {
-  int ret = LoggerGoogle :: GetLogger(sModuleName, sLogPath, iLogLevel, m_pLogFunc);
+int LoggerGuard::Init(const std::string & sModuleName, const std::string & sLogPath, const int iLogLevel) {
+  int ret = LoggerGoogle::GetLogger(sModuleName, sLogPath, iLogLevel, m_pLogFunc);
   if (ret != 0) {
     printf("get logger_google fail, ret %d\n", ret);
     return ret;
@@ -47,7 +47,7 @@ int LoggerGuard :: Init(const std::string & sModuleName, const std::string & sLo
   return 0;
 }
 
-phxpaxos::LogFunc LoggerGuard :: GetLogFunc() {
+phxpaxos::LogFunc LoggerGuard::GetLogFunc() {
   return m_pLogFunc;
 }
 

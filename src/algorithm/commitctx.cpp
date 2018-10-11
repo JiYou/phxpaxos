@@ -24,15 +24,15 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-CommitCtx :: CommitCtx(Config * poConfig)
+CommitCtx::CommitCtx(Config * poConfig)
   : m_poConfig(poConfig) {
   NewCommit(nullptr, nullptr, 0);
 }
 
-CommitCtx :: ~CommitCtx() {
+CommitCtx::~CommitCtx() {
 }
 
-void CommitCtx :: NewCommit(std::string * psValue, SMCtx * poSMCtx, const int iTimeoutMs) {
+void CommitCtx::NewCommit(std::string * psValue, SMCtx * poSMCtx, const int iTimeoutMs) {
   m_oSerialLock.Lock();
 
   m_llInstanceID = (uint64_t)-1;
@@ -51,21 +51,21 @@ void CommitCtx :: NewCommit(std::string * psValue, SMCtx * poSMCtx, const int iT
 }
 
 
-const bool CommitCtx :: IsNewCommit() const {
+const bool CommitCtx::IsNewCommit() const {
   return m_llInstanceID == (uint64_t)-1 && m_psValue != nullptr;
 }
 
-std::string & CommitCtx :: GetCommitValue() {
+std::string & CommitCtx::GetCommitValue() {
   return *m_psValue;
 }
 
-void CommitCtx :: StartCommit(const uint64_t llInstanceID) {
+void CommitCtx::StartCommit(const uint64_t llInstanceID) {
   m_oSerialLock.Lock();
   m_llInstanceID = llInstanceID;
   m_oSerialLock.UnLock();
 }
 
-bool CommitCtx :: IsMyCommit(const uint64_t llInstanceID, const std::string & sLearnValue,  SMCtx *& poSMCtx) {
+bool CommitCtx::IsMyCommit(const uint64_t llInstanceID, const std::string & sLearnValue,  SMCtx *& poSMCtx) {
   m_oSerialLock.Lock();
 
   bool bIsMyCommit = false;
@@ -83,11 +83,11 @@ bool CommitCtx :: IsMyCommit(const uint64_t llInstanceID, const std::string & sL
   return bIsMyCommit;
 }
 
-void CommitCtx :: SetResultOnlyRet(const int iCommitRet) {
+void CommitCtx::SetResultOnlyRet(const int iCommitRet) {
   return SetResult(iCommitRet, (uint64_t)-1, "");
 }
 
-void CommitCtx :: SetResult(
+void CommitCtx::SetResult(
   const int iCommitRet,
   const uint64_t llInstanceID,
   const std::string & sLearnValue) {
@@ -114,7 +114,7 @@ void CommitCtx :: SetResult(
 }
 
 
-int CommitCtx :: GetResult(uint64_t & llSuccInstanceID) {
+int CommitCtx::GetResult(uint64_t & llSuccInstanceID) {
   m_oSerialLock.Lock();
 
   while (!m_bIsCommitEnd) {
@@ -133,7 +133,7 @@ int CommitCtx :: GetResult(uint64_t & llSuccInstanceID) {
   return m_iCommitRet;
 }
 
-const int CommitCtx :: GetTimeoutMs() const {
+const int CommitCtx::GetTimeoutMs() const {
   return m_iTimeoutMs;
 }
 

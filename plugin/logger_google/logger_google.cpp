@@ -31,10 +31,10 @@ using namespace std;
 
 namespace phxpaxos {
 
-int LoggerGoogle :: GetLogger(const std::string & sModuleName, const std::string & sLogPath, const int iLogLevel, LogFunc & pLogFunc) {
+int LoggerGoogle::GetLogger(const std::string & sModuleName, const std::string & sLogPath, const int iLogLevel, LogFunc & pLogFunc) {
   google::InitGoogleLogging(sModuleName.c_str());
   FLAGS_log_dir = sLogPath;
-  FLAGS_stderrthreshold = google :: FATAL;
+  FLAGS_stderrthreshold = google::FATAL;
   switch( iLogLevel ) {
   case 1:
     FLAGS_minloglevel = google::ERROR;
@@ -54,35 +54,35 @@ int LoggerGoogle :: GetLogger(const std::string & sModuleName, const std::string
   return 0;
 }
 
-void LoggerGoogle :: LogError(const char * pcFormat, ...) {
+void LoggerGoogle::LogError(const char * pcFormat, ...) {
   va_list args;
   va_start(args, pcFormat);
   Log(static_cast<int>(LogLevel::LogLevel_Error), pcFormat, args);
   va_end(args);
 }
 
-void LoggerGoogle :: LogWarning(const char * pcFormat, ...) {
+void LoggerGoogle::LogWarning(const char * pcFormat, ...) {
   va_list args;
   va_start(args, pcFormat);
   Log(static_cast<int>(LogLevel::LogLevel_Warning), pcFormat, args);
   va_end(args);
 }
 
-void LoggerGoogle :: LogInfo(const char * pcFormat, ...) {
+void LoggerGoogle::LogInfo(const char * pcFormat, ...) {
   va_list args;
   va_start(args, pcFormat);
   Log(static_cast<int>(LogLevel::LogLevel_Info), pcFormat, args);
   va_end(args);
 }
 
-void LoggerGoogle :: LogVerbose(const char * pcFormat, ...) {
+void LoggerGoogle::LogVerbose(const char * pcFormat, ...) {
   va_list args;
   va_start(args, pcFormat);
   Log(static_cast<int>(LogLevel::LogLevel_Verbose), pcFormat, args);
   va_end(args);
 }
 
-void LoggerGoogle :: Log(const int iLogLevel, const char * pcFormat, va_list args) {
+void LoggerGoogle::Log(const int iLogLevel, const char * pcFormat, va_list args) {
   char sBuf[1024] = {0};
   vsnprintf(sBuf, sizeof(sBuf), pcFormat, args);
 

@@ -24,7 +24,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-int Node :: RunNode(const Options & oOptions, Node *& poNode) {
+int Node::RunNode(const Options & oOptions, Node *& poNode) {
   if (oOptions.bIsLargeValueMode) {
     InsideOptions::Instance()->SetAsLargeBufferMode();
   }

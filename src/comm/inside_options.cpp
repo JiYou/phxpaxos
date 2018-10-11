@@ -25,33 +25,33 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-InsideOptions :: InsideOptions() {
+InsideOptions::InsideOptions() {
   m_bIsLargeBufferMode = false;
   m_bIsIMFollower = false;
   m_iGroupCount = 1;
 }
 
-InsideOptions :: ~InsideOptions() {
+InsideOptions::~InsideOptions() {
 }
 
-InsideOptions * InsideOptions :: Instance() {
+InsideOptions * InsideOptions::Instance() {
   static InsideOptions oInsideOptions;
   return &oInsideOptions;
 }
 
-void InsideOptions :: SetAsLargeBufferMode() {
+void InsideOptions::SetAsLargeBufferMode() {
   m_bIsLargeBufferMode = true;
 }
 
-void InsideOptions :: SetAsFollower() {
+void InsideOptions::SetAsFollower() {
   m_bIsIMFollower = true;
 }
 
-void InsideOptions :: SetGroupCount(const int iGroupCount) {
+void InsideOptions::SetGroupCount(const int iGroupCount) {
   m_iGroupCount = iGroupCount;
 }
 
-const int InsideOptions :: GetMaxBufferSize() {
+const int InsideOptions::GetMaxBufferSize() {
   if (m_bIsLargeBufferMode) {
     return 52428800;
   } else {
@@ -59,7 +59,7 @@ const int InsideOptions :: GetMaxBufferSize() {
   }
 }
 
-const int InsideOptions :: GetStartPrepareTimeoutMs() {
+const int InsideOptions::GetStartPrepareTimeoutMs() {
   if (m_bIsLargeBufferMode) {
     return 15000;
   } else {
@@ -67,7 +67,7 @@ const int InsideOptions :: GetStartPrepareTimeoutMs() {
   }
 }
 
-const int InsideOptions :: GetStartAcceptTimeoutMs() {
+const int InsideOptions::GetStartAcceptTimeoutMs() {
   if (m_bIsLargeBufferMode) {
     return 15000;
   } else {
@@ -75,7 +75,7 @@ const int InsideOptions :: GetStartAcceptTimeoutMs() {
   }
 }
 
-const int InsideOptions :: GetMaxPrepareTimeoutMs() {
+const int InsideOptions::GetMaxPrepareTimeoutMs() {
   if (m_bIsLargeBufferMode) {
     return 90000;
   } else {
@@ -83,7 +83,7 @@ const int InsideOptions :: GetMaxPrepareTimeoutMs() {
   }
 }
 
-const int InsideOptions :: GetMaxAcceptTimeoutMs() {
+const int InsideOptions::GetMaxAcceptTimeoutMs() {
   if (m_bIsLargeBufferMode) {
     return 90000;
   } else {
@@ -91,7 +91,7 @@ const int InsideOptions :: GetMaxAcceptTimeoutMs() {
   }
 }
 
-const int InsideOptions :: GetMaxIOLoopQueueLen() {
+const int InsideOptions::GetMaxIOLoopQueueLen() {
   if (m_bIsLargeBufferMode) {
     return 1024 / m_iGroupCount + 100;
   } else {
@@ -99,7 +99,7 @@ const int InsideOptions :: GetMaxIOLoopQueueLen() {
   }
 }
 
-const int InsideOptions :: GetMaxQueueLen() {
+const int InsideOptions::GetMaxQueueLen() {
   if (m_bIsLargeBufferMode) {
     return 1024;
   } else {
@@ -107,7 +107,7 @@ const int InsideOptions :: GetMaxQueueLen() {
   }
 }
 
-const int InsideOptions :: GetAskforLearnInterval() {
+const int InsideOptions::GetAskforLearnInterval() {
   if (!m_bIsIMFollower) {
     if (m_bIsLargeBufferMode) {
       return 50000 + (OtherUtils::FastRand() % 10000);
@@ -123,7 +123,7 @@ const int InsideOptions :: GetAskforLearnInterval() {
   }
 }
 
-const int InsideOptions :: GetLearnerReceiver_Ack_Lead() {
+const int InsideOptions::GetLearnerReceiver_Ack_Lead() {
   if (m_bIsLargeBufferMode) {
     return 2;
   } else {
@@ -131,7 +131,7 @@ const int InsideOptions :: GetLearnerReceiver_Ack_Lead() {
   }
 }
 
-const int InsideOptions :: GetLearnerSenderPrepareTimeoutMs() {
+const int InsideOptions::GetLearnerSenderPrepareTimeoutMs() {
   if (m_bIsLargeBufferMode) {
     return 6000;
   } else {
@@ -139,7 +139,7 @@ const int InsideOptions :: GetLearnerSenderPrepareTimeoutMs() {
   }
 }
 
-const int InsideOptions :: GetLearnerSender_Ack_TimeoutMs() {
+const int InsideOptions::GetLearnerSender_Ack_TimeoutMs() {
   if (m_bIsLargeBufferMode) {
     return 60000;
   } else {
@@ -147,7 +147,7 @@ const int InsideOptions :: GetLearnerSender_Ack_TimeoutMs() {
   }
 }
 
-const int InsideOptions :: GetLearnerSender_Ack_Lead() {
+const int InsideOptions::GetLearnerSender_Ack_Lead() {
   if (m_bIsLargeBufferMode) {
     return 5;
   } else {
@@ -155,7 +155,7 @@ const int InsideOptions :: GetLearnerSender_Ack_Lead() {
   }
 }
 
-const int InsideOptions :: GetTcpOutQueueDropTimeMs() {
+const int InsideOptions::GetTcpOutQueueDropTimeMs() {
   if (m_bIsLargeBufferMode) {
     return 20000;
   } else {
@@ -163,7 +163,7 @@ const int InsideOptions :: GetTcpOutQueueDropTimeMs() {
   }
 }
 
-const int InsideOptions :: GetLogFileMaxSize() {
+const int InsideOptions::GetLogFileMaxSize() {
   if (m_bIsLargeBufferMode) {
     return 524288000;
   } else {
@@ -171,7 +171,7 @@ const int InsideOptions :: GetLogFileMaxSize() {
   }
 }
 
-const int InsideOptions :: GetTcpConnectionNonActiveTimeout() {
+const int InsideOptions::GetTcpConnectionNonActiveTimeout() {
   if (m_bIsLargeBufferMode) {
     return 600000;
   } else {
@@ -179,7 +179,7 @@ const int InsideOptions :: GetTcpConnectionNonActiveTimeout() {
   }
 }
 
-const int InsideOptions :: GetLearnerSenderSendQps() {
+const int InsideOptions::GetLearnerSenderSendQps() {
   if (m_bIsLargeBufferMode) {
     return 10000 / m_iGroupCount;
   } else {
@@ -187,7 +187,7 @@ const int InsideOptions :: GetLearnerSenderSendQps() {
   }
 }
 
-const int InsideOptions :: GetCleanerDeleteQps() {
+const int InsideOptions::GetCleanerDeleteQps() {
   if (m_bIsLargeBufferMode) {
     return 30000 / m_iGroupCount;
   } else {

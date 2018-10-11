@@ -24,11 +24,11 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-MonitorConfig :: MonitorConfig()
+MonitorConfig::MonitorConfig()
   : iOssAttrID(0), iUseTimeOssAttrID(0) {
 }
 
-phxpaxos::Breakpoint * Monitor :: GetBreakpoint(const MonitorConfig & oMonitorConfig, IDKeyOssFunc pIDKeyOssFunc) {
+phxpaxos::Breakpoint * Monitor::GetBreakpoint(const MonitorConfig & oMonitorConfig, IDKeyOssFunc pIDKeyOssFunc) {
   if (pIDKeyOssFunc == nullptr) {
     return nullptr;
   }

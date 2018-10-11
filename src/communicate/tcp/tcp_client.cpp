@@ -26,18 +26,18 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-TcpClient :: TcpClient(EventLoop * poEventLoop, NetWork * poNetWork)
+TcpClient::TcpClient(EventLoop * poEventLoop, NetWork * poNetWork)
   : m_poEventLoop(poEventLoop), m_poNetWork(poNetWork) {
   m_vecEvent.reserve(1000);
 }
 
-TcpClient :: ~TcpClient() {
+TcpClient::~TcpClient() {
   for (auto & it : m_mapEvent) {
     delete it.second;
   }
 }
 
-int TcpClient :: AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
+int TcpClient::AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
   //PLImp("ok");
   MessageEvent * poEvent = GetEvent(sIP, iPort);
   if (poEvent == nullptr) {
@@ -48,7 +48,7 @@ int TcpClient :: AddMessage(const std::string & sIP, const int iPort, const std:
   return poEvent->AddMessage(sMessage);
 }
 
-MessageEvent * TcpClient :: GetEvent(const std::string & sIP, const int iPort) {
+MessageEvent * TcpClient::GetEvent(const std::string & sIP, const int iPort) {
   uint32_t iIP = (uint32_t)inet_addr(sIP.c_str());
   uint64_t llNodeID = (((uint64_t)iIP) << 32) | iPort;
 
@@ -62,7 +62,7 @@ MessageEvent * TcpClient :: GetEvent(const std::string & sIP, const int iPort) {
   return CreateEvent(llNodeID, sIP, iPort);
 }
 
-MessageEvent * TcpClient :: CreateEvent(const uint64_t llNodeID, const std::string & sIP, const int iPort) {
+MessageEvent * TcpClient::CreateEvent(const uint64_t llNodeID, const std::string & sIP, const int iPort) {
   PLImp("start, ip %s port %d", sIP.c_str(), iPort);
 
   Socket oSocket;
@@ -83,7 +83,7 @@ MessageEvent * TcpClient :: CreateEvent(const uint64_t llNodeID, const std::stri
   return poEvent;
 }
 
-void TcpClient :: DealWithWrite() {
+void TcpClient::DealWithWrite() {
   size_t iSize = m_vecEvent.size();
 
   for (size_t i = 0; i < iSize; i++) {

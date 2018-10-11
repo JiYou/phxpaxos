@@ -25,16 +25,16 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-AcceptorState :: AcceptorState(const Config * poConfig, const LogStorage * poLogStorage) :
+AcceptorState::AcceptorState(const Config * poConfig, const LogStorage * poLogStorage) :
   m_oPaxosLog(poLogStorage), m_iSyncTimes(0) {
   m_poConfig = (Config *)poConfig;
   Init();
 }
 
-AcceptorState :: ~AcceptorState() {
+AcceptorState::~AcceptorState() {
 }
 
-void AcceptorState :: Init() {
+void AcceptorState::Init() {
   m_oAcceptedBallot.reset();
 
   m_sAcceptedValue = "";
@@ -42,35 +42,35 @@ void AcceptorState :: Init() {
   m_iChecksum = 0;
 }
 
-const BallotNumber & AcceptorState :: GetPromiseBallot() const {
+const BallotNumber & AcceptorState::GetPromiseBallot() const {
   return m_oPromiseBallot;
 }
 
-void AcceptorState :: SetPromiseBallot(const BallotNumber & oPromiseBallot) {
+void AcceptorState::SetPromiseBallot(const BallotNumber & oPromiseBallot) {
   m_oPromiseBallot = oPromiseBallot;
 }
 
-const BallotNumber & AcceptorState :: GetAcceptedBallot() const {
+const BallotNumber & AcceptorState::GetAcceptedBallot() const {
   return m_oAcceptedBallot;
 }
 
-void AcceptorState :: SetAcceptedBallot(const BallotNumber & oAcceptedBallot) {
+void AcceptorState::SetAcceptedBallot(const BallotNumber & oAcceptedBallot) {
   m_oAcceptedBallot = oAcceptedBallot;
 }
 
-const std::string & AcceptorState :: GetAcceptedValue() {
+const std::string & AcceptorState::GetAcceptedValue() {
   return m_sAcceptedValue;
 }
 
-void AcceptorState :: SetAcceptedValue(const std::string & sAcceptedValue) {
+void AcceptorState::SetAcceptedValue(const std::string & sAcceptedValue) {
   m_sAcceptedValue = sAcceptedValue;
 }
 
-const uint32_t AcceptorState :: GetChecksum() const {
+const uint32_t AcceptorState::GetChecksum() const {
   return m_iChecksum;
 }
 
-int AcceptorState :: Persist(const uint64_t llInstanceID, const uint32_t iLastChecksum) {
+int AcceptorState::Persist(const uint64_t llInstanceID, const uint32_t iLastChecksum) {
   if (llInstanceID > 0 && iLastChecksum == 0) {
     m_iChecksum = 0;
   } else if (m_sAcceptedValue.size() > 0) {
@@ -111,7 +111,7 @@ int AcceptorState :: Persist(const uint64_t llInstanceID, const uint32_t iLastCh
   return 0;
 }
 
-int AcceptorState :: Load(uint64_t & llInstanceID) {
+int AcceptorState::Load(uint64_t & llInstanceID) {
   int ret = m_oPaxosLog.GetMaxInstanceIDFromLog(m_poConfig->GetMyGroupIdx(), llInstanceID);
   if (ret != 0 && ret != 1) {
     PLGErr("Load max instance id fail, ret %d", ret);
@@ -148,7 +148,7 @@ int AcceptorState :: Load(uint64_t & llInstanceID) {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-Acceptor :: Acceptor(
+Acceptor::Acceptor(
   const Config * poConfig,
   const MsgTransport * poMsgTransport,
   const Instance * poInstance,
@@ -156,10 +156,10 @@ Acceptor :: Acceptor(
   : Base(poConfig, poMsgTransport, poInstance), m_oAcceptorState(poConfig, poLogStorage) {
 }
 
-Acceptor :: ~Acceptor() {
+Acceptor::~Acceptor() {
 }
 
-int Acceptor :: Init() {
+int Acceptor::Init() {
   uint64_t llInstanceID = 0;
   int ret = m_oAcceptorState.Load(llInstanceID);
   if (ret != 0) {
@@ -178,15 +178,15 @@ int Acceptor :: Init() {
   return 0;
 }
 
-void Acceptor :: InitForNewPaxosInstance() {
+void Acceptor::InitForNewPaxosInstance() {
   m_oAcceptorState.Init();
 }
 
-AcceptorState * Acceptor :: GetAcceptorState() {
+AcceptorState * Acceptor::GetAcceptorState() {
   return &m_oAcceptorState;
 }
 
-int Acceptor :: OnPrepare(const PaxosMsg & oPaxosMsg) {
+int Acceptor::OnPrepare(const PaxosMsg & oPaxosMsg) {
   PLGHead("START Msg.InstanceID %lu Msg.from_nodeid %lu Msg.ProposalID %lu",
           oPaxosMsg.instanceid(), oPaxosMsg.nodeid(), oPaxosMsg.proposalid());
 
@@ -247,7 +247,7 @@ int Acceptor :: OnPrepare(const PaxosMsg & oPaxosMsg) {
   return 0;
 }
 
-void Acceptor :: OnAccept(const PaxosMsg & oPaxosMsg) {
+void Acceptor::OnAccept(const PaxosMsg & oPaxosMsg) {
   PLGHead("START Msg.InstanceID %lu Msg.from_nodeid %lu Msg.ProposalID %lu Msg.ValueLen %zu",
           oPaxosMsg.instanceid(), oPaxosMsg.nodeid(), oPaxosMsg.proposalid(), oPaxosMsg.value().size());
 

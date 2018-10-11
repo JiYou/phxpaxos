@@ -27,7 +27,7 @@ using namespace std;
 
 namespace phxpaxos {
 
-IOLoop :: IOLoop(Config * poConfig, Instance * poInstance)
+IOLoop::IOLoop(Config * poConfig, Instance * poInstance)
   : m_poConfig(poConfig), m_poInstance(poInstance) {
   m_bIsEnd = false;
   m_bIsStart = false;
@@ -35,10 +35,10 @@ IOLoop :: IOLoop(Config * poConfig, Instance * poInstance)
   m_iQueueMemSize = 0;
 }
 
-IOLoop :: ~IOLoop() {
+IOLoop::~IOLoop() {
 }
 
-void IOLoop :: run() {
+void IOLoop::run() {
   m_bIsEnd = false;
   m_bIsStart = true;
   while(true) {
@@ -59,13 +59,13 @@ void IOLoop :: run() {
   }
 }
 
-void IOLoop :: AddNotify() {
+void IOLoop::AddNotify() {
   m_oMessageQueue.lock();
   m_oMessageQueue.add(nullptr);
   m_oMessageQueue.unlock();
 }
 
-int IOLoop :: AddMessage(const char * pcMessage, const int iMessageLen) {
+int IOLoop::AddMessage(const char * pcMessage, const int iMessageLen) {
   m_oMessageQueue.lock();
 
   BP->GetIOLoopBP()->EnqueueMsg();
@@ -93,7 +93,7 @@ int IOLoop :: AddMessage(const char * pcMessage, const int iMessageLen) {
   return 0;
 }
 
-int IOLoop :: AddRetryPaxosMsg(const PaxosMsg & oPaxosMsg) {
+int IOLoop::AddRetryPaxosMsg(const PaxosMsg & oPaxosMsg) {
   BP->GetIOLoopBP()->EnqueueRetryMsg();
 
   if (m_oRetryQueue.size() > RETRY_QUEUE_MAX_LEN) {
@@ -105,20 +105,20 @@ int IOLoop :: AddRetryPaxosMsg(const PaxosMsg & oPaxosMsg) {
   return 0;
 }
 
-void IOLoop :: Stop() {
+void IOLoop::Stop() {
   m_bIsEnd = true;
   if (m_bIsStart) {
     join();
   }
 }
 
-void IOLoop :: ClearRetryQueue() {
+void IOLoop::ClearRetryQueue() {
   while (!m_oRetryQueue.empty()) {
     m_oRetryQueue.pop();
   }
 }
 
-void IOLoop :: DealWithRetry() {
+void IOLoop::DealWithRetry() {
   if (m_oRetryQueue.empty()) {
     return;
   }
@@ -148,7 +148,7 @@ void IOLoop :: DealWithRetry() {
   }
 }
 
-void IOLoop :: OneLoop(const int iTimeoutMs) {
+void IOLoop::OneLoop(const int iTimeoutMs) {
   std::string * psMessage = nullptr;
 
   m_oMessageQueue.lock();
@@ -177,7 +177,7 @@ void IOLoop :: OneLoop(const int iTimeoutMs) {
   m_poInstance->CheckNewValue();
 }
 
-bool IOLoop :: AddTimer(const int iTimeout, const int iType, uint32_t & iTimerID) {
+bool IOLoop::AddTimer(const int iTimeout, const int iType, uint32_t & iTimerID) {
   if (iTimeout == -1) {
     return true;
   }
@@ -190,7 +190,7 @@ bool IOLoop :: AddTimer(const int iTimeout, const int iType, uint32_t & iTimerID
   return true;
 }
 
-void IOLoop :: RemoveTimer(uint32_t & iTimerID) {
+void IOLoop::RemoveTimer(uint32_t & iTimerID) {
   auto it = m_mapTimerIDExist.find(iTimerID);
   if (it != end(m_mapTimerIDExist)) {
     m_mapTimerIDExist.erase(it);
@@ -199,7 +199,7 @@ void IOLoop :: RemoveTimer(uint32_t & iTimerID) {
   iTimerID = 0;
 }
 
-void IOLoop :: DealwithTimeoutOne(const uint32_t iTimerID, const int iType) {
+void IOLoop::DealwithTimeoutOne(const uint32_t iTimerID, const int iType) {
   auto it = m_mapTimerIDExist.find(iTimerID);
   if (it == end(m_mapTimerIDExist)) {
     //PLGErr("Timeout aready remove!, timerid %u iType %d", iTimerID, iType);
@@ -211,7 +211,7 @@ void IOLoop :: DealwithTimeoutOne(const uint32_t iTimerID, const int iType) {
   m_poInstance->OnTimeout(iTimerID, iType);
 }
 
-void IOLoop :: DealwithTimeout(int & iNextTimeout) {
+void IOLoop::DealwithTimeout(int & iNextTimeout) {
   bool bHasTimeout = true;
 
   while(bHasTimeout) {

@@ -33,24 +33,24 @@ namespace phxpaxos {
 
 using namespace std;
 
-const uint64_t Time :: GetTimestampMS() {
+const uint64_t Time::GetTimestampMS() {
   auto now_time = chrono::system_clock::now();
   uint64_t now = (chrono::duration_cast<chrono::milliseconds>(now_time.time_since_epoch())).count();
   return now;
 }
 
-const uint64_t Time :: GetSteadyClockMS() {
+const uint64_t Time::GetSteadyClockMS() {
   auto now_time = chrono::steady_clock::now();
   uint64_t now = (chrono::duration_cast<chrono::milliseconds>(now_time.time_since_epoch())).count();
   return now;
 }
 
-void Time :: MsSleep(const int iTimeMs) {
+void Time::MsSleep(const int iTimeMs) {
   std::this_thread::sleep_for(std::chrono::milliseconds(iTimeMs));
 }
 
 /////////////////////////////////////////////
-int FileUtils :: IsDir(const std::string & sPath, bool & bIsDir) {
+int FileUtils::IsDir(const std::string & sPath, bool & bIsDir) {
   bIsDir = false;
   struct stat tStat;
   int ret = stat(sPath.c_str(), &tStat);
@@ -65,7 +65,7 @@ int FileUtils :: IsDir(const std::string & sPath, bool & bIsDir) {
   return 0;
 }
 
-int FileUtils :: DeleteDir(const std::string & sDirPath) {
+int FileUtils::DeleteDir(const std::string & sDirPath) {
   DIR * dir = nullptr;
   struct dirent  * ptr;
 
@@ -113,7 +113,7 @@ int FileUtils :: DeleteDir(const std::string & sDirPath) {
   return ret;
 }
 
-int FileUtils :: IterDir(const std::string & sDirPath, std::vector<std::string> & vecFilePathList) {
+int FileUtils::IterDir(const std::string & sDirPath, std::vector<std::string> & vecFilePathList) {
   DIR * dir = nullptr;
   struct dirent  * ptr;
 
@@ -156,11 +156,11 @@ int FileUtils :: IterDir(const std::string & sDirPath, std::vector<std::string> 
 
 ////////////////////////////////
 
-TimeStat :: TimeStat() {
+TimeStat::TimeStat() {
   m_llTime = Time::GetSteadyClockMS();
 }
 
-int TimeStat :: Point() {
+int TimeStat::Point() {
   uint64_t llNowTime = Time::GetSteadyClockMS();
   int llPassTime = 0;
   if (llNowTime > m_llTime) {
@@ -174,7 +174,7 @@ int TimeStat :: Point() {
 
 /////////////////////////////////
 
-uint64_t OtherUtils :: GenGid(const uint64_t llNodeID) {
+uint64_t OtherUtils::GenGid(const uint64_t llNodeID) {
   return (llNodeID ^ FastRand()) + FastRand();
 }
 
@@ -222,7 +222,7 @@ static void InitFastRandomSeed() {
   ResetFastRandomSeed();
 }
 
-const uint32_t OtherUtils :: FastRand() {
+const uint32_t OtherUtils::FastRand() {
   if (!seed_thread_safe.init) {
     InitFastRandomSeed();
   }

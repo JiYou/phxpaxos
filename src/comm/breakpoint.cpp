@@ -23,16 +23,16 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Breakpoint * Breakpoint :: m_poBreakpoint = nullptr;
+Breakpoint * Breakpoint::m_poBreakpoint = nullptr;
 
-Breakpoint :: Breakpoint() {
+Breakpoint::Breakpoint() {
 }
 
-void Breakpoint :: SetInstance(Breakpoint * poBreakpoint) {
+void Breakpoint::SetInstance(Breakpoint * poBreakpoint) {
   m_poBreakpoint = poBreakpoint;
 }
 
-Breakpoint * Breakpoint :: Instance() {
+Breakpoint * Breakpoint::Instance() {
   if (m_poBreakpoint != nullptr) {
     return m_poBreakpoint;
   }
@@ -41,47 +41,47 @@ Breakpoint * Breakpoint :: Instance() {
   return &oBreakpoint;
 }
 
-ProposerBP * Breakpoint :: GetProposerBP() {
+ProposerBP * Breakpoint::GetProposerBP() {
   return &m_oProposerBP;
 }
 
-AcceptorBP * Breakpoint :: GetAcceptorBP() {
+AcceptorBP * Breakpoint::GetAcceptorBP() {
   return &m_oAcceptorBP;
 }
 
-LearnerBP * Breakpoint :: GetLearnerBP() {
+LearnerBP * Breakpoint::GetLearnerBP() {
   return &m_oLearnerBP;
 }
 
-InstanceBP * Breakpoint :: GetInstanceBP() {
+InstanceBP * Breakpoint::GetInstanceBP() {
   return &m_oInstanceBP;
 }
 
-CommiterBP * Breakpoint :: GetCommiterBP() {
+CommiterBP * Breakpoint::GetCommiterBP() {
   return &m_oCommiterBP;
 }
 
-IOLoopBP * Breakpoint :: GetIOLoopBP() {
+IOLoopBP * Breakpoint::GetIOLoopBP() {
   return &m_oIOLoopBP;
 }
 
-NetworkBP * Breakpoint :: GetNetworkBP() {
+NetworkBP * Breakpoint::GetNetworkBP() {
   return &m_oNetworkBP;
 }
 
-LogStorageBP * Breakpoint :: GetLogStorageBP() {
+LogStorageBP * Breakpoint::GetLogStorageBP() {
   return &m_oLogStorageBP;
 }
 
-AlgorithmBaseBP * Breakpoint :: GetAlgorithmBaseBP() {
+AlgorithmBaseBP * Breakpoint::GetAlgorithmBaseBP() {
   return &m_oAlgorithmBaseBP;
 }
 
-CheckpointBP * Breakpoint :: GetCheckpointBP() {
+CheckpointBP * Breakpoint::GetCheckpointBP() {
   return &m_oCheckpointBP;
 }
 
-MasterBP * Breakpoint :: GetMasterBP() {
+MasterBP * Breakpoint::GetMasterBP() {
   return &m_oMasterBP;
 }
 

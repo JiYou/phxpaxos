@@ -28,7 +28,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Cleaner :: Cleaner(
+Cleaner::Cleaner(
   Config * poConfig,
   SMFac * poSMFac,
   LogStorage * poLogStorage,
@@ -45,30 +45,30 @@ Cleaner :: Cleaner(
     m_llHoldCount(CAN_DELETE_DELTA) {
 }
 
-Cleaner :: ~Cleaner() {
+Cleaner::~Cleaner() {
 }
 
-void Cleaner :: Stop() {
+void Cleaner::Stop() {
   m_bIsEnd = true;
   if (m_bIsStart) {
     join();
   }
 }
 
-void Cleaner :: Pause() {
+void Cleaner::Pause() {
   m_bCanrun = false;
 }
 
-void Cleaner :: Continue() {
+void Cleaner::Continue() {
   m_bIsPaused = false;
   m_bCanrun = true;
 }
 
-const bool Cleaner :: IsPaused() const {
+const bool Cleaner::IsPaused() const {
   return m_bIsPaused;
 }
 
-void Cleaner :: run() {
+void Cleaner::run() {
   m_bIsStart = true;
   Continue();
 
@@ -127,7 +127,7 @@ void Cleaner :: run() {
   }
 }
 
-int Cleaner :: FixMinChosenInstanceID(const uint64_t llOldMinChosenInstanceID) {
+int Cleaner::FixMinChosenInstanceID(const uint64_t llOldMinChosenInstanceID) {
   uint64_t llCPInstanceID = m_poSMFac->GetCheckpointInstanceID(m_poConfig->GetMyGroupIdx()) + 1;
   uint64_t llFixMinChosenInstanceID = llOldMinChosenInstanceID;
   int ret = 0;
@@ -161,7 +161,7 @@ int Cleaner :: FixMinChosenInstanceID(const uint64_t llOldMinChosenInstanceID) {
   return 0;
 }
 
-bool Cleaner :: DeleteOne(const uint64_t llInstanceID) {
+bool Cleaner::DeleteOne(const uint64_t llInstanceID) {
   WriteOptions oWriteOptions;
   oWriteOptions.bSync = false;
 
@@ -188,7 +188,7 @@ bool Cleaner :: DeleteOne(const uint64_t llInstanceID) {
   return true;
 }
 
-void Cleaner :: SetHoldPaxosLogCount(const uint64_t llHoldCount) {
+void Cleaner::SetHoldPaxosLogCount(const uint64_t llHoldCount) {
   if (llHoldCount < 300) {
     m_llHoldCount = 300;
   } else {

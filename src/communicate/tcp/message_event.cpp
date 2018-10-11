@@ -27,7 +27,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-MessageEvent :: MessageEvent(
+MessageEvent::MessageEvent(
   const int iType,
   const int fd,
   const SocketAddress & oAddr,
@@ -56,7 +56,7 @@ MessageEvent :: MessageEvent(
   m_iQueueMemSize = 0;
 }
 
-MessageEvent :: ~MessageEvent() {
+MessageEvent::~MessageEvent() {
   while (!m_oInQueue.empty()) {
     QueueData tData = m_oInQueue.front();
     m_oInQueue.pop();
@@ -65,15 +65,15 @@ MessageEvent :: ~MessageEvent() {
   }
 }
 
-int MessageEvent :: GetSocketFd() const {
+int MessageEvent::GetSocketFd() const {
   return m_oSocket.getSocketHandle();
 }
 
-const std::string & MessageEvent :: GetSocketHost() {
+const std::string & MessageEvent::GetSocketHost() {
   return m_sHost;
 }
 
-const bool MessageEvent :: IsActive() {
+const bool MessageEvent::IsActive() {
   uint64_t llNowTime = Time::GetSteadyClockMS();
   if (llNowTime > m_llLastActiveTime
       && ((int)(llNowTime - m_llLastActiveTime) > CONNECTTION_NONACTIVE_TIMEOUT)) {
@@ -83,7 +83,7 @@ const bool MessageEvent :: IsActive() {
   return true;
 }
 
-int MessageEvent :: AddMessage(const std::string & sMessage) {
+int MessageEvent::AddMessage(const std::string & sMessage) {
   m_llLastActiveTime = Time::GetSteadyClockMS();
   std::unique_lock<std::mutex> oLock(m_oMutex);
 
@@ -112,14 +112,14 @@ int MessageEvent :: AddMessage(const std::string & sMessage) {
   return 0;
 }
 
-void MessageEvent :: ReadDone(BytesBuffer & oBytesBuffer, const int iLen) {
+void MessageEvent::ReadDone(BytesBuffer & oBytesBuffer, const int iLen) {
   //PLHead("ok, len %d", iLen);
   m_poNetWork->OnReceiveMessage(oBytesBuffer.GetPtr(), iLen);
 
   BP->GetNetworkBP()->TcpReadOneMessageOk(iLen);
 }
 
-int MessageEvent :: ReadLeft() {
+int MessageEvent::ReadLeft() {
   bool bAgain = false;
   int iReadLen = m_oSocket.receive(m_oReadCacheBuffer.GetPtr() + m_iLastReadPos, m_iLeftReadLen, &bAgain);
   //PLImp("readlen %d", iReadLen);
@@ -140,7 +140,7 @@ int MessageEvent :: ReadLeft() {
   return 0;
 }
 
-int MessageEvent :: OnRead() {
+int MessageEvent::OnRead() {
   if (m_iLeftReadLen > 0) {
     return ReadLeft();
   }
@@ -204,7 +204,7 @@ int MessageEvent :: OnRead() {
   return 0;
 }
 
-void MessageEvent :: OpenWrite() {
+void MessageEvent::OpenWrite() {
   if (!m_oInQueue.empty()) {
     if (IsDestroy()) {
       PLErr("this connection fd:%d host:%s is destroy, reconnect", GetSocketFd(), GetSocketHost().c_str());
@@ -216,12 +216,12 @@ void MessageEvent :: OpenWrite() {
   }
 }
 
-void MessageEvent :: WriteDone() {
+void MessageEvent::WriteDone() {
   //PLHead("ok");
   RemoveEvent(EPOLLOUT);
 }
 
-int MessageEvent :: WriteLeft() {
+int MessageEvent::WriteLeft() {
   int iWriteLen = m_oSocket.send(m_oWriteCacheBuffer.GetPtr() + m_iLastWritePos, m_iLeftWriteLen);
   //PLImp("writelen %d", iWriteLen);
   if (iWriteLen < 0) {
@@ -247,7 +247,7 @@ int MessageEvent :: WriteLeft() {
   return 0;
 }
 
-int MessageEvent :: OnWrite() {
+int MessageEvent::OnWrite() {
   int ret = 0;
   while (!m_oInQueue.empty() || m_iLeftWriteLen > 0) {
     ret = DoOnWrite();
@@ -264,7 +264,7 @@ int MessageEvent :: OnWrite() {
   return 0;
 }
 
-int MessageEvent :: DoOnWrite() {
+int MessageEvent::DoOnWrite() {
   if (m_iLeftWriteLen > 0) {
     return WriteLeft();
   }
@@ -337,7 +337,7 @@ int MessageEvent :: DoOnWrite() {
   return 0;
 }
 
-void MessageEvent :: OnError(bool & bNeedDelete) {
+void MessageEvent::OnError(bool & bNeedDelete) {
   bNeedDelete = false;
 
   if (m_iType == MessageEventType_RECV) {
@@ -368,7 +368,7 @@ void MessageEvent :: OnError(bool & bNeedDelete) {
   }
 }
 
-void MessageEvent :: OnTimeout(const uint32_t iTimerID, const int iType) {
+void MessageEvent::OnTimeout(const uint32_t iTimerID, const int iType) {
   if (iTimerID != m_iReconnectTimeoutID) {
     return;
   }
@@ -378,7 +378,7 @@ void MessageEvent :: OnTimeout(const uint32_t iTimerID, const int iType) {
   }
 }
 
-void MessageEvent :: ReConnect() {
+void MessageEvent::ReConnect() {
   BP->GetNetworkBP()->TcpReconnect();
 
   //reset

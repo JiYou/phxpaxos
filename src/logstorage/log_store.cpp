@@ -32,7 +32,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-LogStore :: LogStore() {
+LogStore::LogStore() {
   m_iFd = -1;
   m_iMetaFd = -1;
   m_iFileID = -1;
@@ -42,7 +42,7 @@ LogStore :: LogStore() {
   m_iNowFileOffset = 0;
 }
 
-LogStore :: ~LogStore() {
+LogStore::~LogStore() {
   if (m_iFd != -1) {
     close(m_iFd);
   }
@@ -52,7 +52,7 @@ LogStore :: ~LogStore() {
   }
 }
 
-int LogStore :: Init(const std::string & sPath, const int iMyGroupIdx, Database * poDatabase) {
+int LogStore::Init(const std::string & sPath, const int iMyGroupIdx, Database * poDatabase) {
   m_iMyGroupIdx = iMyGroupIdx;
   m_sPath = sPath + "/" + "vfile";
   if (access(m_sPath.c_str(), F_OK) == -1) {
@@ -129,7 +129,7 @@ int LogStore :: Init(const std::string & sPath, const int iMyGroupIdx, Database 
   return 0;
 }
 
-int LogStore :: ExpandFile(int iFd, int & iFileSize) {
+int LogStore::ExpandFile(int iFd, int & iFileSize) {
   iFileSize = lseek(iFd, 0, SEEK_END);
   if (iFileSize == -1) {
     PLG1Err("lseek fail, ret %d", iFileSize);
@@ -160,7 +160,7 @@ int LogStore :: ExpandFile(int iFd, int & iFileSize) {
   return 0;
 }
 
-int LogStore :: IncreaseFileID() {
+int LogStore::IncreaseFileID() {
   int iFileID = m_iFileID + 1;
   uint32_t iCheckSum = crc32(0, (const uint8_t*)(&iFileID), sizeof(int));
 
@@ -191,7 +191,7 @@ int LogStore :: IncreaseFileID() {
   return 0;
 }
 
-int LogStore :: OpenFile(const int iFileID, int & iFd) {
+int LogStore::OpenFile(const int iFileID, int & iFd) {
   char sFilePath[512] = {0};
   snprintf(sFilePath, sizeof(sFilePath), "%s/%d.f", m_sPath.c_str(), iFileID);
   iFd = open(sFilePath, O_CREAT | O_RDWR, S_IWRITE | S_IREAD);
@@ -204,7 +204,7 @@ int LogStore :: OpenFile(const int iFileID, int & iFd) {
   return 0;
 }
 
-int LogStore :: DeleteFile(const int iFileID) {
+int LogStore::DeleteFile(const int iFileID) {
   if (m_iDeletedMaxFileID == -1) {
     if (iFileID - 2000 > 0) {
       m_iDeletedMaxFileID = iFileID - 2000;
@@ -242,7 +242,7 @@ int LogStore :: DeleteFile(const int iFileID) {
   return ret;
 }
 
-int LogStore :: GetFileFD(const int iNeedWriteSize, int & iFd, int & iFileID, int & iOffset) {
+int LogStore::GetFileFD(const int iNeedWriteSize, int & iFd, int & iFileID, int & iOffset) {
   if (m_iFd == -1) {
     PLG1Err("File aready broken, fileid %d", m_iFileID);
     return -1;
@@ -299,7 +299,7 @@ int LogStore :: GetFileFD(const int iNeedWriteSize, int & iFd, int & iFileID, in
   return 0;
 }
 
-int LogStore :: Append(const WriteOptions & oWriteOptions, const uint64_t llInstanceID, const std::string & sBuffer, std::string & sFileID) {
+int LogStore::Append(const WriteOptions & oWriteOptions, const uint64_t llInstanceID, const std::string & sBuffer, std::string & sFileID) {
   m_oTimeStat.Point();
   std::lock_guard<std::mutex> oLock(m_oMutex);
 
@@ -353,7 +353,7 @@ int LogStore :: Append(const WriteOptions & oWriteOptions, const uint64_t llInst
   return 0;
 }
 
-int LogStore :: Read(const std::string & sFileID, uint64_t & llInstanceID, std::string & sBuffer) {
+int LogStore::Read(const std::string & sFileID, uint64_t & llInstanceID, std::string & sBuffer) {
   int iFileID = -1;
   int iOffset = -1;
   uint32_t iCheckSum = 0;
@@ -407,7 +407,7 @@ int LogStore :: Read(const std::string & sFileID, uint64_t & llInstanceID, std::
   return 0;
 }
 
-int LogStore :: Del(const std::string & sFileID, const uint64_t llInstanceID) {
+int LogStore::Del(const std::string & sFileID, const uint64_t llInstanceID) {
   int iFileID = -1;
   int iOffset = -1;
   uint32_t iCheckSum = 0;
@@ -425,7 +425,7 @@ int LogStore :: Del(const std::string & sFileID, const uint64_t llInstanceID) {
   return 0;
 }
 
-int LogStore :: ForceDel(const std::string & sFileID, const uint64_t llInstanceID) {
+int LogStore::ForceDel(const std::string & sFileID, const uint64_t llInstanceID) {
   int iFileID = -1;
   int iOffset = -1;
   uint32_t iCheckSum = 0;
@@ -449,7 +449,7 @@ int LogStore :: ForceDel(const std::string & sFileID, const uint64_t llInstanceI
 }
 
 
-void LogStore :: GenFileID(const int iFileID, const int iOffset, const uint32_t iCheckSum, std::string & sFileID) {
+void LogStore::GenFileID(const int iFileID, const int iOffset, const uint32_t iCheckSum, std::string & sFileID) {
   char sTmp[sizeof(int) + sizeof(int) + sizeof(uint32_t)] = {0};
   memcpy(sTmp, (char *)&iFileID, sizeof(int));
   memcpy(sTmp + sizeof(int), (char *)&iOffset, sizeof(int));
@@ -458,7 +458,7 @@ void LogStore :: GenFileID(const int iFileID, const int iOffset, const uint32_t 
   sFileID = std::string(sTmp, sizeof(int) + sizeof(int) + sizeof(uint32_t));
 }
 
-void LogStore :: ParseFileID(const std::string & sFileID, int & iFileID, int & iOffset, uint32_t & iCheckSum) {
+void LogStore::ParseFileID(const std::string & sFileID, int & iFileID, int & iOffset, uint32_t & iCheckSum) {
   memcpy(&iFileID, (void *)sFileID.c_str(), sizeof(int));
   memcpy(&iOffset, (void *)(sFileID.c_str() + sizeof(int)), sizeof(int));
   memcpy(&iCheckSum, (void *)(sFileID.c_str() + sizeof(int) + sizeof(int)), sizeof(uint32_t));
@@ -466,7 +466,7 @@ void LogStore :: ParseFileID(const std::string & sFileID, int & iFileID, int & i
   PLG1Debug("fileid %d offset %d checksum %u", iFileID, iOffset, iCheckSum);
 }
 
-const bool LogStore :: IsValidFileID(const std::string & sFileID) {
+const bool LogStore::IsValidFileID(const std::string & sFileID) {
   if (sFileID.size() != FILEID_LEN) {
     return false;
   }
@@ -476,7 +476,7 @@ const bool LogStore :: IsValidFileID(const std::string & sFileID) {
 
 //////////////////////////////////////////////////////////////////
 
-int LogStore :: RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
+int LogStore::RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
   string sLastFileID;
 
   uint64_t llNowInstanceID = 0;
@@ -522,7 +522,7 @@ int LogStore :: RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
   return ret;
 }
 
-int LogStore :: RebuildIndexForOneFile(const int iFileID, const int iOffset,
+int LogStore::RebuildIndexForOneFile(const int iFileID, const int iOffset,
                                        Database * poDatabase, int & iNowFileWriteOffset, uint64_t & llNowInstanceID) {
   char sFilePath[512] = {0};
   snprintf(sFilePath, sizeof(sFilePath), "%s/%d.f", m_sPath.c_str(), iFileID);
@@ -646,23 +646,23 @@ int LogStore :: RebuildIndexForOneFile(const int iFileID, const int iOffset,
 
 //////////////////////////////////////////////////////////
 
-LogStoreLogger :: LogStoreLogger()
+LogStoreLogger::LogStoreLogger()
   : m_iLogFd(-1) {
 }
 
-LogStoreLogger :: ~LogStoreLogger() {
+LogStoreLogger::~LogStoreLogger() {
   if (m_iLogFd != -1) {
     close(m_iLogFd);
   }
 }
 
-void LogStoreLogger :: Init(const std::string & sPath) {
+void LogStoreLogger::Init(const std::string & sPath) {
   char sFilePath[512] = {0};
   snprintf(sFilePath, sizeof(sFilePath), "%s/LOG", sPath.c_str());
   m_iLogFd = open(sFilePath, O_CREAT | O_RDWR | O_APPEND, S_IWRITE | S_IREAD);
 }
 
-void LogStoreLogger :: Log(const char * pcFormat, ...) {
+void LogStoreLogger::Log(const char * pcFormat, ...) {
   if (m_iLogFd == -1) {
     return;
   }

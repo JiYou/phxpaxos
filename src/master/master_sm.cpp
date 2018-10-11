@@ -27,7 +27,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-MasterStateMachine :: MasterStateMachine(
+MasterStateMachine::MasterStateMachine(
   const LogStorage * poLogStorage,
   const nodeid_t iMyNodeID,
   const int iGroupIdx,
@@ -43,12 +43,12 @@ MasterStateMachine :: MasterStateMachine(
 
 }
 
-MasterStateMachine :: ~MasterStateMachine() {
+MasterStateMachine::~MasterStateMachine() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-int MasterStateMachine :: Init() {
+int MasterStateMachine::Init() {
   MasterVariables oVariables;
   int ret = m_oMVStore.Read(m_iMyGroupIdx, oVariables);
   if (ret != 0 && ret != 1) {
@@ -76,7 +76,7 @@ int MasterStateMachine :: Init() {
   return 0;
 }
 
-int MasterStateMachine :: UpdateMasterToStore(const nodeid_t llMasterNodeID, const uint64_t llVersion, const uint32_t iLeaseTime) {
+int MasterStateMachine::UpdateMasterToStore(const nodeid_t llMasterNodeID, const uint64_t llVersion, const uint32_t iLeaseTime) {
   MasterVariables oVariables;
   oVariables.set_masternodeid(llMasterNodeID);
   oVariables.set_version(llVersion);
@@ -88,7 +88,7 @@ int MasterStateMachine :: UpdateMasterToStore(const nodeid_t llMasterNodeID, con
   return m_oMVStore.Write(oWriteOptions, m_iMyGroupIdx, oVariables);
 }
 
-int MasterStateMachine :: LearnMaster(
+int MasterStateMachine::LearnMaster(
   const uint64_t llInstanceID,
   const MasterOperator & oMasterOper,
   const uint64_t llAbsMasterTimeout) {
@@ -158,7 +158,7 @@ int MasterStateMachine :: LearnMaster(
   return 0;
 }
 
-void MasterStateMachine :: SafeGetMaster(nodeid_t & iMasterNodeID, uint64_t & llMasterVersion) {
+void MasterStateMachine::SafeGetMaster(nodeid_t & iMasterNodeID, uint64_t & llMasterVersion) {
   std::lock_guard<std::mutex> oLockGuard(m_oMutex);
 
   if (Time::GetSteadyClockMS() >= m_llAbsExpireTime) {
@@ -170,7 +170,7 @@ void MasterStateMachine :: SafeGetMaster(nodeid_t & iMasterNodeID, uint64_t & ll
   llMasterVersion = m_llMasterVersion;
 }
 
-const nodeid_t MasterStateMachine :: GetMaster() const {
+const nodeid_t MasterStateMachine::GetMaster() const {
   if (Time::GetSteadyClockMS() >= m_llAbsExpireTime) {
     return nullnode;
   }
@@ -178,20 +178,20 @@ const nodeid_t MasterStateMachine :: GetMaster() const {
   return m_iMasterNodeID;
 }
 
-const nodeid_t MasterStateMachine :: GetMasterWithVersion(uint64_t & llVersion) {
+const nodeid_t MasterStateMachine::GetMasterWithVersion(uint64_t & llVersion) {
   nodeid_t iMasterNodeID = nullnode;
   SafeGetMaster(iMasterNodeID, llVersion);
   return iMasterNodeID;
 }
 
-const bool MasterStateMachine :: IsIMMaster() const {
+const bool MasterStateMachine::IsIMMaster() const {
   nodeid_t iMasterNodeID = GetMaster();
   return iMasterNodeID == m_iMyNodeID;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MasterStateMachine :: Execute(const int iGroupIdx, const uint64_t llInstanceID,
+bool MasterStateMachine::Execute(const int iGroupIdx, const uint64_t llInstanceID,
                                    const std::string & sValue, SMCtx * poSMCtx) {
   MasterOperator oMasterOper;
   bool bSucc = oMasterOper.ParseFromArray(sValue.data(), sValue.size());
@@ -225,7 +225,7 @@ bool MasterStateMachine :: Execute(const int iGroupIdx, const uint64_t llInstanc
 
 ////////////////////////////////////////////////////
 
-bool MasterStateMachine :: MakeOpValue(
+bool MasterStateMachine::MakeOpValue(
   const nodeid_t iNodeID,
   const uint64_t llVersion,
   const int iTimeout,
@@ -243,7 +243,7 @@ bool MasterStateMachine :: MakeOpValue(
 
 ////////////////////////////////////////////////////////////
 
-int MasterStateMachine :: GetCheckpointBuffer(std::string & sCPBuffer) {
+int MasterStateMachine::GetCheckpointBuffer(std::string & sCPBuffer) {
   std::lock_guard<std::mutex> oLockGuard(m_oMutex);
 
   if (m_llMasterVersion == (uint64_t)-1) {
@@ -264,7 +264,7 @@ int MasterStateMachine :: GetCheckpointBuffer(std::string & sCPBuffer) {
   return 0;
 }
 
-int MasterStateMachine :: UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChange) {
+int MasterStateMachine::UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChange) {
   if (sCPBuffer.size() == 0) {
     return 0;
   }
@@ -320,7 +320,7 @@ int MasterStateMachine :: UpdateByCheckpoint(const std::string & sCPBuffer, bool
 
 ////////////////////////////////////////////////////////
 
-void MasterStateMachine :: BeforePropose(const int iGroupIdx, std::string & sValue) {
+void MasterStateMachine::BeforePropose(const int iGroupIdx, std::string & sValue) {
   std::lock_guard<std::mutex> oLockGuard(m_oMutex);
   MasterOperator oMasterOper;
   bool bSucc = oMasterOper.ParseFromArray(sValue.data(), sValue.size());
@@ -334,7 +334,7 @@ void MasterStateMachine :: BeforePropose(const int iGroupIdx, std::string & sVal
   assert(bSucc == true);
 }
 
-const bool MasterStateMachine :: NeedCallBeforePropose() {
+const bool MasterStateMachine::NeedCallBeforePropose() {
   return true;
 }
 

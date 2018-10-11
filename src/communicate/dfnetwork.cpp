@@ -24,20 +24,20 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-DFNetWork :: DFNetWork() : m_oUDPRecv(this), m_oTcpIOThread(this) {
+DFNetWork::DFNetWork() : m_oUDPRecv(this), m_oTcpIOThread(this) {
 }
 
-DFNetWork :: ~DFNetWork() {
+DFNetWork::~DFNetWork() {
   PLHead("NetWork Deleted!");
 }
 
-void DFNetWork :: StopNetWork() {
+void DFNetWork::StopNetWork() {
   m_oUDPRecv.Stop();
   m_oUDPSend.Stop();
   m_oTcpIOThread.Stop();
 }
 
-int DFNetWork :: Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
+int DFNetWork::Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
   int ret = m_oUDPSend.Init();
   if (ret != 0) {
     return ret;
@@ -57,17 +57,17 @@ int DFNetWork :: Init(const std::string & sListenIp, const int iListenPort, cons
   return 0;
 }
 
-void DFNetWork :: RunNetWork() {
+void DFNetWork::RunNetWork() {
   m_oUDPSend.start();
   m_oUDPRecv.start();
   m_oTcpIOThread.Start();
 }
 
-int DFNetWork :: SendMessageTCP(const int iGroupIdx, const std::string & sIp, const int iPort, const std::string & sMessage) {
+int DFNetWork::SendMessageTCP(const int iGroupIdx, const std::string & sIp, const int iPort, const std::string & sMessage) {
   return m_oTcpIOThread.AddMessage(iGroupIdx, sIp, iPort, sMessage);
 }
 
-int DFNetWork :: SendMessageUDP(const int iGroupIdx, const std::string & sIp, const int iPort, const std::string & sMessage) {
+int DFNetWork::SendMessageUDP(const int iGroupIdx, const std::string & sIp, const int iPort, const std::string & sMessage) {
   return m_oUDPSend.AddMessage(sIp, iPort, sMessage);
 }
 

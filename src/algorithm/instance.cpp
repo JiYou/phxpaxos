@@ -26,7 +26,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Instance :: Instance(
+Instance::Instance(
   const Config * poConfig,
   const LogStorage * poLogStorage,
   const MsgTransport * poMsgTransport,
@@ -47,11 +47,11 @@ Instance :: Instance(
   m_iLastChecksum = 0;
 }
 
-Instance :: ~Instance() {
+Instance::~Instance() {
   PLGHead("Instance Deleted, GroupIdx %d.", m_poConfig->GetMyGroupIdx());
 }
 
-int Instance :: Init() {
+int Instance::Init() {
   //Must init acceptor first, because the max instanceid is record in acceptor state.
   int ret = m_oAcceptor.Init();
   if (ret != 0) {
@@ -112,7 +112,7 @@ int Instance :: Init() {
   return 0;
 }
 
-void Instance :: Start() {
+void Instance::Start() {
   //start learner sender
   m_oLearner.StartLearnerSender();
   //start ioloop
@@ -123,7 +123,7 @@ void Instance :: Start() {
   m_bStarted = true;
 }
 
-void Instance :: Stop() {
+void Instance::Stop() {
   if (m_bStarted) {
     m_oIOLoop.Stop();
     m_oCheckpointMgr.Stop();
@@ -131,7 +131,7 @@ void Instance :: Stop() {
   }
 }
 
-int Instance :: ProtectionLogic_IsCheckpointInstanceIDCorrect(const uint64_t llCPInstanceID, const uint64_t llLogMaxInstanceID) {
+int Instance::ProtectionLogic_IsCheckpointInstanceIDCorrect(const uint64_t llCPInstanceID, const uint64_t llLogMaxInstanceID) {
   if (llCPInstanceID <= llLogMaxInstanceID + 1) {
     return 0;
   }
@@ -177,7 +177,7 @@ int Instance :: ProtectionLogic_IsCheckpointInstanceIDCorrect(const uint64_t llC
   }
 }
 
-int Instance :: InitLastCheckSum() {
+int Instance::InitLastCheckSum() {
   if (m_oAcceptor.GetInstanceID() == 0) {
     m_iLastChecksum = 0;
     return 0;
@@ -207,7 +207,7 @@ int Instance :: InitLastCheckSum() {
   return 0;
 }
 
-int Instance :: PlayLog(const uint64_t llBeginInstanceID, const uint64_t llEndInstanceID) {
+int Instance::PlayLog(const uint64_t llBeginInstanceID, const uint64_t llEndInstanceID) {
   if (llBeginInstanceID < m_oCheckpointMgr.GetMinChosenInstanceID()) {
     PLGErr("now instanceid %lu small than min chosen instanceid %lu",
            llBeginInstanceID, m_oCheckpointMgr.GetMinChosenInstanceID());
@@ -232,25 +232,25 @@ int Instance :: PlayLog(const uint64_t llBeginInstanceID, const uint64_t llEndIn
   return 0;
 }
 
-const uint32_t Instance :: GetLastChecksum() {
+const uint32_t Instance::GetLastChecksum() {
   return m_iLastChecksum;
 }
 
-Committer * Instance :: GetCommitter() {
+Committer * Instance::GetCommitter() {
   return &m_oCommitter;
 }
 
-Cleaner * Instance :: GetCheckpointCleaner() {
+Cleaner * Instance::GetCheckpointCleaner() {
   return m_oCheckpointMgr.GetCleaner();
 }
 
-Replayer * Instance :: GetCheckpointReplayer() {
+Replayer * Instance::GetCheckpointReplayer() {
   return m_oCheckpointMgr.GetReplayer();
 }
 
 ////////////////////////////////////////////////
 
-void Instance :: CheckNewValue() {
+void Instance::CheckNewValue() {
   if (!m_oCommitCtx.IsNewCommit()) {
     return;
   }
@@ -307,7 +307,7 @@ void Instance :: CheckNewValue() {
   }
 }
 
-void Instance :: OnNewValueCommitTimeout() {
+void Instance::OnNewValueCommitTimeout() {
   BP->GetInstanceBP()->OnNewValueCommitTimeout();
 
   m_oProposer.ExitPrepare();
@@ -318,13 +318,13 @@ void Instance :: OnNewValueCommitTimeout() {
 
 //////////////////////////////////////////////////////////////////////
 
-int Instance :: OnReceiveMessage(const char * pcMessage, const int iMessageLen) {
+int Instance::OnReceiveMessage(const char * pcMessage, const int iMessageLen) {
   m_oIOLoop.AddMessage(pcMessage, iMessageLen);
 
   return 0;
 }
 
-bool Instance :: ReceiveMsgHeaderCheck(const Header & oHeader, const nodeid_t iFromNodeID) {
+bool Instance::ReceiveMsgHeaderCheck(const Header & oHeader, const nodeid_t iFromNodeID) {
   if (m_poConfig->GetGid() == 0 || oHeader.gid() == 0) {
     return true;
   }
@@ -339,7 +339,7 @@ bool Instance :: ReceiveMsgHeaderCheck(const Header & oHeader, const nodeid_t iF
   return true;
 }
 
-void Instance :: OnReceive(const std::string & sBuffer) {
+void Instance::OnReceive(const std::string & sBuffer) {
   BP->GetInstanceBP()->OnReceive();
 
   if (sBuffer.size() <= 6) {
@@ -393,7 +393,7 @@ void Instance :: OnReceive(const std::string & sBuffer) {
   }
 }
 
-void Instance :: OnReceiveCheckpointMsg(const CheckpointMsg & oCheckpointMsg) {
+void Instance::OnReceiveCheckpointMsg(const CheckpointMsg & oCheckpointMsg) {
   PLGImp("Now.InstanceID %lu MsgType %d Msg.from_nodeid %lu My.nodeid %lu flag %d"
          " uuid %lu sequence %lu checksum %lu offset %lu buffsize %zu filepath %s",
          m_oAcceptor.GetInstanceID(), oCheckpointMsg.msgtype(), oCheckpointMsg.nodeid(),
@@ -412,7 +412,7 @@ void Instance :: OnReceiveCheckpointMsg(const CheckpointMsg & oCheckpointMsg) {
   }
 }
 
-int Instance :: OnReceivePaxosMsg(const PaxosMsg & oPaxosMsg, const bool bIsRetry) {
+int Instance::OnReceivePaxosMsg(const PaxosMsg & oPaxosMsg, const bool bIsRetry) {
   BP->GetInstanceBP()->OnReceivePaxosMsg();
 
   PLGImp("Now.InstanceID %lu Msg.InstanceID %lu MsgType %d Msg.from_nodeid %lu My.nodeid %lu Seen.LatestInstanceID %lu",
@@ -465,7 +465,7 @@ int Instance :: OnReceivePaxosMsg(const PaxosMsg & oPaxosMsg, const bool bIsRetr
   return 0;
 }
 
-int Instance :: ReceiveMsgForProposer(const PaxosMsg & oPaxosMsg) {
+int Instance::ReceiveMsgForProposer(const PaxosMsg & oPaxosMsg) {
   if (m_poConfig->IsIMFollower()) {
     PLGErr("I'm follower, skip this message");
     return 0;
@@ -504,7 +504,7 @@ int Instance :: ReceiveMsgForProposer(const PaxosMsg & oPaxosMsg) {
   return 0;
 }
 
-int Instance :: ReceiveMsgForAcceptor(const PaxosMsg & oPaxosMsg, const bool bIsRetry) {
+int Instance::ReceiveMsgForAcceptor(const PaxosMsg & oPaxosMsg, const bool bIsRetry) {
   if (m_poConfig->IsIMFollower()) {
     PLGErr("I'm follower, skip this message");
     return 0;
@@ -557,7 +557,7 @@ int Instance :: ReceiveMsgForAcceptor(const PaxosMsg & oPaxosMsg, const bool bIs
   return 0;
 }
 
-int Instance :: ReceiveMsgForLearner(const PaxosMsg & oPaxosMsg) {
+int Instance::ReceiveMsgForLearner(const PaxosMsg & oPaxosMsg) {
   if (oPaxosMsg.msgtype() == MsgType_PaxosLearner_AskforLearn) {
     m_oLearner.OnAskforLearn(oPaxosMsg);
   } else if (oPaxosMsg.msgtype() == MsgType_PaxosLearner_SendLearnValue) {
@@ -634,23 +634,23 @@ int Instance :: ReceiveMsgForLearner(const PaxosMsg & oPaxosMsg) {
   return 0;
 }
 
-void Instance :: NewInstance() {
+void Instance::NewInstance() {
   m_oAcceptor.NewInstance();
   m_oLearner.NewInstance();
   m_oProposer.NewInstance();
 }
 
-const uint64_t Instance :: GetNowInstanceID() {
+const uint64_t Instance::GetNowInstanceID() {
   return m_oAcceptor.GetInstanceID();
 }
 
-const uint64_t Instance :: GetMinChosenInstanceID() {
+const uint64_t Instance::GetMinChosenInstanceID() {
   return m_oCheckpointMgr.GetMinChosenInstanceID();
 }
 
 ///////////////////////////////
 
-void Instance :: OnTimeout(const uint32_t iTimerID, const int iType) {
+void Instance::OnTimeout(const uint32_t iTimerID, const int iType) {
   if (iType == Timer_Proposer_Prepare_Timeout) {
     m_oProposer.OnPrepareTimeout();
   } else if (iType == Timer_Proposer_Accept_Timeout) {
@@ -666,11 +666,11 @@ void Instance :: OnTimeout(const uint32_t iTimerID, const int iType) {
 
 ////////////////////////////////
 
-void Instance :: AddStateMachine(StateMachine * poSM) {
+void Instance::AddStateMachine(StateMachine * poSM) {
   m_oSMFac.AddSM(poSM);
 }
 
-bool Instance :: SMExecute(
+bool Instance::SMExecute(
   const uint64_t llInstanceID,
   const std::string & sValue,
   const bool bIsMyCommit,
@@ -680,7 +680,7 @@ bool Instance :: SMExecute(
 
 ////////////////////////////////
 
-void Instance :: ChecksumLogic(const PaxosMsg & oPaxosMsg) {
+void Instance::ChecksumLogic(const PaxosMsg & oPaxosMsg) {
   if (oPaxosMsg.lastchecksum() == 0) {
     return;
   }
@@ -708,7 +708,7 @@ void Instance :: ChecksumLogic(const PaxosMsg & oPaxosMsg) {
 
 //////////////////////////////////////////
 
-int Instance :: GetInstanceValue(const uint64_t llInstanceID, std::string & sValue, int & iSMID) {
+int Instance::GetInstanceValue(const uint64_t llInstanceID, std::string & sValue, int & iSMID) {
   iSMID = 0;
 
   if (llInstanceID >= m_oAcceptor.GetInstanceID()) {

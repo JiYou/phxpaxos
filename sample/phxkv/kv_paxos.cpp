@@ -32,7 +32,7 @@ using namespace std;
 
 namespace phxkv {
 
-PhxKV :: PhxKV(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList,
+PhxKV::PhxKV(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList,
                const std::string & sKVDBPath, const std::string & sPaxosLogPath)
   : m_oMyNode(oMyNode), m_vecNodeList(vecNodeList),
     m_sKVDBPath(sKVDBPath), m_sPaxosLogPath(sPaxosLogPath),
@@ -42,21 +42,21 @@ PhxKV :: PhxKV(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList 
   m_iGroupCount = 3;
 }
 
-PhxKV :: ~PhxKV() {
+PhxKV::~PhxKV() {
   delete m_poPaxosNode;
 }
 
-const phxpaxos::NodeInfo PhxKV :: GetMaster(const std::string & sKey) {
+const phxpaxos::NodeInfo PhxKV::GetMaster(const std::string & sKey) {
   int iGroupIdx = GetGroupIdx(sKey);
   return m_poPaxosNode->GetMaster(iGroupIdx);
 }
 
-const bool PhxKV :: IsIMMaster(const std::string & sKey) {
+const bool PhxKV::IsIMMaster(const std::string & sKey) {
   int iGroupIdx = GetGroupIdx(sKey);
   return m_poPaxosNode->IsIMMaster(iGroupIdx);
 }
 
-int PhxKV :: RunPaxos() {
+int PhxKV::RunPaxos() {
   bool bSucc = m_oPhxKVSM.Init();
   if (!bSucc) {
     return -1;
@@ -97,7 +97,7 @@ int PhxKV :: RunPaxos() {
   return 0;
 }
 
-int PhxKV :: GetGroupIdx(const std::string & sKey) {
+int PhxKV::GetGroupIdx(const std::string & sKey) {
   uint32_t iHashNum = 0;
   for (size_t i = 0; i < sKey.size(); i++) {
     iHashNum = iHashNum * 7 + ((int)sKey[i]);
@@ -106,7 +106,7 @@ int PhxKV :: GetGroupIdx(const std::string & sKey) {
   return iHashNum % m_iGroupCount;
 }
 
-int PhxKV :: KVPropose(const std::string & sKey, const std::string & sPaxosValue, PhxKVSMCtx & oPhxKVSMCtx) {
+int PhxKV::KVPropose(const std::string & sKey, const std::string & sPaxosValue, PhxKVSMCtx & oPhxKVSMCtx) {
   int iGroupIdx = GetGroupIdx(sKey);
 
   SMCtx oCtx;
@@ -124,7 +124,7 @@ int PhxKV :: KVPropose(const std::string & sKey, const std::string & sPaxosValue
   return 0;
 }
 
-PhxKVStatus PhxKV :: Put(
+PhxKVStatus PhxKV::Put(
   const std::string & sKey,
   const std::string & sValue,
   const uint64_t llVersion) {
@@ -149,7 +149,7 @@ PhxKVStatus PhxKV :: Put(
   }
 }
 
-PhxKVStatus PhxKV :: GetLocal(
+PhxKVStatus PhxKV::GetLocal(
   const std::string & sKey,
   std::string & sValue,
   uint64_t & llVersion) {
@@ -163,7 +163,7 @@ PhxKVStatus PhxKV :: GetLocal(
   }
 }
 
-PhxKVStatus PhxKV :: Delete(
+PhxKVStatus PhxKV::Delete(
   const std::string & sKey,
   const uint64_t llVersion) {
   string sPaxosValue;

@@ -31,7 +31,7 @@ using namespace std;
 
 namespace phxpaxos {
 
-EventLoop :: EventLoop(NetWork * poNetWork) {
+EventLoop::EventLoop(NetWork * poNetWork) {
   m_iEpollFd = -1;
   m_bIsEnd = false;
   m_poNetWork = poNetWork;
@@ -40,19 +40,19 @@ EventLoop :: EventLoop(NetWork * poNetWork) {
   memset(m_EpollEvents, 0, sizeof(m_EpollEvents));
 }
 
-EventLoop :: ~EventLoop() {
+EventLoop::~EventLoop() {
   ClearEvent();
 }
 
-void EventLoop :: JumpoutEpollWait() {
+void EventLoop::JumpoutEpollWait() {
   m_poNotify->SendNotify();
 }
 
-void EventLoop :: SetTcpClient(TcpClient * poTcpClient) {
+void EventLoop::SetTcpClient(TcpClient * poTcpClient) {
   m_poTcpClient = poTcpClient;
 }
 
-int EventLoop :: Init(const int iEpollLength) {
+int EventLoop::Init(const int iEpollLength) {
   m_iEpollFd = epoll_create(iEpollLength);
   if (m_iEpollFd == -1) {
     PLErr("epoll_create fail, ret %d", m_iEpollFd);
@@ -70,7 +70,7 @@ int EventLoop :: Init(const int iEpollLength) {
   return 0;
 }
 
-void EventLoop :: ModEvent(const Event * poEvent, const int iEvents) {
+void EventLoop::ModEvent(const Event * poEvent, const int iEvents) {
   auto it = m_mapEvent.find(poEvent->GetSocketFd());
   int iEpollOpertion = 0;
   if (it == end(m_mapEvent)) {
@@ -99,7 +99,7 @@ void EventLoop :: ModEvent(const Event * poEvent, const int iEvents) {
   m_mapEvent[poEvent->GetSocketFd()] = tCtx;
 }
 
-void EventLoop :: RemoveEvent(const Event * poEvent) {
+void EventLoop::RemoveEvent(const Event * poEvent) {
   auto it = m_mapEvent.find(poEvent->GetSocketFd());
   if (it == end(m_mapEvent)) {
     return;
@@ -124,7 +124,7 @@ void EventLoop :: RemoveEvent(const Event * poEvent) {
   m_mapEvent.erase(poEvent->GetSocketFd());
 }
 
-void EventLoop :: StartLoop() {
+void EventLoop::StartLoop() {
   m_bIsEnd = false;
   while(true) {
     BP->GetNetworkBP()->TcpEpollLoop();
@@ -150,11 +150,11 @@ void EventLoop :: StartLoop() {
   }
 }
 
-void EventLoop :: Stop() {
+void EventLoop::Stop() {
   m_bIsEnd = true;
 }
 
-void EventLoop :: OneLoop(const int iTimeoutMs) {
+void EventLoop::OneLoop(const int iTimeoutMs) {
   int n = epoll_wait(m_iEpollFd, m_EpollEvents, MAX_EVENTS, 1);
   if (n == -1) {
     if (errno != EINTR) {
@@ -197,7 +197,7 @@ void EventLoop :: OneLoop(const int iTimeoutMs) {
   }
 }
 
-void EventLoop :: OnError(const int iEvents, Event * poEvent) {
+void EventLoop::OnError(const int iEvents, Event * poEvent) {
   BP->GetNetworkBP()->TcpOnError();
 
   PLErr("event error, events %d socketfd %d socket ip %s errno %d",
@@ -213,7 +213,7 @@ void EventLoop :: OnError(const int iEvents, Event * poEvent) {
   }
 }
 
-bool EventLoop :: AddTimer(const Event * poEvent, const int iTimeout, const int iType, uint32_t & iTimerID) {
+bool EventLoop::AddTimer(const Event * poEvent, const int iTimeout, const int iType, uint32_t & iTimerID) {
   if (poEvent->GetSocketFd() == 0) {
     return false;
   }
@@ -234,14 +234,14 @@ bool EventLoop :: AddTimer(const Event * poEvent, const int iTimeout, const int 
   return true;
 }
 
-void EventLoop :: RemoveTimer(const uint32_t iTimerID) {
+void EventLoop::RemoveTimer(const uint32_t iTimerID) {
   auto it = m_mapTimerID2FD.find(iTimerID);
   if (it != end(m_mapTimerID2FD)) {
     m_mapTimerID2FD.erase(it);
   }
 }
 
-void EventLoop :: DealwithTimeoutOne(const uint32_t iTimerID, const int iType) {
+void EventLoop::DealwithTimeoutOne(const uint32_t iTimerID, const int iType) {
   auto it = m_mapTimerID2FD.find(iTimerID);
   if (it == end(m_mapTimerID2FD)) {
     //PLErr("Timeout aready remove!, timerid %u iType %d", iTimerID, iType);
@@ -260,7 +260,7 @@ void EventLoop :: DealwithTimeoutOne(const uint32_t iTimerID, const int iType) {
   eventIt->second.m_poEvent->OnTimeout(iTimerID, iType);
 }
 
-void EventLoop :: DealwithTimeout(int & iNextTimeout) {
+void EventLoop::DealwithTimeout(int & iNextTimeout) {
   bool bHasTimeout = true;
 
   while(bHasTimeout) {
@@ -279,12 +279,12 @@ void EventLoop :: DealwithTimeout(int & iNextTimeout) {
   }
 }
 
-void EventLoop :: AddEvent(int iFD, SocketAddress oAddr) {
+void EventLoop::AddEvent(int iFD, SocketAddress oAddr) {
   std::lock_guard<std::mutex> oLockGuard(m_oMutex);
   m_oFDQueue.push(make_pair(iFD, oAddr));
 }
 
-void EventLoop :: CreateEvent() {
+void EventLoop::CreateEvent() {
   std::lock_guard<std::mutex> oLockGuard(m_oMutex);
 
   if (m_oFDQueue.empty()) {
@@ -307,7 +307,7 @@ void EventLoop :: CreateEvent() {
   }
 }
 
-void EventLoop :: ClearEvent() {
+void EventLoop::ClearEvent() {
   for (auto it = m_vecCreatedEvent.begin(); it != end(m_vecCreatedEvent);) {
     if ((*it)->IsDestroy()) {
       delete (*it);
@@ -318,7 +318,7 @@ void EventLoop :: ClearEvent() {
   }
 }
 
-int EventLoop :: GetActiveEventCount() {
+int EventLoop::GetActiveEventCount() {
   std::lock_guard<std::mutex> oLockGuard(m_oMutex);
   ClearEvent();
   return (int)m_vecCreatedEvent.size();

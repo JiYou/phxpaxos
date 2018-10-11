@@ -25,17 +25,17 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Timer :: Timer() : m_iNowTimerID(1) {
+Timer::Timer() : m_iNowTimerID(1) {
 }
 
-Timer :: ~Timer() {
+Timer::~Timer() {
 }
 
-void Timer :: AddTimer(const uint64_t llAbsTime, uint32_t & iTimerID) {
+void Timer::AddTimer(const uint64_t llAbsTime, uint32_t & iTimerID) {
   return AddTimerWithType(llAbsTime, 0, iTimerID);
 }
 
-void Timer :: AddTimerWithType(const uint64_t llAbsTime, const int iType, uint32_t & iTimerID) {
+void Timer::AddTimerWithType(const uint64_t llAbsTime, const int iType, uint32_t & iTimerID) {
   iTimerID = m_iNowTimerID++;
 
   TimerObj tObj(iTimerID, llAbsTime, iType);
@@ -43,7 +43,7 @@ void Timer :: AddTimerWithType(const uint64_t llAbsTime, const int iType, uint32
   push_heap(begin(m_vecTimerHeap), end(m_vecTimerHeap));
 }
 
-const int Timer :: GetNextTimeout() const {
+const int Timer::GetNextTimeout() const {
   if (m_vecTimerHeap.empty()) {
     return -1;
   }
@@ -59,7 +59,7 @@ const int Timer :: GetNextTimeout() const {
   return iNextTimeout;
 }
 
-bool Timer :: PopTimeout(uint32_t & iTimerID, int & iType) {
+bool Timer::PopTimeout(uint32_t & iTimerID, int & iType) {
   if (m_vecTimerHeap.empty()) {
     return false;
   }

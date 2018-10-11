@@ -26,7 +26,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Base :: Base(const Config * poConfig, const MsgTransport * poMsgTransport, const Instance * poInstance) {
+Base::Base(const Config * poConfig, const MsgTransport * poMsgTransport, const Instance * poInstance) {
   m_poConfig = (Config *)poConfig;
   m_poMsgTransport = (MsgTransport *)poMsgTransport;
   m_poInstance = (Instance *)poInstance;
@@ -36,27 +36,27 @@ Base :: Base(const Config * poConfig, const MsgTransport * poMsgTransport, const
   m_bIsTestMode = false;
 }
 
-Base :: ~Base() {
+Base::~Base() {
 }
 
-uint64_t Base :: GetInstanceID() {
+uint64_t Base::GetInstanceID() {
   return m_llInstanceID;
 }
 
-void Base :: SetInstanceID(const uint64_t llInstanceID) {
+void Base::SetInstanceID(const uint64_t llInstanceID) {
   m_llInstanceID = llInstanceID;
 }
 
-void Base :: NewInstance() {
+void Base::NewInstance() {
   m_llInstanceID++;
   InitForNewPaxosInstance();
 }
 
-const uint32_t Base :: GetLastChecksum() const {
+const uint32_t Base::GetLastChecksum() const {
   return m_poInstance->GetLastChecksum();
 }
 
-int Base :: PackMsg(const PaxosMsg & oPaxosMsg, std::string & sBuffer) {
+int Base::PackMsg(const PaxosMsg & oPaxosMsg, std::string & sBuffer) {
   std::string sBodyBuffer;
   bool bSucc = oPaxosMsg.SerializeToString(&sBodyBuffer);
   if (!bSucc) {
@@ -70,7 +70,7 @@ int Base :: PackMsg(const PaxosMsg & oPaxosMsg, std::string & sBuffer) {
   return 0;
 }
 
-int Base :: PackCheckpointMsg(const CheckpointMsg & oCheckpointMsg, std::string & sBuffer) {
+int Base::PackCheckpointMsg(const CheckpointMsg & oCheckpointMsg, std::string & sBuffer) {
   std::string sBodyBuffer;
   bool bSucc = oCheckpointMsg.SerializeToString(&sBodyBuffer);
   if (!bSucc) {
@@ -84,7 +84,7 @@ int Base :: PackCheckpointMsg(const CheckpointMsg & oCheckpointMsg, std::string 
   return 0;
 }
 
-void Base :: PackBaseMsg(const std::string & sBodyBuffer, const int iCmd, std::string & sBuffer) {
+void Base::PackBaseMsg(const std::string & sBodyBuffer, const int iCmd, std::string & sBuffer) {
   char sGroupIdx[GROUPIDXLEN] = {0};
   int iGroupIdx = m_poConfig->GetMyGroupIdx();
   memcpy(sGroupIdx, &iGroupIdx, sizeof(sGroupIdx));
@@ -116,7 +116,7 @@ void Base :: PackBaseMsg(const std::string & sBodyBuffer, const int iCmd, std::s
   sBuffer += string(sBufferChecksum, sizeof(sBufferChecksum));
 }
 
-int Base :: UnPackBaseMsg(const std::string & sBuffer, Header & oHeader, size_t & iBodyStartPos, size_t & iBodyLen) {
+int Base::UnPackBaseMsg(const std::string & sBuffer, Header & oHeader, size_t & iBodyStartPos, size_t & iBodyLen) {
   uint16_t iHeaderLen = 0;
   memcpy(&iHeaderLen, sBuffer.data() + GROUPIDXLEN, HEADLEN_LEN);
 
@@ -168,7 +168,7 @@ int Base :: UnPackBaseMsg(const std::string & sBuffer, Header & oHeader, size_t 
   return 0;
 }
 
-int Base :: SendMessage(const nodeid_t iSendtoNodeID, const CheckpointMsg & oCheckpointMsg, const int iSendType) {
+int Base::SendMessage(const nodeid_t iSendtoNodeID, const CheckpointMsg & oCheckpointMsg, const int iSendType) {
   if (iSendtoNodeID == m_poConfig->GetMyNodeID()) {
     return 0;
   }
@@ -182,7 +182,7 @@ int Base :: SendMessage(const nodeid_t iSendtoNodeID, const CheckpointMsg & oChe
   return m_poMsgTransport->SendMessage(m_poConfig->GetMyGroupIdx(), iSendtoNodeID, sBuffer, iSendType);
 }
 
-int Base :: SendMessage(const nodeid_t iSendtoNodeID, const PaxosMsg & oPaxosMsg, const int iSendType) {
+int Base::SendMessage(const nodeid_t iSendtoNodeID, const PaxosMsg & oPaxosMsg, const int iSendType) {
   if (m_bIsTestMode) {
     return 0;
   }
@@ -203,7 +203,7 @@ int Base :: SendMessage(const nodeid_t iSendtoNodeID, const PaxosMsg & oPaxosMsg
   return m_poMsgTransport->SendMessage(m_poConfig->GetMyGroupIdx(), iSendtoNodeID, sBuffer, iSendType);
 }
 
-int Base :: BroadcastMessage(const PaxosMsg & oPaxosMsg, const int iRunType, const int iSendType) {
+int Base::BroadcastMessage(const PaxosMsg & oPaxosMsg, const int iRunType, const int iSendType) {
   if (m_bIsTestMode) {
     return 0;
   }
@@ -231,7 +231,7 @@ int Base :: BroadcastMessage(const PaxosMsg & oPaxosMsg, const int iRunType, con
   return ret;
 }
 
-int Base :: BroadcastMessageToFollower(const PaxosMsg & oPaxosMsg, const int iSendType) {
+int Base::BroadcastMessageToFollower(const PaxosMsg & oPaxosMsg, const int iSendType) {
   string sBuffer;
   int ret = PackMsg(oPaxosMsg, sBuffer);
   if (ret != 0) {
@@ -241,7 +241,7 @@ int Base :: BroadcastMessageToFollower(const PaxosMsg & oPaxosMsg, const int iSe
   return m_poMsgTransport->BroadcastMessageFollower(m_poConfig->GetMyGroupIdx(), sBuffer, iSendType);
 }
 
-int Base :: BroadcastMessageToTempNode(const PaxosMsg & oPaxosMsg, const int iSendType) {
+int Base::BroadcastMessageToTempNode(const PaxosMsg & oPaxosMsg, const int iSendType) {
   string sBuffer;
   int ret = PackMsg(oPaxosMsg, sBuffer);
   if (ret != 0) {
@@ -253,7 +253,7 @@ int Base :: BroadcastMessageToTempNode(const PaxosMsg & oPaxosMsg, const int iSe
 
 ///////////////////////////
 
-void Base :: SetAsTestMode() {
+void Base::SetAsTestMode() {
   m_bIsTestMode = true;
 }
 

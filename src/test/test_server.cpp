@@ -33,24 +33,24 @@ using namespace std;
 
 namespace phxpaxos_test {
 
-TestServer :: TestServer(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
+TestServer::TestServer(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
   : m_oMyNode(oMyNode), m_vecNodeList(vecNodeList), m_poPaxosNode(nullptr) {
 }
 
-TestServer :: ~TestServer() {
+TestServer::~TestServer() {
   printf("start end server ip %s port %d\n", m_oMyNode.GetIP().c_str(), m_oMyNode.GetPort());
   delete m_poPaxosNode;
   printf("server ip %s port %d ended\n", m_oMyNode.GetIP().c_str(), m_oMyNode.GetPort());
 }
 
-int TestServer :: MakeLogStoragePath(std::string & sLogStoragePath) {
+int TestServer::MakeLogStoragePath(std::string & sLogStoragePath) {
   char sTmp[128] = {0};
   snprintf(sTmp, sizeof(sTmp), "./logpath_%s_%d", m_oMyNode.GetIP().c_str(), m_oMyNode.GetPort());
 
   sLogStoragePath = string(sTmp);
 
   if (access(sLogStoragePath.c_str(), F_OK) != -1) {
-    if (FileUtils :: DeleteDir(sLogStoragePath) != 0) {
+    if (FileUtils::DeleteDir(sLogStoragePath) != 0) {
       printf("Delete exist logstorage dir fail\n");
       return -1;
     }
@@ -64,7 +64,7 @@ int TestServer :: MakeLogStoragePath(std::string & sLogStoragePath) {
   return 0;
 }
 
-int TestServer :: RunPaxos() {
+int TestServer::RunPaxos() {
   Options oOptions;
 
   int ret = MakeLogStoragePath(oOptions.sLogStoragePath);
@@ -103,7 +103,7 @@ int TestServer :: RunPaxos() {
   return 0;
 }
 
-int TestServer :: Write(const std::string & sTestValue, uint64_t & llInstanceID) {
+int TestServer::Write(const std::string & sTestValue, uint64_t & llInstanceID) {
   SMCtx oCtx;
   oCtx.m_iSMID = 1;
   oCtx.m_pCtx = nullptr;
@@ -118,7 +118,7 @@ int TestServer :: Write(const std::string & sTestValue, uint64_t & llInstanceID)
   return 0;
 }
 
-int TestServer :: BatchWrite(const std::string & sTestValue, uint64_t & llInstanceID, uint32_t & iBatchIndex) {
+int TestServer::BatchWrite(const std::string & sTestValue, uint64_t & llInstanceID, uint32_t & iBatchIndex) {
   SMCtx oCtx;
   oCtx.m_iSMID = 1;
   oCtx.m_pCtx = nullptr;
@@ -133,7 +133,7 @@ int TestServer :: BatchWrite(const std::string & sTestValue, uint64_t & llInstan
   return 0;
 }
 
-int TestServer :: Ready() {
+int TestServer::Ready() {
   uint64_t llInstanceID = 0;
   int ret = m_poPaxosNode->Propose(0, "nullvalue", llInstanceID);
   if (ret == 0) {
@@ -146,7 +146,7 @@ int TestServer :: Ready() {
   return ret;
 }
 
-TestSM * TestServer :: GetSM() {
+TestSM * TestServer::GetSM() {
   return &m_oTestSM;
 }
 

@@ -28,11 +28,11 @@ using namespace std;
 
 namespace phxpaxos_test {
 
-TestSM :: TestSM() {
+TestSM::TestSM() {
   m_iLastValueChecksum = 0;
 }
 
-bool TestSM :: Execute(const int iGroupIdx, const uint64_t llInstanceID,
+bool TestSM::Execute(const int iGroupIdx, const uint64_t llInstanceID,
                        const std::string & sPaxosValue, SMCtx * poSMCtx) {
   uint32_t iOtherLastChecksum = 0;
   string sBodyValue;
@@ -51,7 +51,7 @@ bool TestSM :: Execute(const int iGroupIdx, const uint64_t llInstanceID,
   return true;
 }
 
-bool TestSM :: CheckExecuteValueCorrect(const std::vector<pair<uint64_t, std::string> > & vecOtherExecuted) {
+bool TestSM::CheckExecuteValueCorrect(const std::vector<pair<uint64_t, std::string> > & vecOtherExecuted) {
   if (vecOtherExecuted.size() != m_vecExecuted.size()) {
     printf("size not same, other.size %zu excute.size %zu\n",
            vecOtherExecuted.size(), m_vecExecuted.size());
@@ -88,26 +88,26 @@ bool TestSM :: CheckExecuteValueCorrect(const std::vector<pair<uint64_t, std::st
 
 ////////////////////////////
 
-void TestSM :: BeforePropose(const int iGroupIdx, std::string & sValue) {
+void TestSM::BeforePropose(const int iGroupIdx, std::string & sValue) {
   PackTestValueWithChecksum(sValue, m_iLastValueChecksum);
   NLDebug("after value size %zu", sValue.size());
 }
 
-const bool TestSM :: NeedCallBeforePropose() {
+const bool TestSM::NeedCallBeforePropose() {
   return rand() % 3 == 0 ? true : false;
 }
 
-std::string TestSM :: PackTestValue(const std::string & sValue) {
+std::string TestSM::PackTestValue(const std::string & sValue) {
   return "0" + sValue;
 }
 
-void TestSM :: PackTestValueWithChecksum(std::string & sValue, const uint32_t iLastChecksum) {
+void TestSM::PackTestValueWithChecksum(std::string & sValue, const uint32_t iLastChecksum) {
   char sChecksum[sizeof(uint32_t)];
   memcpy(sChecksum, &iLastChecksum, sizeof(uint32_t));
   sValue = "1" + string(sChecksum, sizeof(uint32_t)) + sValue.substr(1, sValue.size());
 }
 
-void TestSM :: UnPackTestValue(const std::string & sValue, std::string & sBodyValue, uint32_t & iLastChecksum) {
+void TestSM::UnPackTestValue(const std::string & sValue, std::string & sBodyValue, uint32_t & iLastChecksum) {
   if (sValue[0] == '0') {
     iLastChecksum = 0;
     sBodyValue = sValue.substr(1, sValue.size());

@@ -29,13 +29,13 @@ using namespace std;
 
 namespace phxpaxos {
 
-SMFac :: SMFac(const int iMyGroupIdx) : m_iMyGroupIdx(iMyGroupIdx) {
+SMFac::SMFac(const int iMyGroupIdx) : m_iMyGroupIdx(iMyGroupIdx) {
 }
 
-SMFac :: ~SMFac() {
+SMFac::~SMFac() {
 }
 
-bool SMFac :: Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sPaxosValue, SMCtx * poSMCtx) {
+bool SMFac::Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sPaxosValue, SMCtx * poSMCtx) {
   if (sPaxosValue.size() < sizeof(int)) {
     PLG1Err("Value wrong, instanceid %lu size %zu", llInstanceID, sPaxosValue.size());
     //need do nothing, just skip
@@ -62,7 +62,7 @@ bool SMFac :: Execute(const int iGroupIdx, const uint64_t llInstanceID, const st
   }
 }
 
-bool SMFac :: BatchExecute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sBodyValue, BatchSMCtx * poBatchSMCtx) {
+bool SMFac::BatchExecute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sBodyValue, BatchSMCtx * poBatchSMCtx) {
   BatchPaxosValues oBatchValues;
   bool bSucc = oBatchValues.ParseFromArray(sBodyValue.data(), sBodyValue.size());
   if (!bSucc) {
@@ -90,7 +90,7 @@ bool SMFac :: BatchExecute(const int iGroupIdx, const uint64_t llInstanceID, con
   return true;
 }
 
-bool SMFac :: DoExecute(const int iGroupIdx, const uint64_t llInstanceID,
+bool SMFac::DoExecute(const int iGroupIdx, const uint64_t llInstanceID,
                         const std::string & sBodyValue, const int iSMID, SMCtx * poSMCtx) {
   if (iSMID == 0) {
     PLG1Imp("Value no need to do sm, just skip, instanceid %lu", llInstanceID);
@@ -115,7 +115,7 @@ bool SMFac :: DoExecute(const int iGroupIdx, const uint64_t llInstanceID,
 
 ////////////////////////////////////////////////////////////////
 
-bool SMFac :: ExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sPaxosValue) {
+bool SMFac::ExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sPaxosValue) {
   if (sPaxosValue.size() < sizeof(int)) {
     PLG1Err("Value wrong, instanceid %lu size %zu", llInstanceID, sPaxosValue.size());
     //need do nothing, just skip
@@ -138,7 +138,7 @@ bool SMFac :: ExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanc
   }
 }
 
-bool SMFac :: BatchExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID,
+bool SMFac::BatchExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID,
                                         const std::string & sBodyValue) {
   BatchPaxosValues oBatchValues;
   bool bSucc = oBatchValues.ParseFromArray(sBodyValue.data(), sBodyValue.size());
@@ -158,7 +158,7 @@ bool SMFac :: BatchExecuteForCheckpoint(const int iGroupIdx, const uint64_t llIn
   return true;
 }
 
-bool SMFac :: DoExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID,
+bool SMFac::DoExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID,
                                      const std::string & sBodyValue, const int iSMID) {
   if (iSMID == 0) {
     PLG1Imp("Value no need to do sm, just skip, instanceid %lu", llInstanceID);
@@ -183,7 +183,7 @@ bool SMFac :: DoExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInsta
 
 ////////////////////////////////////////////////////////
 
-void SMFac :: PackPaxosValue(std::string & sPaxosValue, const int iSMID) {
+void SMFac::PackPaxosValue(std::string & sPaxosValue, const int iSMID) {
   char sSMID[sizeof(int)] = {0};
   if (iSMID != 0) {
     memcpy(sSMID, &iSMID, sizeof(sSMID));
@@ -192,7 +192,7 @@ void SMFac :: PackPaxosValue(std::string & sPaxosValue, const int iSMID) {
   sPaxosValue = string(sSMID, sizeof(sSMID)) + sPaxosValue;
 }
 
-void SMFac :: AddSM(StateMachine * poSM) {
+void SMFac::AddSM(StateMachine * poSM) {
   for (auto & poSMt : m_vecSMList) {
     if (poSMt->SMID() == poSM->SMID()) {
       return;
@@ -204,7 +204,7 @@ void SMFac :: AddSM(StateMachine * poSM) {
 
 ///////////////////////////////////////////////////////
 
-const uint64_t SMFac :: GetCheckpointInstanceID(const int iGroupIdx) const {
+const uint64_t SMFac::GetCheckpointInstanceID(const int iGroupIdx) const {
   uint64_t llCPInstanceID = -1;
   uint64_t llCPInstanceID_Insize = -1;
   bool bHaveUseSM = false;
@@ -244,13 +244,13 @@ const uint64_t SMFac :: GetCheckpointInstanceID(const int iGroupIdx) const {
   return bHaveUseSM ? llCPInstanceID : llCPInstanceID_Insize;
 }
 
-std::vector<StateMachine *> SMFac :: GetSMList() {
+std::vector<StateMachine *> SMFac::GetSMList() {
   return m_vecSMList;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void SMFac :: BeforePropose(const int iGroupIdx, std::string & sValue) {
+void SMFac::BeforePropose(const int iGroupIdx, std::string & sValue) {
   int iSMID = 0;
   memcpy(&iSMID, sValue.data(), sizeof(int));
 
@@ -271,7 +271,7 @@ void SMFac :: BeforePropose(const int iGroupIdx, std::string & sValue) {
   }
 }
 
-void SMFac :: BeforeBatchPropose(const int iGroupIdx, std::string & sValue) {
+void SMFac::BeforeBatchPropose(const int iGroupIdx, std::string & sValue) {
   BatchPaxosValues oBatchValues;
   bool bSucc = oBatchValues.ParseFromArray(sValue.data() + sizeof(int), sValue.size() - sizeof(int));
   if (!bSucc) {
@@ -300,7 +300,7 @@ void SMFac :: BeforeBatchPropose(const int iGroupIdx, std::string & sValue) {
   }
 }
 
-void SMFac :: BeforeProposeCall(const int iGroupIdx, const int iSMID, std::string & sBodyValue, bool & change) {
+void SMFac::BeforeProposeCall(const int iGroupIdx, const int iSMID, std::string & sBodyValue, bool & change) {
   if (iSMID == 0) {
     return;
   }

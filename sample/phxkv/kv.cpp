@@ -28,15 +28,15 @@ using namespace std;
 
 namespace phxkv {
 
-KVClient :: KVClient() {
+KVClient::KVClient() {
   m_bHasInit = false;
   m_poLevelDB = nullptr;
 }
 
-KVClient :: ~KVClient() {
+KVClient::~KVClient() {
 }
 
-bool KVClient :: Init(const std::string & sDBPath) {
+bool KVClient::Init(const std::string & sDBPath) {
   if (m_bHasInit) {
     return true;
   }
@@ -57,12 +57,12 @@ bool KVClient :: Init(const std::string & sDBPath) {
   return true;
 }
 
-KVClient * KVClient :: Instance() {
+KVClient * KVClient::Instance() {
   static KVClient oKVClient;
   return &oKVClient;
 }
 
-KVClientRet KVClient :: Get(const std::string & sKey, std::string & sValue, uint64_t & llVersion) {
+KVClientRet KVClient::Get(const std::string & sKey, std::string & sValue, uint64_t & llVersion) {
   if (!m_bHasInit) {
     PLErr("no init yet");
     return KVCLIENT_SYS_FAIL;
@@ -102,7 +102,7 @@ KVClientRet KVClient :: Get(const std::string & sKey, std::string & sValue, uint
   return KVCLIENT_OK;
 }
 
-KVClientRet KVClient :: Set(const std::string & sKey, const std::string & sValue, const uint64_t llVersion) {
+KVClientRet KVClient::Set(const std::string & sKey, const std::string & sValue, const uint64_t llVersion) {
   if (!m_bHasInit) {
     PLErr("no init yet");
     return KVCLIENT_SYS_FAIL;
@@ -145,7 +145,7 @@ KVClientRet KVClient :: Set(const std::string & sKey, const std::string & sValue
   return KVCLIENT_OK;
 }
 
-KVClientRet KVClient :: Del(const std::string & sKey, const uint64_t llVersion) {
+KVClientRet KVClient::Del(const std::string & sKey, const uint64_t llVersion) {
   if (!m_bHasInit) {
     PLErr("no init yet");
     return KVCLIENT_SYS_FAIL;
@@ -188,7 +188,7 @@ KVClientRet KVClient :: Del(const std::string & sKey, const uint64_t llVersion) 
   return KVCLIENT_OK;
 }
 
-KVClientRet KVClient :: GetCheckpointInstanceID(uint64_t & llCheckpointInstanceID) {
+KVClientRet KVClient::GetCheckpointInstanceID(uint64_t & llCheckpointInstanceID) {
   if (!m_bHasInit) {
     PLErr("no init yet");
     return KVCLIENT_SYS_FAIL;
@@ -215,7 +215,7 @@ KVClientRet KVClient :: GetCheckpointInstanceID(uint64_t & llCheckpointInstanceI
   return KVCLIENT_OK;
 }
 
-KVClientRet KVClient :: SetCheckpointInstanceID(const uint64_t llCheckpointInstanceID) {
+KVClientRet KVClient::SetCheckpointInstanceID(const uint64_t llCheckpointInstanceID) {
   if (!m_bHasInit) {
     PLErr("no init yet");
     return KVCLIENT_SYS_FAIL;

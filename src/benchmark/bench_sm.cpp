@@ -25,17 +25,17 @@ using namespace phxpaxos;
 
 namespace bench {
 
-BenchSM :: BenchSM(const phxpaxos::nodeid_t llMyNodeID, const int iGroupIdx)
+BenchSM::BenchSM(const phxpaxos::nodeid_t llMyNodeID, const int iGroupIdx)
   : m_llMyNodeID(llMyNodeID), m_iGroupIdx(iGroupIdx) {
 }
 
-bool BenchSM :: Execute(const int iGroupIdx, const uint64_t llInstanceID,
+bool BenchSM::Execute(const int iGroupIdx, const uint64_t llInstanceID,
                         const std::string & sPaxosValue, SMCtx * poSMCtx) {
   //bench sm do nothing
   return true;
 }
 
-const int BenchSM :: GetGroupIdx() const {
+const int BenchSM::GetGroupIdx() const {
   return m_iGroupIdx;
 }
 

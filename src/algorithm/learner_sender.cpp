@@ -24,7 +24,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-LearnerSender :: LearnerSender(Config * poConfig, Learner * poLearner, PaxosLog * poPaxosLog)
+LearnerSender::LearnerSender(Config * poConfig, Learner * poLearner, PaxosLog * poPaxosLog)
   : m_poConfig(poConfig), m_poLearner(poLearner), m_poPaxosLog(poPaxosLog) {
   m_iAckLead = LearnerSender_ACK_LEAD;
   m_bIsEnd = false;
@@ -32,17 +32,17 @@ LearnerSender :: LearnerSender(Config * poConfig, Learner * poLearner, PaxosLog 
   SendDone();
 }
 
-LearnerSender :: ~LearnerSender() {
+LearnerSender::~LearnerSender() {
 }
 
-void LearnerSender :: Stop() {
+void LearnerSender::Stop() {
   if (m_bIsStart) {
     m_bIsEnd = true;
     join();
   }
 }
 
-void LearnerSender :: run() {
+void LearnerSender::run() {
   m_bIsStart = true;
 
   while (true) {
@@ -61,11 +61,11 @@ void LearnerSender :: run() {
 
 ////////////////////////////////////////
 
-void LearnerSender :: ReleshSending() {
+void LearnerSender::ReleshSending() {
   m_llAbsLastSendTime = Time::GetSteadyClockMS();
 }
 
-const bool LearnerSender :: IsIMSending() {
+const bool LearnerSender::IsIMSending() {
   if (!m_bIsIMSending) {
     return false;
   }
@@ -80,14 +80,14 @@ const bool LearnerSender :: IsIMSending() {
   return true;
 }
 
-void LearnerSender :: CutAckLead() {
+void LearnerSender::CutAckLead() {
   int iReceiveAckLead = LearnerReceiver_ACK_LEAD;
   if (m_iAckLead - iReceiveAckLead > iReceiveAckLead) {
     m_iAckLead = m_iAckLead - iReceiveAckLead;
   }
 }
 
-const bool LearnerSender :: CheckAck(const uint64_t llSendInstanceID) {
+const bool LearnerSender::CheckAck(const uint64_t llSendInstanceID) {
   m_oLock.Lock();
 
   if (llSendInstanceID < m_llAckInstanceID) {
@@ -125,7 +125,7 @@ const bool LearnerSender :: CheckAck(const uint64_t llSendInstanceID) {
 
 //////////////////////////////////////////////////////////////////////////
 
-const bool LearnerSender :: Prepare(const uint64_t llBeginInstanceID, const nodeid_t iSendToNodeID) {
+const bool LearnerSender::Prepare(const uint64_t llBeginInstanceID, const nodeid_t iSendToNodeID) {
   m_oLock.Lock();
 
   bool bPrepareRet = false;
@@ -143,7 +143,7 @@ const bool LearnerSender :: Prepare(const uint64_t llBeginInstanceID, const node
   return bPrepareRet;
 }
 
-const bool LearnerSender :: Comfirm(const uint64_t llBeginInstanceID, const nodeid_t iSendToNodeID) {
+const bool LearnerSender::Comfirm(const uint64_t llBeginInstanceID, const nodeid_t iSendToNodeID) {
   m_oLock.Lock();
 
   bool bComfirmRet = false;
@@ -162,7 +162,7 @@ const bool LearnerSender :: Comfirm(const uint64_t llBeginInstanceID, const node
   return bComfirmRet;
 }
 
-void LearnerSender :: Ack(const uint64_t llAckInstanceID, const nodeid_t iFromNodeID) {
+void LearnerSender::Ack(const uint64_t llAckInstanceID, const nodeid_t iFromNodeID) {
   m_oLock.Lock();
 
   if (IsIMSending() && m_bIsComfirmed) {
@@ -180,7 +180,7 @@ void LearnerSender :: Ack(const uint64_t llAckInstanceID, const nodeid_t iFromNo
 
 ///////////////////////////////////////////////
 
-void LearnerSender :: WaitToSend() {
+void LearnerSender::WaitToSend() {
   m_oLock.Lock();
   while (!m_bIsComfirmed) {
     m_oLock.WaitTime(1000);
@@ -191,7 +191,7 @@ void LearnerSender :: WaitToSend() {
   m_oLock.UnLock();
 }
 
-void LearnerSender :: SendLearnedValue(const uint64_t llBeginInstanceID, const nodeid_t iSendToNodeID) {
+void LearnerSender::SendLearnedValue(const uint64_t llBeginInstanceID, const nodeid_t iSendToNodeID) {
   PLGHead("BeginInstanceID %lu SendToNodeID %lu", llBeginInstanceID, iSendToNodeID);
 
   uint64_t llSendInstanceID = llBeginInstanceID;
@@ -235,7 +235,7 @@ void LearnerSender :: SendLearnedValue(const uint64_t llBeginInstanceID, const n
   PLGImp("SendDone, SendEndInstanceID %lu", llSendInstanceID);
 }
 
-int LearnerSender :: SendOne(const uint64_t llSendInstanceID, const nodeid_t iSendToNodeID, uint32_t & iLastChecksum) {
+int LearnerSender::SendOne(const uint64_t llSendInstanceID, const nodeid_t iSendToNodeID, uint32_t & iLastChecksum) {
   BP->GetLearnerBP()->SenderSendOnePaxosLog();
 
   AcceptorStateData oState;
@@ -253,7 +253,7 @@ int LearnerSender :: SendOne(const uint64_t llSendInstanceID, const nodeid_t iSe
   return ret;
 }
 
-void LearnerSender :: SendDone() {
+void LearnerSender::SendDone() {
   m_oLock.Lock();
 
   m_bIsIMSending = false;

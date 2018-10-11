@@ -30,15 +30,15 @@ using namespace std;
 
 namespace phxpaxos {
 
-CheckpointReceiver :: CheckpointReceiver(Config * poConfig, LogStorage * poLogStorage) :
+CheckpointReceiver::CheckpointReceiver(Config * poConfig, LogStorage * poLogStorage) :
   m_poConfig(poConfig), m_poLogStorage(poLogStorage) {
   Reset();
 }
 
-CheckpointReceiver :: ~CheckpointReceiver() {
+CheckpointReceiver::~CheckpointReceiver() {
 }
 
-void CheckpointReceiver :: Reset() {
+void CheckpointReceiver::Reset() {
   m_mapHasInitDir.clear();
 
   m_iSenderNodeID = nullnode;
@@ -46,7 +46,7 @@ void CheckpointReceiver :: Reset() {
   m_llSequence = 0;
 }
 
-int CheckpointReceiver :: NewReceiver(const nodeid_t iSenderNodeID, const uint64_t llUUID) {
+int CheckpointReceiver::NewReceiver(const nodeid_t iSenderNodeID, const uint64_t llUUID) {
   int ret = ClearCheckpointTmp();
   if (ret != 0) {
     return ret;
@@ -68,7 +68,7 @@ int CheckpointReceiver :: NewReceiver(const nodeid_t iSenderNodeID, const uint64
   return 0;
 }
 
-int CheckpointReceiver :: ClearCheckpointTmp() {
+int CheckpointReceiver::ClearCheckpointTmp() {
   string sLogStoragePath = m_poLogStorage->GetLogStorageDirPath(m_poConfig->GetMyGroupIdx());
 
   DIR * dir = nullptr;
@@ -99,7 +99,7 @@ int CheckpointReceiver :: ClearCheckpointTmp() {
   return ret;
 }
 
-const bool CheckpointReceiver :: IsReceiverFinish(const nodeid_t iSenderNodeID,
+const bool CheckpointReceiver::IsReceiverFinish(const nodeid_t iSenderNodeID,
     const uint64_t llUUID, const uint64_t llEndSequence) {
   if (iSenderNodeID == m_iSenderNodeID
       && llUUID == m_llUUID
@@ -110,7 +110,7 @@ const bool CheckpointReceiver :: IsReceiverFinish(const nodeid_t iSenderNodeID,
   }
 }
 
-const std::string CheckpointReceiver :: GetTmpDirPath(const int iSMID) {
+const std::string CheckpointReceiver::GetTmpDirPath(const int iSMID) {
   string sLogStoragePath = m_poLogStorage->GetLogStorageDirPath(m_poConfig->GetMyGroupIdx());
   char sTmpDirPath[512] = {0};
 
@@ -119,7 +119,7 @@ const std::string CheckpointReceiver :: GetTmpDirPath(const int iSMID) {
   return string(sTmpDirPath);
 }
 
-int CheckpointReceiver :: InitFilePath(const std::string & sFilePath, std::string & sFormatFilePath) {
+int CheckpointReceiver::InitFilePath(const std::string & sFilePath, std::string & sFormatFilePath) {
   PLGHead("START filepath %s", sFilePath.c_str());
 
   string sNewFilePath = "/" + sFilePath + "/";
@@ -164,7 +164,7 @@ int CheckpointReceiver :: InitFilePath(const std::string & sFilePath, std::strin
   return 0;
 }
 
-int CheckpointReceiver :: CreateDir(const std::string & sDirPath) {
+int CheckpointReceiver::CreateDir(const std::string & sDirPath) {
   if (access(sDirPath.c_str(), F_OK) == -1) {
     if (mkdir(sDirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
       PLGErr("Create dir fail, path %s", sDirPath.c_str());
@@ -175,7 +175,7 @@ int CheckpointReceiver :: CreateDir(const std::string & sDirPath) {
   return 0;
 }
 
-int CheckpointReceiver :: ReceiveCheckpoint(const CheckpointMsg & oCheckpointMsg) {
+int CheckpointReceiver::ReceiveCheckpoint(const CheckpointMsg & oCheckpointMsg) {
   if (oCheckpointMsg.nodeid() != m_iSenderNodeID
       || oCheckpointMsg.uuid() != m_llUUID) {
     PLGErr("msg not valid, Msg.SenderNodeID %lu Receiver.SenderNodeID %lu Msg.UUID %lu Receiver.UUID %lu",

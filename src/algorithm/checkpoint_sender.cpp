@@ -32,7 +32,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-CheckpointSender :: CheckpointSender(
+CheckpointSender::CheckpointSender(
   const nodeid_t iSendNodeID,
   Config * poConfig,
   Learner * poLearner,
@@ -53,25 +53,25 @@ CheckpointSender :: CheckpointSender(
   m_llAbsLastAckTime = 0;
 }
 
-CheckpointSender :: ~CheckpointSender() {
+CheckpointSender::~CheckpointSender() {
 }
 
-void CheckpointSender :: Stop() {
+void CheckpointSender::Stop() {
   if (m_bIsStarted && !m_bIsEnded) {
     m_bIsEnd = true;
     join();
   }
 }
 
-void CheckpointSender :: End() {
+void CheckpointSender::End() {
   m_bIsEnd = true;
 }
 
-const bool CheckpointSender :: IsEnd() const {
+const bool CheckpointSender::IsEnd() const {
   return m_bIsEnded;
 }
 
-void CheckpointSender :: run() {
+void CheckpointSender::run() {
   m_bIsStarted = true;
   m_llAbsLastAckTime = Time::GetSteadyClockMS();
 
@@ -107,7 +107,7 @@ void CheckpointSender :: run() {
   m_bIsEnded = true;
 }
 
-int CheckpointSender :: LockCheckpoint() {
+int CheckpointSender::LockCheckpoint() {
   std::vector<StateMachine *> vecSMList = m_poSMFac->GetSMList();
   std::vector<StateMachine *> vecLockSMList;
   int ret = 0;
@@ -129,14 +129,14 @@ int CheckpointSender :: LockCheckpoint() {
   return ret;
 }
 
-void CheckpointSender :: UnLockCheckpoint() {
+void CheckpointSender::UnLockCheckpoint() {
   std::vector<StateMachine *> vecSMList = m_poSMFac->GetSMList();
   for (auto & poSM : vecSMList) {
     poSM->UnLockCheckpointState();
   }
 }
 
-void CheckpointSender :: SendCheckpoint() {
+void CheckpointSender::SendCheckpoint() {
   int ret = -1;
   for (int i = 0; i < 2; i++) {
     ret = m_poLearner->SendCheckpointBegin(
@@ -170,7 +170,7 @@ void CheckpointSender :: SendCheckpoint() {
   BP->GetCheckpointBP()->SendCheckpointEnd();
 }
 
-int CheckpointSender :: SendCheckpointFofaSM(StateMachine * poSM) {
+int CheckpointSender::SendCheckpointFofaSM(StateMachine * poSM) {
   string sDirPath;
   std::vector<std::string> vecFileList;
 
@@ -201,7 +201,7 @@ int CheckpointSender :: SendCheckpointFofaSM(StateMachine * poSM) {
   return 0;
 }
 
-int CheckpointSender :: SendFile(const StateMachine * poSM, const std::string & sDirPath, const std::string & sFilePath) {
+int CheckpointSender::SendFile(const StateMachine * poSM, const std::string & sDirPath, const std::string & sFilePath) {
   PLGHead("START smid %d dirpath %s filepath %s", poSM->SMID(), sDirPath.c_str(), sFilePath.c_str());
 
   string sPath = sDirPath + sFilePath;
@@ -255,7 +255,7 @@ int CheckpointSender :: SendFile(const StateMachine * poSM, const std::string & 
   return 0;
 }
 
-int CheckpointSender :: SendBuffer(const int iSMID, const uint64_t llCheckpointInstanceID,
+int CheckpointSender::SendBuffer(const int iSMID, const uint64_t llCheckpointInstanceID,
                                    const std::string & sFilePath, const uint64_t llOffset, const std::string & sBuffer) {
   uint32_t iChecksum = crc32(0, (const uint8_t *)sBuffer.data(), sBuffer.size(), CRC32SKIP);
 
@@ -287,7 +287,7 @@ int CheckpointSender :: SendBuffer(const int iSMID, const uint64_t llCheckpointI
   return ret;
 }
 
-void CheckpointSender :: Ack(const nodeid_t iSendNodeID, const uint64_t llUUID, const uint64_t llSequence) {
+void CheckpointSender::Ack(const nodeid_t iSendNodeID, const uint64_t llUUID, const uint64_t llSequence) {
   if (iSendNodeID != m_iSendNodeID) {
     PLGErr("send nodeid not same, ack.sendnodeid %lu self.sendnodeid %lu", iSendNodeID, m_iSendNodeID);
     return;
@@ -307,7 +307,7 @@ void CheckpointSender :: Ack(const nodeid_t iSendNodeID, const uint64_t llUUID, 
   m_llAbsLastAckTime = Time::GetSteadyClockMS();
 }
 
-const bool CheckpointSender :: CheckAck(const uint64_t llSendSequence) {
+const bool CheckpointSender::CheckAck(const uint64_t llSendSequence) {
   while (llSendSequence > m_llAckSequence + Checkpoint_ACK_LEAD) {
     uint64_t llNowTime = Time::GetSteadyClockMS();
     uint64_t llPassTime = llNowTime > m_llAbsLastAckTime ? llNowTime - m_llAbsLastAckTime : 0;

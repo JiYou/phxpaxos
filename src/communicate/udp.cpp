@@ -34,25 +34,25 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-UDPRecv :: UDPRecv(DFNetWork * poDFNetWork)
+UDPRecv::UDPRecv(DFNetWork * poDFNetWork)
   : m_poDFNetWork(poDFNetWork), m_iSockFD(-1), m_bIsEnd(false), m_bIsStarted(false) {
 }
 
-UDPRecv :: ~UDPRecv() {
+UDPRecv::~UDPRecv() {
   if (m_iSockFD != -1) {
     close(m_iSockFD);
     m_iSockFD = -1;
   }
 }
 
-void UDPRecv :: Stop() {
+void UDPRecv::Stop() {
   if (m_bIsStarted) {
     m_bIsEnd = true;
     join();
   }
 }
 
-int UDPRecv :: Init(const int iPort) {
+int UDPRecv::Init(const int iPort) {
   if ((m_iSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     return -1;
   }
@@ -74,7 +74,7 @@ int UDPRecv :: Init(const int iPort) {
   return 0;
 }
 
-void UDPRecv :: run() {
+void UDPRecv::run() {
   m_bIsStarted = true;
 
   char sBuffer[65536] = {0};
@@ -116,10 +116,10 @@ void UDPRecv :: run() {
 
 //////////////////////////////////////////////
 
-UDPSend :: UDPSend() : m_iSockFD(-1), m_bIsEnd(false), m_bIsStarted(false) {
+UDPSend::UDPSend() : m_iSockFD(-1), m_bIsEnd(false), m_bIsStarted(false) {
 }
 
-UDPSend :: ~UDPSend() {
+UDPSend::~UDPSend() {
   while (!m_oSendQueue.empty()) {
     QueueData * poData = m_oSendQueue.peek();
     m_oSendQueue.pop();
@@ -127,7 +127,7 @@ UDPSend :: ~UDPSend() {
   }
 }
 
-int UDPSend :: Init() {
+int UDPSend::Init() {
   if ((m_iSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     return -1;
   }
@@ -135,14 +135,14 @@ int UDPSend :: Init() {
   return 0;
 }
 
-void UDPSend :: Stop() {
+void UDPSend::Stop() {
   if (m_bIsStarted) {
     m_bIsEnd = true;
     join();
   }
 }
 
-void UDPSend :: SendMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
+void UDPSend::SendMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
   struct sockaddr_in addr;
   int addr_len = sizeof(struct sockaddr_in);
   memset(&addr, 0, sizeof(addr));
@@ -157,7 +157,7 @@ void UDPSend :: SendMessage(const std::string & sIP, const int iPort, const std:
   }
 }
 
-void UDPSend :: run() {
+void UDPSend::run() {
   m_bIsStarted = true;
 
   while(true) {
@@ -184,7 +184,7 @@ void UDPSend :: run() {
   }
 }
 
-int UDPSend :: AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
+int UDPSend::AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
   m_oSendQueue.lock();
 
   if ((int)m_oSendQueue.size() > UDP_QUEUE_MAXLEN) {

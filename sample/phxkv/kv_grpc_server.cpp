@@ -28,16 +28,16 @@ using namespace std;
 namespace phxkv {
 
 
-PhxKVServiceImpl :: PhxKVServiceImpl(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList,
+PhxKVServiceImpl::PhxKVServiceImpl(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList,
                                      const std::string & sKVDBPath, const std::string & sPaxosLogPath)
   : m_oPhxKV(oMyNode, vecNodeList, sKVDBPath, sPaxosLogPath) {
 }
 
-int PhxKVServiceImpl :: Init() {
+int PhxKVServiceImpl::Init() {
   return m_oPhxKV.RunPaxos();
 }
 
-Status PhxKVServiceImpl :: Put(ServerContext* context, const KVOperator * request, KVResponse * reply) {
+Status PhxKVServiceImpl::Put(ServerContext* context, const KVOperator * request, KVResponse * reply) {
   if (!m_oPhxKV.IsIMMaster(request->key())) {
     reply->set_ret((int)PhxKVStatus::MASTER_REDIRECT);
     uint64_t llMasterNodeID = m_oPhxKV.GetMaster(request->key()).GetNodeID();
@@ -56,7 +56,7 @@ Status PhxKVServiceImpl :: Put(ServerContext* context, const KVOperator * reques
   return Status::OK;
 }
 
-Status PhxKVServiceImpl :: GetLocal(ServerContext* context, const KVOperator * request, KVResponse * reply) {
+Status PhxKVServiceImpl::GetLocal(ServerContext* context, const KVOperator * request, KVResponse * reply) {
   string sReadValue;
   uint64_t llReadVersion = 0;
 
@@ -76,7 +76,7 @@ Status PhxKVServiceImpl :: GetLocal(ServerContext* context, const KVOperator * r
   return Status::OK;
 }
 
-Status PhxKVServiceImpl :: GetGlobal(ServerContext* context, const KVOperator * request, KVResponse * reply) {
+Status PhxKVServiceImpl::GetGlobal(ServerContext* context, const KVOperator * request, KVResponse * reply) {
   if (!m_oPhxKV.IsIMMaster(request->key())) {
     reply->set_ret((int)PhxKVStatus::MASTER_REDIRECT);
     uint64_t llMasterNodeID = m_oPhxKV.GetMaster(request->key()).GetNodeID();
@@ -91,7 +91,7 @@ Status PhxKVServiceImpl :: GetGlobal(ServerContext* context, const KVOperator * 
   return GetLocal(context, request, reply);
 }
 
-Status PhxKVServiceImpl :: Delete(ServerContext* context, const KVOperator * request, KVResponse * reply) {
+Status PhxKVServiceImpl::Delete(ServerContext* context, const KVOperator * request, KVResponse * reply) {
   if (!m_oPhxKV.IsIMMaster(request->key())) {
     reply->set_ret((int)PhxKVStatus::MASTER_REDIRECT);
     uint64_t llMasterNodeID = m_oPhxKV.GetMaster(request->key()).GetNodeID();

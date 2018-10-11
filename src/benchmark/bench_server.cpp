@@ -32,7 +32,7 @@ using namespace std;
 
 namespace bench {
 
-BenchServer :: BenchServer(const int iGroupCount, const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
+BenchServer::BenchServer(const int iGroupCount, const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
   : m_oMyNode(oMyNode), m_vecNodeList(vecNodeList), m_poPaxosNode(nullptr) {
   m_iGroupCount = iGroupCount;
 
@@ -43,7 +43,7 @@ BenchServer :: BenchServer(const int iGroupCount, const phxpaxos::NodeInfo & oMy
   }
 }
 
-BenchServer :: ~BenchServer() {
+BenchServer::~BenchServer() {
   delete m_poPaxosNode;
 
   for (auto & poBenchSM : m_vecSMList) {
@@ -51,7 +51,7 @@ BenchServer :: ~BenchServer() {
   }
 }
 
-int BenchServer :: MakeLogStoragePath(std::string & sLogStoragePath) {
+int BenchServer::MakeLogStoragePath(std::string & sLogStoragePath) {
   char sTmp[128] = {0};
   snprintf(sTmp, sizeof(sTmp), "./logpath_%s_%d", m_oMyNode.GetIP().c_str(), m_oMyNode.GetPort());
 
@@ -67,7 +67,7 @@ int BenchServer :: MakeLogStoragePath(std::string & sLogStoragePath) {
   return 0;
 }
 
-int BenchServer :: RunPaxos() {
+int BenchServer::RunPaxos() {
   Options oOptions;
 
   int ret = MakeLogStoragePath(oOptions.sLogStoragePath);
@@ -110,7 +110,7 @@ int BenchServer :: RunPaxos() {
   return 0;
 }
 
-int BenchServer :: ReadyBench() {
+int BenchServer::ReadyBench() {
   int ret = 0;
   for (int i = 0; i < m_iGroupCount; i++) {
     ret = Write(i, "start bench");
@@ -122,12 +122,12 @@ int BenchServer :: ReadyBench() {
   return 0;
 }
 
-int BenchServer :: Write(const std::string & sBenchValue) {
+int BenchServer::Write(const std::string & sBenchValue) {
   int iGroupIdx = rand() % m_iGroupCount;
   return Write(iGroupIdx, sBenchValue);
 }
 
-int BenchServer :: Write(const int iGroupIdx, const std::string & sBenchValue) {
+int BenchServer::Write(const int iGroupIdx, const std::string & sBenchValue) {
 
   SMCtx oCtx;
   //smid must same to BenchSM.SMID().

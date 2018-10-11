@@ -25,11 +25,11 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-int PaxosComparator :: Compare(const leveldb::Slice & a, const leveldb::Slice & b) const {
+int PaxosComparator::Compare(const leveldb::Slice & a, const leveldb::Slice & b) const {
   return PCompare(a, b);
 }
 
-int PaxosComparator :: PCompare(const leveldb::Slice & a, const leveldb::Slice & b) {
+int PaxosComparator::PCompare(const leveldb::Slice & a, const leveldb::Slice & b) {
   if (a.size() != sizeof(uint64_t)) {
     NLErr("assert a.size %zu b.size %zu", a.size(), b.size());
     assert(a.size() == sizeof(uint64_t));
@@ -55,19 +55,19 @@ int PaxosComparator :: PCompare(const leveldb::Slice & a, const leveldb::Slice &
 
 ////////////////////////
 
-Database :: Database() : m_poLevelDB(nullptr), m_poValueStore(nullptr) {
+Database::Database() : m_poLevelDB(nullptr), m_poValueStore(nullptr) {
   m_bHasInit = false;
   m_iMyGroupIdx = -1;
 }
 
-Database :: ~Database() {
+Database::~Database() {
   delete m_poValueStore;
   delete m_poLevelDB;
 
   PLG1Head("LevelDB Deleted. Path %s", m_sDBPath.c_str());
 }
 
-int Database :: ClearAllLog() {
+int Database::ClearAllLog() {
   string sSystemVariablesBuffer;
   int ret = GetSystemVariables(sSystemVariablesBuffer);
   if (ret != 0 && ret != 1) {
@@ -128,7 +128,7 @@ int Database :: ClearAllLog() {
   return 0;
 }
 
-int Database :: Init(const std::string & sDBPath, const int iMyGroupIdx) {
+int Database::Init(const std::string & sDBPath, const int iMyGroupIdx) {
   if (m_bHasInit) {
     return 0;
   }
@@ -166,11 +166,11 @@ int Database :: Init(const std::string & sDBPath, const int iMyGroupIdx) {
   return 0;
 }
 
-const std::string Database :: GetDBPath() {
+const std::string Database::GetDBPath() {
   return m_sDBPath;
 }
 
-int Database :: GetMaxInstanceIDFileID(std::string & sFileID, uint64_t & llInstanceID) {
+int Database::GetMaxInstanceIDFileID(std::string & sFileID, uint64_t & llInstanceID) {
   uint64_t llMaxInstanceID = 0;
   int ret = GetMaxInstanceID(llMaxInstanceID);
   if (ret != 0 && ret != 1) {
@@ -202,7 +202,7 @@ int Database :: GetMaxInstanceIDFileID(std::string & sFileID, uint64_t & llInsta
   return 0;
 }
 
-int Database :: RebuildOneIndex(const uint64_t llInstanceID, const std::string & sFileID) {
+int Database::RebuildOneIndex(const uint64_t llInstanceID, const std::string & sFileID) {
   string sKey = GenKey(llInstanceID);
 
   leveldb::WriteOptions oLevelDBWriteOptions;
@@ -220,7 +220,7 @@ int Database :: RebuildOneIndex(const uint64_t llInstanceID, const std::string &
 
 ////////////////////////////////////////////////////////////////////////
 
-int Database :: GetFromLevelDB(const uint64_t llInstanceID, std::string & sValue) {
+int Database::GetFromLevelDB(const uint64_t llInstanceID, std::string & sValue) {
   string sKey = GenKey(llInstanceID);
 
   leveldb::Status oStatus = m_poLevelDB->Get(leveldb::ReadOptions(), sKey, &sValue);
@@ -239,7 +239,7 @@ int Database :: GetFromLevelDB(const uint64_t llInstanceID, std::string & sValue
   return 0;
 }
 
-int Database :: Get(const uint64_t llInstanceID, std::string & sValue) {
+int Database::Get(const uint64_t llInstanceID, std::string & sValue) {
   if (!m_bHasInit) {
     PLG1Err("no init yet");
     return -1;
@@ -266,7 +266,7 @@ int Database :: Get(const uint64_t llInstanceID, std::string & sValue) {
   return 0;
 }
 
-int Database :: ValueToFileID(const WriteOptions & oWriteOptions, const uint64_t llInstanceID, const std::string & sValue, std::string & sFileID) {
+int Database::ValueToFileID(const WriteOptions & oWriteOptions, const uint64_t llInstanceID, const std::string & sValue, std::string & sFileID) {
   int ret = m_poValueStore->Append(oWriteOptions, llInstanceID, sValue, sFileID);
   if (ret != 0) {
     BP->GetLogStorageBP()->ValueToFileIDFail();
@@ -277,7 +277,7 @@ int Database :: ValueToFileID(const WriteOptions & oWriteOptions, const uint64_t
   return 0;
 }
 
-int Database :: FileIDToValue(const std::string & sFileID, uint64_t & llInstanceID, std::string & sValue) {
+int Database::FileIDToValue(const std::string & sFileID, uint64_t & llInstanceID, std::string & sValue) {
   int ret = m_poValueStore->Read(sFileID, llInstanceID, sValue);
   if (ret != 0) {
     PLG1Err("fail, ret %d", ret);
@@ -287,7 +287,7 @@ int Database :: FileIDToValue(const std::string & sFileID, uint64_t & llInstance
   return 0;
 }
 
-int Database :: PutToLevelDB(const bool bSync, const uint64_t llInstanceID, const std::string & sValue) {
+int Database::PutToLevelDB(const bool bSync, const uint64_t llInstanceID, const std::string & sValue) {
   string sKey = GenKey(llInstanceID);
 
   leveldb::WriteOptions oLevelDBWriteOptions;
@@ -307,7 +307,7 @@ int Database :: PutToLevelDB(const bool bSync, const uint64_t llInstanceID, cons
   return 0;
 }
 
-int Database :: Put(const WriteOptions & oWriteOptions, const uint64_t llInstanceID, const std::string & sValue) {
+int Database::Put(const WriteOptions & oWriteOptions, const uint64_t llInstanceID, const std::string & sValue) {
   if (!m_bHasInit) {
     PLG1Err("no init yet");
     return -1;
@@ -324,7 +324,7 @@ int Database :: Put(const WriteOptions & oWriteOptions, const uint64_t llInstanc
   return ret;
 }
 
-int Database :: ForceDel(const WriteOptions & oWriteOptions, const uint64_t llInstanceID) {
+int Database::ForceDel(const WriteOptions & oWriteOptions, const uint64_t llInstanceID) {
   if (!m_bHasInit) {
     PLG1Err("no init yet");
     return -1;
@@ -361,7 +361,7 @@ int Database :: ForceDel(const WriteOptions & oWriteOptions, const uint64_t llIn
   return 0;
 }
 
-int Database :: Del(const WriteOptions & oWriteOptions, const uint64_t llInstanceID) {
+int Database::Del(const WriteOptions & oWriteOptions, const uint64_t llInstanceID) {
   if (!m_bHasInit) {
     PLG1Err("no init yet");
     return -1;
@@ -401,7 +401,7 @@ int Database :: Del(const WriteOptions & oWriteOptions, const uint64_t llInstanc
   return 0;
 }
 
-int Database :: GetMaxInstanceID(uint64_t & llInstanceID) {
+int Database::GetMaxInstanceID(uint64_t & llInstanceID) {
   llInstanceID = MINCHOSEN_KEY;
 
   leveldb::Iterator * it = m_poLevelDB->NewIterator(leveldb::ReadOptions());
@@ -424,20 +424,20 @@ int Database :: GetMaxInstanceID(uint64_t & llInstanceID) {
   return 1;
 }
 
-std::string Database :: GenKey(const uint64_t llInstanceID) {
+std::string Database::GenKey(const uint64_t llInstanceID) {
   string sKey;
   sKey.append((char *)&llInstanceID, sizeof(uint64_t));
   return sKey;
 }
 
-const uint64_t Database :: GetInstanceIDFromKey(const std::string & sKey) {
+const uint64_t Database::GetInstanceIDFromKey(const std::string & sKey) {
   uint64_t llInstanceID = 0;
   memcpy(&llInstanceID, sKey.data(), sizeof(uint64_t));
 
   return llInstanceID;
 }
 
-int Database :: GetMinChosenInstanceID(uint64_t & llMinInstanceID) {
+int Database::GetMinChosenInstanceID(uint64_t & llMinInstanceID) {
   if (!m_bHasInit) {
     PLG1Err("no init yet");
     return -1;
@@ -479,7 +479,7 @@ int Database :: GetMinChosenInstanceID(uint64_t & llMinInstanceID) {
   return 0;
 }
 
-int Database :: SetMinChosenInstanceID(const WriteOptions & oWriteOptions, const uint64_t llMinInstanceID) {
+int Database::SetMinChosenInstanceID(const WriteOptions & oWriteOptions, const uint64_t llMinInstanceID) {
   if (!m_bHasInit) {
     PLG1Err("no init yet");
     return -1;
@@ -500,38 +500,38 @@ int Database :: SetMinChosenInstanceID(const WriteOptions & oWriteOptions, const
 }
 
 
-int Database :: SetSystemVariables(const WriteOptions & oWriteOptions, const std::string & sBuffer) {
+int Database::SetSystemVariables(const WriteOptions & oWriteOptions, const std::string & sBuffer) {
   static uint64_t llSystemVariablesKey = SYSTEMVARIABLES_KEY;
   return PutToLevelDB(true, llSystemVariablesKey, sBuffer);
 }
 
-int Database :: GetSystemVariables(std::string & sBuffer) {
+int Database::GetSystemVariables(std::string & sBuffer) {
   static uint64_t llSystemVariablesKey = SYSTEMVARIABLES_KEY;
   return GetFromLevelDB(llSystemVariablesKey, sBuffer);
 }
 
-int Database :: SetMasterVariables(const WriteOptions & oWriteOptions, const std::string & sBuffer) {
+int Database::SetMasterVariables(const WriteOptions & oWriteOptions, const std::string & sBuffer) {
   static uint64_t llMasterVariablesKey = MASTERVARIABLES_KEY;
   return PutToLevelDB(true, llMasterVariablesKey, sBuffer);
 }
 
-int Database :: GetMasterVariables(std::string & sBuffer) {
+int Database::GetMasterVariables(std::string & sBuffer) {
   static uint64_t llMasterVariablesKey = MASTERVARIABLES_KEY;
   return GetFromLevelDB(llMasterVariablesKey, sBuffer);
 }
 
 ////////////////////////////////////////////////////
 
-MultiDatabase :: MultiDatabase() {
+MultiDatabase::MultiDatabase() {
 }
 
-MultiDatabase :: ~MultiDatabase() {
+MultiDatabase::~MultiDatabase() {
   for (auto & poDB : m_vecDBList) {
     delete poDB;
   }
 }
 
-int MultiDatabase :: Init(const std::string & sDBPath, const int iGroupCount) {
+int MultiDatabase::Init(const std::string & sDBPath, const int iGroupCount) {
   if (access(sDBPath.c_str(), F_OK) == -1) {
     PLErr("DBPath not exist or no limit to open, %s", sDBPath.c_str());
     return -1;
@@ -566,7 +566,7 @@ int MultiDatabase :: Init(const std::string & sDBPath, const int iGroupCount) {
   return 0;
 }
 
-const std::string MultiDatabase :: GetLogStorageDirPath(const int iGroupIdx) {
+const std::string MultiDatabase::GetLogStorageDirPath(const int iGroupIdx) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return "";
   }
@@ -574,7 +574,7 @@ const std::string MultiDatabase :: GetLogStorageDirPath(const int iGroupIdx) {
   return m_vecDBList[iGroupIdx]->GetDBPath();
 }
 
-int MultiDatabase :: Get(const int iGroupIdx, const uint64_t llInstanceID, std::string & sValue) {
+int MultiDatabase::Get(const int iGroupIdx, const uint64_t llInstanceID, std::string & sValue) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -582,7 +582,7 @@ int MultiDatabase :: Get(const int iGroupIdx, const uint64_t llInstanceID, std::
   return m_vecDBList[iGroupIdx]->Get(llInstanceID, sValue);
 }
 
-int MultiDatabase :: Put(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue) {
+int MultiDatabase::Put(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -590,7 +590,7 @@ int MultiDatabase :: Put(const WriteOptions & oWriteOptions, const int iGroupIdx
   return m_vecDBList[iGroupIdx]->Put(oWriteOptions, llInstanceID, sValue);
 }
 
-int MultiDatabase :: Del(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID) {
+int MultiDatabase::Del(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -598,7 +598,7 @@ int MultiDatabase :: Del(const WriteOptions & oWriteOptions, const int iGroupIdx
   return m_vecDBList[iGroupIdx]->Del(oWriteOptions, llInstanceID);
 }
 
-int MultiDatabase :: ForceDel(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID) {
+int MultiDatabase::ForceDel(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -606,7 +606,7 @@ int MultiDatabase :: ForceDel(const WriteOptions & oWriteOptions, const int iGro
   return m_vecDBList[iGroupIdx]->ForceDel(oWriteOptions, llInstanceID);
 }
 
-int MultiDatabase :: GetMaxInstanceID(const int iGroupIdx, uint64_t & llInstanceID) {
+int MultiDatabase::GetMaxInstanceID(const int iGroupIdx, uint64_t & llInstanceID) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -614,7 +614,7 @@ int MultiDatabase :: GetMaxInstanceID(const int iGroupIdx, uint64_t & llInstance
   return m_vecDBList[iGroupIdx]->GetMaxInstanceID(llInstanceID);
 }
 
-int MultiDatabase :: SetMinChosenInstanceID(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llMinInstanceID) {
+int MultiDatabase::SetMinChosenInstanceID(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llMinInstanceID) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -622,7 +622,7 @@ int MultiDatabase :: SetMinChosenInstanceID(const WriteOptions & oWriteOptions, 
   return m_vecDBList[iGroupIdx]->SetMinChosenInstanceID(oWriteOptions, llMinInstanceID);
 }
 
-int MultiDatabase :: GetMinChosenInstanceID(const int iGroupIdx, uint64_t & llMinInstanceID) {
+int MultiDatabase::GetMinChosenInstanceID(const int iGroupIdx, uint64_t & llMinInstanceID) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -630,7 +630,7 @@ int MultiDatabase :: GetMinChosenInstanceID(const int iGroupIdx, uint64_t & llMi
   return m_vecDBList[iGroupIdx]->GetMinChosenInstanceID(llMinInstanceID);
 }
 
-int MultiDatabase :: ClearAllLog(const int iGroupIdx) {
+int MultiDatabase::ClearAllLog(const int iGroupIdx) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -638,7 +638,7 @@ int MultiDatabase :: ClearAllLog(const int iGroupIdx) {
   return m_vecDBList[iGroupIdx]->ClearAllLog();
 }
 
-int MultiDatabase :: SetSystemVariables(const WriteOptions & oWriteOptions, const int iGroupIdx, const std::string & sBuffer) {
+int MultiDatabase::SetSystemVariables(const WriteOptions & oWriteOptions, const int iGroupIdx, const std::string & sBuffer) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -646,7 +646,7 @@ int MultiDatabase :: SetSystemVariables(const WriteOptions & oWriteOptions, cons
   return m_vecDBList[iGroupIdx]->SetSystemVariables(oWriteOptions, sBuffer);
 }
 
-int MultiDatabase :: GetSystemVariables(const int iGroupIdx, std::string & sBuffer) {
+int MultiDatabase::GetSystemVariables(const int iGroupIdx, std::string & sBuffer) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -654,7 +654,7 @@ int MultiDatabase :: GetSystemVariables(const int iGroupIdx, std::string & sBuff
   return m_vecDBList[iGroupIdx]->GetSystemVariables(sBuffer);
 }
 
-int MultiDatabase :: SetMasterVariables(const WriteOptions & oWriteOptions, const int iGroupIdx, const std::string & sBuffer) {
+int MultiDatabase::SetMasterVariables(const WriteOptions & oWriteOptions, const int iGroupIdx, const std::string & sBuffer) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }
@@ -662,7 +662,7 @@ int MultiDatabase :: SetMasterVariables(const WriteOptions & oWriteOptions, cons
   return m_vecDBList[iGroupIdx]->SetMasterVariables(oWriteOptions, sBuffer);
 }
 
-int MultiDatabase :: GetMasterVariables(const int iGroupIdx, std::string & sBuffer) {
+int MultiDatabase::GetMasterVariables(const int iGroupIdx, std::string & sBuffer) {
   if (iGroupIdx >= (int)m_vecDBList.size()) {
     return -2;
   }

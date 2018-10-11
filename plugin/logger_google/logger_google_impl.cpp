@@ -30,10 +30,10 @@ using namespace std;
 
 namespace phxpaxos {
 
-LoggerGoogleImpl :: LoggerGoogleImpl(const std::string & sModuleName, const std::string & sLogPath, const int iLogLevel) {
+LoggerGoogleImpl::LoggerGoogleImpl(const std::string & sModuleName, const std::string & sLogPath, const int iLogLevel) {
   google::InitGoogleLogging(sModuleName.c_str());
   FLAGS_log_dir = sLogPath;
-  FLAGS_stderrthreshold = google :: FATAL;
+  FLAGS_stderrthreshold = google::FATAL;
   switch( iLogLevel ) {
   case 1:
     FLAGS_minloglevel = google::ERROR;
@@ -52,10 +52,10 @@ LoggerGoogleImpl :: LoggerGoogleImpl(const std::string & sModuleName, const std:
   LogVerbose("%s", "init_glog_info_file");
 }
 
-LoggerGoogleImpl :: ~LoggerGoogleImpl() {
+LoggerGoogleImpl::~LoggerGoogleImpl() {
 }
 
-void LoggerGoogleImpl :: LogError(const char * pcFormat, ...) {
+void LoggerGoogleImpl::LogError(const char * pcFormat, ...) {
   char sBuf[1024] = {0};
   string newFormat = "\033[41;37m " + string(pcFormat) + " \033[0m";
   va_list args;
@@ -66,7 +66,7 @@ void LoggerGoogleImpl :: LogError(const char * pcFormat, ...) {
   LOG(ERROR) << sBuf;
 }
 
-void LoggerGoogleImpl :: LogWarning(const char * pcFormat, ...) {
+void LoggerGoogleImpl::LogWarning(const char * pcFormat, ...) {
   char sBuf[1024] = {0};
   string newFormat = "\033[44;37m " + string(pcFormat) + " \033[0m";
   va_list args;
@@ -77,7 +77,7 @@ void LoggerGoogleImpl :: LogWarning(const char * pcFormat, ...) {
   LOG(WARNING) << sBuf;
 }
 
-void LoggerGoogleImpl :: LogInfo(const char * pcFormat, ...) {
+void LoggerGoogleImpl::LogInfo(const char * pcFormat, ...) {
   char sBuf[1024] = {0};
   string newFormat = "\033[45;37m " + string(pcFormat) + " \033[0m";
   va_list args;
@@ -88,7 +88,7 @@ void LoggerGoogleImpl :: LogInfo(const char * pcFormat, ...) {
   LOG(INFO) << sBuf;
 }
 
-void LoggerGoogleImpl :: LogVerbose(const char * pcFormat, ...) {
+void LoggerGoogleImpl::LogVerbose(const char * pcFormat, ...) {
   char sBuf[1024] = {0};
   va_list args;
   va_start(args, pcFormat);

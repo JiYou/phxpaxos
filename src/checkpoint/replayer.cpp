@@ -28,7 +28,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Replayer :: Replayer(
+Replayer::Replayer(
   Config * poConfig,
   SMFac * poSMFac,
   LogStorage * poLogStorage,
@@ -42,19 +42,19 @@ Replayer :: Replayer(
     m_bIsEnd(false) {
 }
 
-Replayer :: ~Replayer() {
+Replayer::~Replayer() {
 }
 
-void Replayer :: Stop() {
+void Replayer::Stop() {
   m_bIsEnd = true;
   join();
 }
 
-void Replayer :: Pause() {
+void Replayer::Pause() {
   m_bCanrun = false;
 }
 
-void Replayer :: Continue() {
+void Replayer::Continue() {
   m_bIsPaused = false;
   m_bCanrun = true;
 }
@@ -63,7 +63,7 @@ const bool Replayer:: IsPaused() const {
   return m_bIsPaused;
 }
 
-void Replayer :: run() {
+void Replayer::run() {
   PLGHead("Checkpoint.Replayer [START]");
   uint64_t llInstanceID = m_poSMFac->GetCheckpointInstanceID(m_poConfig->GetMyGroupIdx()) + 1;
 
@@ -98,7 +98,7 @@ void Replayer :: run() {
   }
 }
 
-bool Replayer :: PlayOne(const uint64_t llInstanceID) {
+bool Replayer::PlayOne(const uint64_t llInstanceID) {
   AcceptorStateData oState;
   int ret = m_oPaxosLog.ReadState(m_poConfig->GetMyGroupIdx(), llInstanceID, oState);
   if (ret != 0) {

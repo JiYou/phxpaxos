@@ -35,7 +35,7 @@ int MakeLogStoragePath(std::string & sLogStoragePath) {
   sLogStoragePath = "./ut_test_db_path/";
 
   if (access(sLogStoragePath.c_str(), F_OK) != -1) {
-    if (FileUtils :: DeleteDir(sLogStoragePath) != 0) {
+    if (FileUtils::DeleteDir(sLogStoragePath) != 0) {
       printf("Delete exist logstorage dir fail\n");
       return -1;
     }

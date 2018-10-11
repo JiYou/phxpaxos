@@ -25,10 +25,10 @@ using namespace phxpaxos;
 
 namespace phxecho {
 
-PhxEchoSM :: PhxEchoSM() {
+PhxEchoSM::PhxEchoSM() {
 }
 
-bool PhxEchoSM :: Execute(const int iGroupIdx, const uint64_t llInstanceID,
+bool PhxEchoSM::Execute(const int iGroupIdx, const uint64_t llInstanceID,
                           const std::string & sPaxosValue, SMCtx * poSMCtx) {
   printf("[SM Execute] ok, smid %d instanceid %lu value %s\n",
          SMID(), llInstanceID, sPaxosValue.c_str());

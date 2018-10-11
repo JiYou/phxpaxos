@@ -26,7 +26,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Config :: Config(
+Config::Config(
   const LogStorage * poLogStorage,
   const bool bLogSync,
   const int iSyncInterval,
@@ -63,10 +63,10 @@ Config :: Config(
   }
 }
 
-Config :: ~Config() {
+Config::~Config() {
 }
 
-int Config :: Init() {
+int Config::Init() {
   int ret = m_oSystemVSM.Init();
   if (ret != 0) {
     PLG1Err("fail, ret %d", ret);
@@ -79,7 +79,7 @@ int Config :: Init() {
   return 0;
 }
 
-const bool Config :: CheckConfig() {
+const bool Config::CheckConfig() {
   if (!m_oSystemVSM.IsIMInMembership()) {
     PLG1Err("my node %lu is not in membership", m_iMyNodeID);
     return false;
@@ -88,75 +88,75 @@ const bool Config :: CheckConfig() {
   return true;
 }
 
-const uint64_t Config :: GetGid() const {
+const uint64_t Config::GetGid() const {
   return m_oSystemVSM.GetGid();
 }
 
-const nodeid_t Config :: GetMyNodeID() const {
+const nodeid_t Config::GetMyNodeID() const {
   return m_iMyNodeID;
 }
 
-const int Config :: GetNodeCount() const {
+const int Config::GetNodeCount() const {
   return m_oSystemVSM.GetNodeCount();
 }
 
-const int Config :: GetMyGroupIdx() const {
+const int Config::GetMyGroupIdx() const {
   return m_iMyGroupIdx;
 }
 
-const int Config :: GetGroupCount() const {
+const int Config::GetGroupCount() const {
   return m_iGroupCount;
 }
 
-const int Config :: GetMajorityCount() const {
+const int Config::GetMajorityCount() const {
   return m_oSystemVSM.GetMajorityCount();
 }
 
-const bool Config :: GetIsUseMembership() const {
+const bool Config::GetIsUseMembership() const {
   return m_bUseMembership;
 }
 
 ////////////////////////////////////////////////////////////
 
-const uint64_t Config :: GetAskforLearnTimeoutMs() const {
+const uint64_t Config::GetAskforLearnTimeoutMs() const {
   return 2000;
 }
 
-const int Config :: GetPrepareTimeoutMs() const {
+const int Config::GetPrepareTimeoutMs() const {
   return 3000;
 }
 
-const int Config :: GetAcceptTimeoutMs() const {
+const int Config::GetAcceptTimeoutMs() const {
   return 3000;
 }
 
 ///////////////////////////////////////////////////////////
 
-const bool Config :: IsValidNodeID(const nodeid_t iNodeID) {
+const bool Config::IsValidNodeID(const nodeid_t iNodeID) {
   return m_oSystemVSM.IsValidNodeID(iNodeID);
 }
 
-const bool Config :: IsIMFollower() const {
+const bool Config::IsIMFollower() const {
   return m_bIsIMFollower;
 }
 
-const nodeid_t Config :: GetFollowToNodeID() const {
+const nodeid_t Config::GetFollowToNodeID() const {
   return m_iFollowToNodeID;
 }
 
 ///////////////////////////////////////////////////////
 
-SystemVSM * Config :: GetSystemVSM() {
+SystemVSM * Config::GetSystemVSM() {
   return &m_oSystemVSM;
 }
 
 ///////////////////////////////////////////////////////
 
-void Config :: SetMasterSM(InsideSM * poMasterSM) {
+void Config::SetMasterSM(InsideSM * poMasterSM) {
   m_poMasterSM = poMasterSM;
 }
 
-InsideSM * Config :: GetMasterSM() {
+InsideSM * Config::GetMasterSM() {
   return m_poMasterSM;
 }
 
@@ -164,7 +164,7 @@ InsideSM * Config :: GetMasterSM() {
 
 #define TmpNodeTimeout 60000
 
-void Config :: AddTmpNodeOnlyForLearn(const nodeid_t iTmpNodeID) {
+void Config::AddTmpNodeOnlyForLearn(const nodeid_t iTmpNodeID) {
   const std::set<nodeid_t> & setNodeID = m_oSystemVSM.GetMembershipMap();
   if (setNodeID.find(iTmpNodeID) != end(setNodeID)) {
     return;
@@ -173,7 +173,7 @@ void Config :: AddTmpNodeOnlyForLearn(const nodeid_t iTmpNodeID) {
   m_mapTmpNodeOnlyForLearn[iTmpNodeID] = Time::GetSteadyClockMS() + TmpNodeTimeout;
 }
 
-const std::map<nodeid_t, uint64_t> & Config :: GetTmpNodeMap() {
+const std::map<nodeid_t, uint64_t> & Config::GetTmpNodeMap() {
   uint64_t llNowTime = Time::GetSteadyClockMS();
 
   for (auto it = m_mapTmpNodeOnlyForLearn.begin(); it != end(m_mapTmpNodeOnlyForLearn);) {
@@ -189,12 +189,12 @@ const std::map<nodeid_t, uint64_t> & Config :: GetTmpNodeMap() {
   return m_mapTmpNodeOnlyForLearn;
 }
 
-void Config :: AddFollowerNode(const nodeid_t iMyFollowerNodeID) {
+void Config::AddFollowerNode(const nodeid_t iMyFollowerNodeID) {
   static int iFollowerTimeout = ASKFORLEARN_NOOP_INTERVAL * 3;
   m_mapMyFollower[iMyFollowerNodeID] = Time::GetSteadyClockMS() + iFollowerTimeout;
 }
 
-const std::map<nodeid_t, uint64_t> & Config :: GetMyFollowerMap() {
+const std::map<nodeid_t, uint64_t> & Config::GetMyFollowerMap() {
   uint64_t llNowTime = Time::GetSteadyClockMS();
 
   for (auto it = m_mapMyFollower.begin(); it != end(m_mapMyFollower);) {
@@ -210,19 +210,19 @@ const std::map<nodeid_t, uint64_t> & Config :: GetMyFollowerMap() {
   return m_mapMyFollower;
 }
 
-const size_t Config :: GetMyFollowerCount() {
+const size_t Config::GetMyFollowerCount() {
   return m_mapMyFollower.size();
 }
 
-const bool Config :: LogSync() const {
+const bool Config::LogSync() const {
   return m_bLogSync;
 }
 
-void Config :: SetLogSync(const bool LogSync) {
+void Config::SetLogSync(const bool LogSync) {
   m_bLogSync = LogSync;
 }
 
-const int Config :: SyncInterval() const {
+const int Config::SyncInterval() const {
   return m_iSyncInterval;
 }
 

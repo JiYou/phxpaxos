@@ -30,11 +30,11 @@ using namespace std;
 
 namespace phxkv {
 
-PhxKVClient :: PhxKVClient(std::shared_ptr<Channel> channel)
+PhxKVClient::PhxKVClient(std::shared_ptr<Channel> channel)
   : stub_(PhxKVServer::NewStub(channel)) {
 }
 
-void PhxKVClient :: NewChannel(const uint64_t llNodeID) {
+void PhxKVClient::NewChannel(const uint64_t llNodeID) {
   NodeInfo oNodeInfo(llNodeID);
 
   //for test multi node in one machine, each node have difference grpc_port.
@@ -55,7 +55,7 @@ void PhxKVClient :: NewChannel(const uint64_t llNodeID) {
                                grpc::InsecureChannelCredentials()));
 }
 
-int PhxKVClient :: Put(
+int PhxKVClient::Put(
   const std::string & sKey,
   const std::string & sValue,
   const uint64_t llVersion,
@@ -90,7 +90,7 @@ int PhxKVClient :: Put(
   }
 }
 
-int PhxKVClient :: GetLocal(
+int PhxKVClient::GetLocal(
   const std::string & sKey,
   std::string & sValue,
   uint64_t & llVersion) {
@@ -111,7 +111,7 @@ int PhxKVClient :: GetLocal(
   }
 }
 
-int PhxKVClient :: GetLocal(
+int PhxKVClient::GetLocal(
   const std::string & sKey,
   const uint64_t minVersion,
   std::string & sValue,
@@ -126,7 +126,7 @@ int PhxKVClient :: GetLocal(
   return ret;
 }
 
-int PhxKVClient :: Delete(
+int PhxKVClient::Delete(
   const std::string & sKey,
   const uint64_t llVersion,
   const int iDeep) {
@@ -155,7 +155,7 @@ int PhxKVClient :: Delete(
   }
 }
 
-int PhxKVClient :: GetGlobal(
+int PhxKVClient::GetGlobal(
   const std::string & sKey,
   std::string & sValue,
   uint64_t & llVersion,

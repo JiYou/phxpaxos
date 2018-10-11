@@ -26,25 +26,25 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-ProposerState :: ProposerState(const Config * poConfig) {
+ProposerState::ProposerState(const Config * poConfig) {
   m_poConfig = (Config *)poConfig;
   m_llProposalID = 1;
   Init();
 }
 
-ProposerState :: ~ProposerState() {
+ProposerState::~ProposerState() {
 }
 
-void ProposerState :: Init() {
+void ProposerState::Init() {
   m_llHighestOtherProposalID = 0;
   m_sValue.clear();
 }
 
-void ProposerState ::  SetStartProposalID(const uint64_t llProposalID) {
+void ProposerState:: SetStartProposalID(const uint64_t llProposalID) {
   m_llProposalID = llProposalID;
 }
 
-void ProposerState :: NewPrepare() {
+void ProposerState::NewPrepare() {
   PLGHead("START ProposalID %lu HighestOther %lu MyNodeID %lu",
           m_llProposalID, m_llHighestOtherProposalID, m_poConfig->GetMyNodeID());
 
@@ -57,7 +57,7 @@ void ProposerState :: NewPrepare() {
 
 }
 
-void ProposerState :: AddPreAcceptValue(
+void ProposerState::AddPreAcceptValue(
   const BallotNumber & oOtherPreAcceptBallot,
   const std::string & sOtherPreAcceptValue) {
   PLGDebug("OtherPreAcceptID %lu OtherPreAcceptNodeID %lu HighestOtherPreAcceptID %lu "
@@ -76,31 +76,31 @@ void ProposerState :: AddPreAcceptValue(
   }
 }
 
-const uint64_t ProposerState :: GetProposalID() {
+const uint64_t ProposerState::GetProposalID() {
   return m_llProposalID;
 }
 
-const std::string & ProposerState :: GetValue() {
+const std::string & ProposerState::GetValue() {
   return m_sValue;
 }
 
-void ProposerState :: SetValue(const std::string & sValue) {
+void ProposerState::SetValue(const std::string & sValue) {
   m_sValue = sValue;
 }
 
-void ProposerState :: SetOtherProposalID(const uint64_t llOtherProposalID) {
+void ProposerState::SetOtherProposalID(const uint64_t llOtherProposalID) {
   if (llOtherProposalID > m_llHighestOtherProposalID) {
     m_llHighestOtherProposalID = llOtherProposalID;
   }
 }
 
-void ProposerState :: ResetHighestOtherPreAcceptBallot() {
+void ProposerState::ResetHighestOtherPreAcceptBallot() {
   m_oHighestOtherPreAcceptBallot.reset();
 }
 
 ////////////////////////////////////////////////////////////////
 
-Proposer :: Proposer(
+Proposer::Proposer(
   const Config * poConfig,
   const MsgTransport * poMsgTransport,
   const Instance * poInstance,
@@ -127,14 +127,14 @@ Proposer :: Proposer(
   m_bWasRejectBySomeone = false;
 }
 
-Proposer :: ~Proposer() {
+Proposer::~Proposer() {
 }
 
-void Proposer :: SetStartProposalID(const uint64_t llProposalID) {
+void Proposer::SetStartProposalID(const uint64_t llProposalID) {
   m_oProposerState.SetStartProposalID(llProposalID);
 }
 
-void Proposer :: InitForNewPaxosInstance() {
+void Proposer::InitForNewPaxosInstance() {
   m_oMsgCounter.StartNewRound();
   m_oProposerState.Init();
 
@@ -142,11 +142,11 @@ void Proposer :: InitForNewPaxosInstance() {
   ExitAccept();
 }
 
-bool Proposer :: IsWorking() {
+bool Proposer::IsWorking() {
   return m_bIsPreparing || m_bIsAccepting;
 }
 
-int Proposer :: NewValue(const std::string & sValue) {
+int Proposer::NewValue(const std::string & sValue) {
   BP->GetProposerBP()->NewProposal(sValue);
 
   if (m_oProposerState.GetValue().size() == 0) {
@@ -169,7 +169,7 @@ int Proposer :: NewValue(const std::string & sValue) {
   return 0;
 }
 
-void Proposer :: ExitPrepare() {
+void Proposer::ExitPrepare() {
   if (m_bIsPreparing) {
     m_bIsPreparing = false;
 
@@ -177,7 +177,7 @@ void Proposer :: ExitPrepare() {
   }
 }
 
-void Proposer :: ExitAccept() {
+void Proposer::ExitAccept() {
   if (m_bIsAccepting) {
     m_bIsAccepting = false;
 
@@ -185,7 +185,7 @@ void Proposer :: ExitAccept() {
   }
 }
 
-void Proposer :: AddPrepareTimer(const int iTimeoutMs) {
+void Proposer::AddPrepareTimer(const int iTimeoutMs) {
   if (m_iPrepareTimerID > 0) {
     m_poIOLoop->RemoveTimer(m_iPrepareTimerID);
   }
@@ -213,7 +213,7 @@ void Proposer :: AddPrepareTimer(const int iTimeoutMs) {
   }
 }
 
-void Proposer :: AddAcceptTimer(const int iTimeoutMs) {
+void Proposer::AddAcceptTimer(const int iTimeoutMs) {
   if (m_iAcceptTimerID > 0) {
     m_poIOLoop->RemoveTimer(m_iAcceptTimerID);
   }
@@ -241,7 +241,7 @@ void Proposer :: AddAcceptTimer(const int iTimeoutMs) {
   }
 }
 
-void Proposer :: Prepare(const bool bNeedNewBallot) {
+void Proposer::Prepare(const bool bNeedNewBallot) {
   PLGHead("START Now.InstanceID %lu MyNodeID %lu State.ProposalID %lu State.ValueLen %zu",
           GetInstanceID(), m_poConfig->GetMyNodeID(), m_oProposerState.GetProposalID(),
           m_oProposerState.GetValue().size());
@@ -274,7 +274,7 @@ void Proposer :: Prepare(const bool bNeedNewBallot) {
   BroadcastMessage(oPaxosMsg);
 }
 
-void Proposer :: OnPrepareReply(const PaxosMsg & oPaxosMsg) {
+void Proposer::OnPrepareReply(const PaxosMsg & oPaxosMsg) {
   PLGHead("START Msg.ProposalID %lu State.ProposalID %lu Msg.from_nodeid %lu RejectByPromiseID %lu",
           oPaxosMsg.proposalid(), m_oProposerState.GetProposalID(),
           oPaxosMsg.nodeid(), oPaxosMsg.rejectbypromiseid());
@@ -324,7 +324,7 @@ void Proposer :: OnPrepareReply(const PaxosMsg & oPaxosMsg) {
   PLGHead("END");
 }
 
-void Proposer :: OnExpiredPrepareReply(const PaxosMsg & oPaxosMsg) {
+void Proposer::OnExpiredPrepareReply(const PaxosMsg & oPaxosMsg) {
   if (oPaxosMsg.rejectbypromiseid() != 0) {
     PLGDebug("[Expired Prepare Reply Reject] RejectByPromiseID %lu", oPaxosMsg.rejectbypromiseid());
     m_bWasRejectBySomeone = true;
@@ -332,7 +332,7 @@ void Proposer :: OnExpiredPrepareReply(const PaxosMsg & oPaxosMsg) {
   }
 }
 
-void Proposer :: Accept() {
+void Proposer::Accept() {
   PLGHead("START ProposalID %lu ValueSize %zu ValueLen %zu",
           m_oProposerState.GetProposalID(), m_oProposerState.GetValue().size(), m_oProposerState.GetValue().size());
 
@@ -359,7 +359,7 @@ void Proposer :: Accept() {
   BroadcastMessage(oPaxosMsg, BroadcastMessage_Type_RunSelf_Final);
 }
 
-void Proposer :: OnAcceptReply(const PaxosMsg & oPaxosMsg) {
+void Proposer::OnAcceptReply(const PaxosMsg & oPaxosMsg) {
   PLGHead("START Msg.ProposalID %lu State.ProposalID %lu Msg.from_nodeid %lu RejectByPromiseID %lu",
           oPaxosMsg.proposalid(), m_oProposerState.GetProposalID(),
           oPaxosMsg.nodeid(), oPaxosMsg.rejectbypromiseid());
@@ -408,7 +408,7 @@ void Proposer :: OnAcceptReply(const PaxosMsg & oPaxosMsg) {
   PLGHead("END");
 }
 
-void Proposer :: OnExpiredAcceptReply(const PaxosMsg & oPaxosMsg) {
+void Proposer::OnExpiredAcceptReply(const PaxosMsg & oPaxosMsg) {
   if (oPaxosMsg.rejectbypromiseid() != 0) {
     PLGDebug("[Expired Accept Reply Reject] RejectByPromiseID %lu", oPaxosMsg.rejectbypromiseid());
     m_bWasRejectBySomeone = true;
@@ -416,7 +416,7 @@ void Proposer :: OnExpiredAcceptReply(const PaxosMsg & oPaxosMsg) {
   }
 }
 
-void Proposer :: OnPrepareTimeout() {
+void Proposer::OnPrepareTimeout() {
   PLGHead("OK");
 
   if (GetInstanceID() != m_llTimeoutInstanceID) {
@@ -430,7 +430,7 @@ void Proposer :: OnPrepareTimeout() {
   Prepare(m_bWasRejectBySomeone);
 }
 
-void Proposer :: OnAcceptTimeout() {
+void Proposer::OnAcceptTimeout() {
   PLGHead("OK");
 
   if (GetInstanceID() != m_llTimeoutInstanceID) {
@@ -444,7 +444,7 @@ void Proposer :: OnAcceptTimeout() {
   Prepare(m_bWasRejectBySomeone);
 }
 
-void Proposer :: CancelSkipPrepare() {
+void Proposer::CancelSkipPrepare() {
   m_bCanSkipPrepare = false;
 }
 

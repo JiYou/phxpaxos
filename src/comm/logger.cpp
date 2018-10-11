@@ -26,28 +26,28 @@ using namespace std;
 
 namespace phxpaxos {
 
-Logger :: Logger()
+Logger::Logger()
   : m_pLogFunc(nullptr), m_eLogLevel(LogLevel::LogLevel_None) {
 }
 
-Logger :: ~Logger() {
+Logger::~Logger() {
 }
 
-Logger * Logger :: Instance() {
+Logger * Logger::Instance() {
   static Logger oLogger;
   return &oLogger;
 }
 
-void Logger :: InitLogger(const LogLevel eLogLevel) {
+void Logger::InitLogger(const LogLevel eLogLevel) {
   m_eLogLevel = eLogLevel;
 }
 
-void Logger :: SetLogFunc(LogFunc pLogFunc) {
+void Logger::SetLogFunc(LogFunc pLogFunc) {
   m_pLogFunc = pLogFunc;
 }
 
 
-void Logger :: LogError(const char * pcFormat, ...) {
+void Logger::LogError(const char * pcFormat, ...) {
   string newFormat = "\033[41;37m " + string(pcFormat) + " \033[0m";
 
   if (m_pLogFunc != nullptr) {
@@ -73,7 +73,7 @@ void Logger :: LogError(const char * pcFormat, ...) {
   m_oMutex.unlock();
 }
 
-void Logger :: LogStatus(const char * pcFormat, ...) {
+void Logger::LogStatus(const char * pcFormat, ...) {
   if (m_pLogFunc != nullptr) {
     va_list args;
     va_start(args, pcFormat);
@@ -97,7 +97,7 @@ void Logger :: LogStatus(const char * pcFormat, ...) {
   m_oMutex.unlock();
 }
 
-void Logger :: LogWarning(const char * pcFormat, ...) {
+void Logger::LogWarning(const char * pcFormat, ...) {
   string newFormat = "\033[44;37m " + string(pcFormat) + " \033[0m";
 
   if (m_pLogFunc != nullptr) {
@@ -124,7 +124,7 @@ void Logger :: LogWarning(const char * pcFormat, ...) {
 }
 
 
-void Logger :: LogInfo(const char * pcFormat, ...) {
+void Logger::LogInfo(const char * pcFormat, ...) {
   string newFormat = "\033[45;37m " + string(pcFormat) + " \033[0m";
 
   if (m_pLogFunc != nullptr) {
@@ -150,7 +150,7 @@ void Logger :: LogInfo(const char * pcFormat, ...) {
   m_oMutex.unlock();
 }
 
-void Logger :: LogVerbose(const char * pcFormat, ...) {
+void Logger::LogVerbose(const char * pcFormat, ...) {
   string newFormat = "\033[45;37m " + string(pcFormat) + " \033[0m";
 
   if (m_pLogFunc != nullptr) {
@@ -176,7 +176,7 @@ void Logger :: LogVerbose(const char * pcFormat, ...) {
   m_oMutex.unlock();
 }
 
-void Logger :: LogShowy(const char * pcFormat, ...) {
+void Logger::LogShowy(const char * pcFormat, ...) {
   string newFormat = "\033[45;37m " + string(pcFormat) + " \033[0m";
 
   if (m_pLogFunc != nullptr) {

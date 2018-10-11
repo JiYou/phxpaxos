@@ -25,10 +25,10 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-NetWork :: NetWork() : m_poNode(nullptr) {
+NetWork::NetWork() : m_poNode(nullptr) {
 }
 
-int NetWork :: OnReceiveMessage(const char * pcMessage, const int iMessageLen) {
+int NetWork::OnReceiveMessage(const char * pcMessage, const int iMessageLen) {
   if (m_poNode != nullptr) {
     m_poNode->OnReceiveMessage(pcMessage, iMessageLen);
   } else {

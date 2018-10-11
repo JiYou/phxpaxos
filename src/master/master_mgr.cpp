@@ -25,7 +25,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-MasterMgr :: MasterMgr(
+MasterMgr::MasterMgr(
   const Node * poPaxosNode,
   const int iGroupIdx,
   const LogStorage * poLogStorage,
@@ -42,14 +42,14 @@ MasterMgr :: MasterMgr(
   m_bNeedDropMaster = false;
 }
 
-MasterMgr :: ~MasterMgr() {
+MasterMgr::~MasterMgr() {
 }
 
-int MasterMgr :: Init() {
+int MasterMgr::Init() {
   return m_oDefaultMasterSM.Init();
 }
 
-void MasterMgr :: SetLeaseTime(const int iLeaseTimeMs) {
+void MasterMgr::SetLeaseTime(const int iLeaseTimeMs) {
   if (iLeaseTimeMs < 1000) {
     return;
   }
@@ -57,22 +57,22 @@ void MasterMgr :: SetLeaseTime(const int iLeaseTimeMs) {
   m_iLeaseTime = iLeaseTimeMs;
 }
 
-void MasterMgr :: DropMaster() {
+void MasterMgr::DropMaster() {
   m_bNeedDropMaster = true;
 }
 
-void MasterMgr :: StopMaster() {
+void MasterMgr::StopMaster() {
   if (m_bIsStarted) {
     m_bIsEnd = true;
     join();
   }
 }
 
-void MasterMgr :: RunMaster() {
+void MasterMgr::RunMaster() {
   start();
 }
 
-void MasterMgr :: run() {
+void MasterMgr::run() {
   m_bIsStarted = true;
 
   while(true) {
@@ -105,7 +105,7 @@ void MasterMgr :: run() {
   }
 }
 
-void MasterMgr :: TryBeMaster(const int iLeaseTime) {
+void MasterMgr::TryBeMaster(const int iLeaseTime) {
   nodeid_t iMasterNodeID = nullnode;
   uint64_t llMasterVersion = 0;
 
@@ -147,7 +147,7 @@ void MasterMgr :: TryBeMaster(const int iLeaseTime) {
   }
 }
 
-MasterStateMachine * MasterMgr :: GetMasterSM() {
+MasterStateMachine * MasterMgr::GetMasterSM() {
   return &m_oDefaultMasterSM;
 }
 

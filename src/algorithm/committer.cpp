@@ -26,24 +26,24 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Committer :: Committer(Config * poConfig, CommitCtx * poCommitCtx, IOLoop * poIOLoop, SMFac * poSMFac)
+Committer::Committer(Config * poConfig, CommitCtx * poCommitCtx, IOLoop * poIOLoop, SMFac * poSMFac)
   : m_poConfig(poConfig), m_poCommitCtx(poCommitCtx), m_poIOLoop(poIOLoop), m_poSMFac(poSMFac), m_iTimeoutMs(-1) {
   m_llLastLogTime = Time::GetSteadyClockMS();
 }
 
-Committer :: ~Committer() {
+Committer::~Committer() {
 }
 
-int Committer :: NewValue(const std::string & sValue) {
+int Committer::NewValue(const std::string & sValue) {
   uint64_t llInstanceID = 0;
   return NewValueGetID(sValue, llInstanceID, nullptr);
 }
 
-int Committer :: NewValueGetID(const std::string & sValue, uint64_t & llInstanceID) {
+int Committer::NewValueGetID(const std::string & sValue, uint64_t & llInstanceID) {
   return NewValueGetID(sValue, llInstanceID, nullptr);
 }
 
-int Committer :: NewValueGetID(const std::string & sValue, uint64_t & llInstanceID, SMCtx * poSMCtx) {
+int Committer::NewValueGetID(const std::string & sValue, uint64_t & llInstanceID, SMCtx * poSMCtx) {
   BP->GetCommiterBP()->NewValue();
 
   int iRetryCount = 3;
@@ -73,7 +73,7 @@ int Committer :: NewValueGetID(const std::string & sValue, uint64_t & llInstance
   return ret;
 }
 
-int Committer :: NewValueGetIDNoRetry(const std::string & sValue, uint64_t & llInstanceID, SMCtx * poSMCtx) {
+int Committer::NewValueGetIDNoRetry(const std::string & sValue, uint64_t & llInstanceID, SMCtx * poSMCtx) {
   LogStatus();
 
   int iLockUseTimeMs = 0;
@@ -124,21 +124,21 @@ int Committer :: NewValueGetIDNoRetry(const std::string & sValue, uint64_t & llI
 
 ////////////////////////////////////////////////////
 
-void Committer :: SetTimeoutMs(const int iTimeoutMs) {
+void Committer::SetTimeoutMs(const int iTimeoutMs) {
   m_iTimeoutMs = iTimeoutMs;
 }
 
-void Committer :: SetMaxHoldThreads(const int iMaxHoldThreads) {
+void Committer::SetMaxHoldThreads(const int iMaxHoldThreads) {
   m_oWaitLock.SetMaxWaitLockCount(iMaxHoldThreads);
 }
 
-void Committer :: SetProposeWaitTimeThresholdMS(const int iWaitTimeThresholdMS) {
+void Committer::SetProposeWaitTimeThresholdMS(const int iWaitTimeThresholdMS) {
   m_oWaitLock.SetLockWaitTimeThreshold(iWaitTimeThresholdMS);
 }
 
 ////////////////////////////////////////////////////
 
-void Committer :: LogStatus() {
+void Committer::LogStatus() {
   uint64_t llNowTime = Time::GetSteadyClockMS();
   if (llNowTime > m_llLastLogTime
       && llNowTime - m_llLastLogTime > 1000) {

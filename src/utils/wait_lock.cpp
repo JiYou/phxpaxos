@@ -26,16 +26,16 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-WaitLock :: WaitLock()
+WaitLock::WaitLock()
   :m_bIsLockUsing(false), m_iWaitLockCount(0), m_iMaxWaitLockCount(-1),
    m_iLockUseTimeSum(0), m_iAvgLockUseTime(0), m_iLockUseTimeCount(0),
    m_iRejectRate(0), m_iLockWaitTimeThresholdMS(-1) {
 }
 
-WaitLock :: ~WaitLock() {
+WaitLock::~WaitLock() {
 }
 
-bool WaitLock :: CanLock() {
+bool WaitLock::CanLock() {
   if (m_iMaxWaitLockCount != -1
       && m_iWaitLockCount >= m_iMaxWaitLockCount) {
     //to much lock waiting
@@ -50,7 +50,7 @@ bool WaitLock :: CanLock() {
   return ((int)(e_rand() % 100)) >= m_iRejectRate;
 }
 
-void WaitLock :: RefleshRejectRate(const int iUseTimeMs) {
+void WaitLock::RefleshRejectRate(const int iUseTimeMs) {
   if (m_iLockWaitTimeThresholdMS == -1) {
     return;
   }
@@ -74,15 +74,15 @@ void WaitLock :: RefleshRejectRate(const int iUseTimeMs) {
   }
 }
 
-void WaitLock :: SetMaxWaitLockCount(const int iMaxWaitLockCount) {
+void WaitLock::SetMaxWaitLockCount(const int iMaxWaitLockCount) {
   m_iMaxWaitLockCount = iMaxWaitLockCount;
 }
 
-void WaitLock :: SetLockWaitTimeThreshold(const int iLockWaitTimeThresholdMS) {
+void WaitLock::SetLockWaitTimeThreshold(const int iLockWaitTimeThresholdMS) {
   m_iLockWaitTimeThresholdMS = iLockWaitTimeThresholdMS;
 }
 
-bool WaitLock :: Lock(const int iTimeoutMs, int & iUseTimeMs) {
+bool WaitLock::Lock(const int iTimeoutMs, int & iUseTimeMs) {
   uint64_t llBeginTime = Time::GetSteadyClockMS();
 
   m_oSerialLock.Lock();
@@ -124,7 +124,7 @@ bool WaitLock :: Lock(const int iTimeoutMs, int & iUseTimeMs) {
   return bGetLock;
 }
 
-void WaitLock :: UnLock() {
+void WaitLock::UnLock() {
   m_oSerialLock.Lock();
 
   m_bIsLockUsing = false;
@@ -135,15 +135,15 @@ void WaitLock :: UnLock() {
 
 ////////////////////////////////////////////
 
-int WaitLock :: GetNowHoldThreadCount() {
+int WaitLock::GetNowHoldThreadCount() {
   return m_iWaitLockCount;
 }
 
-int WaitLock :: GetNowAvgThreadWaitTime() {
+int WaitLock::GetNowAvgThreadWaitTime() {
   return m_iAvgLockUseTime;
 }
 
-int WaitLock :: GetNowRejectRate() {
+int WaitLock::GetNowRejectRate() {
   return m_iRejectRate;
 }
 

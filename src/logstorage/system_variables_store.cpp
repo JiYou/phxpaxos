@@ -24,13 +24,13 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-SystemVariablesStore :: SystemVariablesStore(const LogStorage * poLogStorage) : m_poLogStorage((LogStorage *)poLogStorage) {
+SystemVariablesStore::SystemVariablesStore(const LogStorage * poLogStorage) : m_poLogStorage((LogStorage *)poLogStorage) {
 }
 
-SystemVariablesStore :: ~SystemVariablesStore() {
+SystemVariablesStore::~SystemVariablesStore() {
 }
 
-int SystemVariablesStore :: Write(const WriteOptions & oWriteOptions, const int iGroupIdx, const SystemVariables & oVariables) {
+int SystemVariablesStore::Write(const WriteOptions & oWriteOptions, const int iGroupIdx, const SystemVariables & oVariables) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   string sBuffer;
@@ -50,7 +50,7 @@ int SystemVariablesStore :: Write(const WriteOptions & oWriteOptions, const int 
   return 0;
 }
 
-int SystemVariablesStore :: Read(const int iGroupIdx, SystemVariables & oVariables) {
+int SystemVariablesStore::Read(const int iGroupIdx, SystemVariables & oVariables) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   string sBuffer;

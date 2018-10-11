@@ -26,7 +26,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-SystemVSM :: SystemVSM(
+SystemVSM::SystemVSM(
   const int iGroupIdx,
   const nodeid_t iMyNodeID,
   const LogStorage * poLogStorage,
@@ -35,10 +35,10 @@ SystemVSM :: SystemVSM(
     m_iMyNodeID(iMyNodeID), m_pMembershipChangeCallback(pMembershipChangeCallback) {
 }
 
-SystemVSM :: ~SystemVSM() {
+SystemVSM::~SystemVSM() {
 }
 
-int SystemVSM :: Init() {
+int SystemVSM::Init() {
   int ret = m_oSystemVStore.Read(m_iMyGroupIdx, m_oSystemVariables);
   if (ret != 0 && ret != 1) {
     return ret;
@@ -57,7 +57,7 @@ int SystemVSM :: Init() {
   return 0;
 }
 
-int SystemVSM :: UpdateSystemVariables(const SystemVariables & oVariables) {
+int SystemVSM::UpdateSystemVariables(const SystemVariables & oVariables) {
   WriteOptions oWriteOptions;
   oWriteOptions.bSync = true;
 
@@ -74,7 +74,7 @@ int SystemVSM :: UpdateSystemVariables(const SystemVariables & oVariables) {
   return 0;
 }
 
-bool SystemVSM :: Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue, SMCtx * poSMCtx) {
+bool SystemVSM::Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue, SMCtx * poSMCtx) {
   SystemVariables oVariables;
   bool bSucc = oVariables.ParseFromArray(sValue.data(), sValue.size());
   if (!bSucc) {
@@ -114,11 +114,11 @@ bool SystemVSM :: Execute(const int iGroupIdx, const uint64_t llInstanceID, cons
 
 //////////////////////////////////////////////////
 
-const uint64_t SystemVSM :: GetGid() const {
+const uint64_t SystemVSM::GetGid() const {
   return m_oSystemVariables.gid();
 }
 
-void SystemVSM :: GetMembership(NodeInfoList & vecNodeInfoList, uint64_t & llVersion) {
+void SystemVSM::GetMembership(NodeInfoList & vecNodeInfoList, uint64_t & llVersion) {
   //must must get version first!
   llVersion = m_oSystemVariables.version();
 
@@ -130,7 +130,7 @@ void SystemVSM :: GetMembership(NodeInfoList & vecNodeInfoList, uint64_t & llVer
   }
 }
 
-int SystemVSM :: Membership_OPValue(const NodeInfoList & vecNodeInfoList, const uint64_t llVersion, std::string & sOpValue) {
+int SystemVSM::Membership_OPValue(const NodeInfoList & vecNodeInfoList, const uint64_t llVersion, std::string & sOpValue) {
   SystemVariables oVariables;
   //must must set version first!
   oVariables.set_version(llVersion);
@@ -152,7 +152,7 @@ int SystemVSM :: Membership_OPValue(const NodeInfoList & vecNodeInfoList, const 
   return 0;
 }
 
-int SystemVSM :: CreateGid_OPValue(const uint64_t llGid, std::string & sOpValue) {
+int SystemVSM::CreateGid_OPValue(const uint64_t llGid, std::string & sOpValue) {
   SystemVariables oVariables = m_oSystemVariables;
   oVariables.set_gid(llGid);
 
@@ -176,7 +176,7 @@ int SystemVSM :: CreateGid_OPValue(const uint64_t llGid, std::string & sOpValue)
 
 /////////////////////////////////////////////////
 
-void SystemVSM :: AddNodeIDList(const NodeInfoList & vecNodeInfoList) {
+void SystemVSM::AddNodeIDList(const NodeInfoList & vecNodeInfoList) {
   if (m_oSystemVariables.gid() != 0) {
     PLG1Err("No need to add, i already have membership info.");
     return;
@@ -197,7 +197,7 @@ void SystemVSM :: AddNodeIDList(const NodeInfoList & vecNodeInfoList) {
   RefleshNodeID();
 }
 
-void SystemVSM :: RefleshNodeID() {
+void SystemVSM::RefleshNodeID() {
   m_setNodeID.clear();
 
   NodeInfoList vecNodeInfoList;
@@ -219,15 +219,15 @@ void SystemVSM :: RefleshNodeID() {
   }
 }
 
-const int SystemVSM :: GetNodeCount() const {
+const int SystemVSM::GetNodeCount() const {
   return (int)m_setNodeID.size();
 }
 
-const int SystemVSM :: GetMajorityCount() const {
+const int SystemVSM::GetMajorityCount() const {
   return (int)(floor((double)GetNodeCount() / 2) + 1);
 }
 
-const bool SystemVSM :: IsValidNodeID(const nodeid_t iNodeID) {
+const bool SystemVSM::IsValidNodeID(const nodeid_t iNodeID) {
   if (m_oSystemVariables.gid() == 0) {
     return true;
   }
@@ -235,13 +235,13 @@ const bool SystemVSM :: IsValidNodeID(const nodeid_t iNodeID) {
   return m_setNodeID.find(iNodeID) != end(m_setNodeID);
 }
 
-const bool SystemVSM :: IsIMInMembership() {
+const bool SystemVSM::IsIMInMembership() {
   return m_setNodeID.find(m_iMyNodeID) != end(m_setNodeID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int SystemVSM :: GetCheckpointBuffer(std::string & sCPBuffer) {
+int SystemVSM::GetCheckpointBuffer(std::string & sCPBuffer) {
   if (m_oSystemVariables.version() == (uint64_t)-1
       || m_oSystemVariables.gid() == 0) {
     return 0;
@@ -256,7 +256,7 @@ int SystemVSM :: GetCheckpointBuffer(std::string & sCPBuffer) {
   return 0;
 }
 
-int SystemVSM :: UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChange) {
+int SystemVSM::UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChange) {
   if (sCPBuffer.size() == 0) {
     return 0;
   }
@@ -305,13 +305,13 @@ int SystemVSM :: UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChang
 
 ///////////////////////////////////////////////////////////////////////
 
-void SystemVSM :: GetSystemVariables(SystemVariables & oVariables) {
+void SystemVSM::GetSystemVariables(SystemVariables & oVariables) {
   oVariables = m_oSystemVariables;
 }
 
 ///////////////////////////////////////////////////////////////////////
 
-const std::set<nodeid_t> & SystemVSM :: GetMembershipMap() {
+const std::set<nodeid_t> & SystemVSM::GetMembershipMap() {
   return m_setNodeID;
 }
 

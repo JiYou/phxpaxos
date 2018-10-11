@@ -29,44 +29,44 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-NodeInfo :: NodeInfo()
+NodeInfo::NodeInfo()
   : m_iNodeID(nullnode), m_sIP(""), m_iPort(-1) {
 }
 
-NodeInfo :: NodeInfo(const nodeid_t iNodeID)
+NodeInfo::NodeInfo(const nodeid_t iNodeID)
   : m_iNodeID(iNodeID), m_sIP(""), m_iPort(-1) {
   ParseNodeID();
 }
 
-NodeInfo :: NodeInfo(const std::string & sIP, const int iPort)
+NodeInfo::NodeInfo(const std::string & sIP, const int iPort)
   : m_iNodeID(nullnode), m_sIP(sIP), m_iPort(iPort) {
   MakeNodeID();
 }
 
-const nodeid_t NodeInfo :: GetNodeID() const {
+const nodeid_t NodeInfo::GetNodeID() const {
   return m_iNodeID;
 }
 
-const std::string & NodeInfo :: GetIP() const {
+const std::string & NodeInfo::GetIP() const {
   return m_sIP;
 }
 
-const int NodeInfo :: GetPort() const {
+const int NodeInfo::GetPort() const {
   return m_iPort;
 }
 
-void NodeInfo :: SetIPPort(const std::string & sIP, const int iPort) {
+void NodeInfo::SetIPPort(const std::string & sIP, const int iPort) {
   m_sIP = sIP;
   m_iPort = iPort;
   MakeNodeID();
 }
 
-void NodeInfo :: SetNodeID(const nodeid_t iNodeID) {
+void NodeInfo::SetNodeID(const nodeid_t iNodeID) {
   m_iNodeID = iNodeID;
   ParseNodeID();
 }
 
-void NodeInfo :: MakeNodeID() {
+void NodeInfo::MakeNodeID() {
   uint32_t iIP = (uint32_t)inet_addr(m_sIP.c_str());
   assert(iIP != (uint32_t)-1);
 
@@ -75,7 +75,7 @@ void NodeInfo :: MakeNodeID() {
   //PLImp("ip %s ip %u port %d nodeid %lu", m_sIP.c_str(), iIP, m_iPort, m_iNodeID);
 }
 
-void NodeInfo :: ParseNodeID() {
+void NodeInfo::ParseNodeID() {
   m_iPort = m_iNodeID & (0xffffffff);
 
   in_addr addr;
@@ -88,14 +88,14 @@ void NodeInfo :: ParseNodeID() {
 
 /////////////////////////////////////////////////////////////
 
-GroupSMInfo :: GroupSMInfo() {
+GroupSMInfo::GroupSMInfo() {
   iGroupIdx = -1;
   bIsUseMaster = false;
 }
 
 /////////////////////////////////////////////////////////////
 
-Options :: Options() {
+Options::Options() {
   poLogStorage = nullptr;
   bSync = true;
   iSyncInterval = 0;

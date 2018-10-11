@@ -32,15 +32,15 @@ using namespace std;
 
 namespace phxelection {
 
-PhxElection :: PhxElection(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
+PhxElection::PhxElection(const phxpaxos::NodeInfo & oMyNode, const phxpaxos::NodeInfoList & vecNodeList)
   : m_oMyNode(oMyNode), m_vecNodeList(vecNodeList), m_poPaxosNode(nullptr) {
 }
 
-PhxElection :: ~PhxElection() {
+PhxElection::~PhxElection() {
   delete m_poPaxosNode;
 }
 
-int PhxElection :: MakeLogStoragePath(std::string & sLogStoragePath) {
+int PhxElection::MakeLogStoragePath(std::string & sLogStoragePath) {
   char sTmp[128] = {0};
   snprintf(sTmp, sizeof(sTmp), "./logpath_%s_%d", m_oMyNode.GetIP().c_str(), m_oMyNode.GetPort());
 
@@ -56,12 +56,12 @@ int PhxElection :: MakeLogStoragePath(std::string & sLogStoragePath) {
   return 0;
 }
 
-void PhxElection :: OnMasterChange(const int iGroupIdx, const NodeInfo & oNewMaster, const uint64_t llVersion) {
+void PhxElection::OnMasterChange(const int iGroupIdx, const NodeInfo & oNewMaster, const uint64_t llVersion) {
   printf("master change!!! groupidx %d newmaster ip %s port %d version %lu\n",
          iGroupIdx, oNewMaster.GetIP().c_str(), oNewMaster.GetPort(), llVersion);
 }
 
-int PhxElection :: RunPaxos() {
+int PhxElection::RunPaxos() {
   Options oOptions;
 
   int ret = MakeLogStoragePath(oOptions.sLogStoragePath);
@@ -96,16 +96,16 @@ int PhxElection :: RunPaxos() {
   return 0;
 }
 
-const phxpaxos::NodeInfo PhxElection :: GetMaster() {
+const phxpaxos::NodeInfo PhxElection::GetMaster() {
   //only one group, so groupidx is 0.
   return m_poPaxosNode->GetMaster(0);
 }
 
-const phxpaxos::NodeInfo PhxElection :: GetMasterWithVersion(uint64_t & llVersion) {
+const phxpaxos::NodeInfo PhxElection::GetMasterWithVersion(uint64_t & llVersion) {
   return m_poPaxosNode->GetMasterWithVersion(0, llVersion);
 }
 
-const bool PhxElection :: IsIMMaster() {
+const bool PhxElection::IsIMMaster() {
   return m_poPaxosNode->IsIMMaster(0);
 }
 

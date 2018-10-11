@@ -24,13 +24,13 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-PaxosLog :: PaxosLog(const LogStorage * poLogStorage) : m_poLogStorage((LogStorage *)poLogStorage) {
+PaxosLog::PaxosLog(const LogStorage * poLogStorage) : m_poLogStorage((LogStorage *)poLogStorage) {
 }
 
-PaxosLog :: ~PaxosLog() {
+PaxosLog::~PaxosLog() {
 }
 
-int PaxosLog :: WriteLog(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue) {
+int PaxosLog::WriteLog(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   AcceptorStateData oState;
@@ -53,7 +53,7 @@ int PaxosLog :: WriteLog(const WriteOptions & oWriteOptions, const int iGroupIdx
   return 0;
 }
 
-int PaxosLog :: ReadLog(const int iGroupIdx, const uint64_t llInstanceID, std::string & sValue) {
+int PaxosLog::ReadLog(const int iGroupIdx, const uint64_t llInstanceID, std::string & sValue) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   AcceptorStateData oState;
@@ -73,7 +73,7 @@ int PaxosLog :: ReadLog(const int iGroupIdx, const uint64_t llInstanceID, std::s
   return 0;
 }
 
-int PaxosLog :: WriteState(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID, const AcceptorStateData & oState) {
+int PaxosLog::WriteState(const WriteOptions & oWriteOptions, const int iGroupIdx, const uint64_t llInstanceID, const AcceptorStateData & oState) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   string sBuffer;
@@ -93,7 +93,7 @@ int PaxosLog :: WriteState(const WriteOptions & oWriteOptions, const int iGroupI
   return 0;
 }
 
-int PaxosLog :: ReadState(const int iGroupIdx, const uint64_t llInstanceID, AcceptorStateData & oState) {
+int PaxosLog::ReadState(const int iGroupIdx, const uint64_t llInstanceID, AcceptorStateData & oState) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   string sBuffer;
@@ -115,7 +115,7 @@ int PaxosLog :: ReadState(const int iGroupIdx, const uint64_t llInstanceID, Acce
   return 0;
 }
 
-int PaxosLog :: GetMaxInstanceIDFromLog(const int iGroupIdx, uint64_t & llInstanceID) {
+int PaxosLog::GetMaxInstanceIDFromLog(const int iGroupIdx, uint64_t & llInstanceID) {
   const int m_iMyGroupIdx = iGroupIdx;
 
   int ret = m_poLogStorage->GetMaxInstanceID(iGroupIdx, llInstanceID);

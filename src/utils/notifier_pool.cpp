@@ -27,12 +27,12 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Notifier :: Notifier() {
+Notifier::Notifier() {
   m_iPipeFD[0] = -1;
   m_iPipeFD[1] = -1;
 }
 
-Notifier :: ~Notifier() {
+Notifier::~Notifier() {
   for (int i = 0; i < 2; i++) {
     if (m_iPipeFD[i] != -1) {
       close(m_iPipeFD[i]);
@@ -40,7 +40,7 @@ Notifier :: ~Notifier() {
   }
 }
 
-int Notifier :: Init() {
+int Notifier::Init() {
   int ret = pipe(m_iPipeFD);
   if (ret != 0) {
     return ret;
@@ -49,12 +49,12 @@ int Notifier :: Init() {
   return 0;
 }
 
-void Notifier :: SendNotify(const int ret) {
+void Notifier::SendNotify(const int ret) {
   int iWriteLen = write(m_iPipeFD[1], (char *)&ret, sizeof(int));
   assert(iWriteLen == sizeof(int));
 }
 
-void Notifier :: WaitNotify(int & ret) {
+void Notifier::WaitNotify(int & ret) {
   ret = -1;
   int iReadLen = read(m_iPipeFD[0], (char *)&ret, sizeof(int));
   assert(iReadLen == sizeof(int));
@@ -62,16 +62,16 @@ void Notifier :: WaitNotify(int & ret) {
 
 ///////////////////////////////////
 
-NotifierPool :: NotifierPool() {
+NotifierPool::NotifierPool() {
 }
 
-NotifierPool :: ~NotifierPool() {
+NotifierPool::~NotifierPool() {
   for (auto & it : m_mapPool) {
     delete it.second;
   }
 }
 
-int NotifierPool :: GetNotifier(const uint64_t iID, Notifier *& poNotifier) {
+int NotifierPool::GetNotifier(const uint64_t iID, Notifier *& poNotifier) {
   poNotifier = nullptr;
   std::lock_guard<std::mutex> oLock(m_oMutex);
 

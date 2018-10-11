@@ -30,26 +30,26 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-TcpAcceptor :: TcpAcceptor() {
+TcpAcceptor::TcpAcceptor() {
   m_bIsEnd = false;
   m_bIsStarted = false;
 }
 
-TcpAcceptor :: ~TcpAcceptor() {
+TcpAcceptor::~TcpAcceptor() {
 }
 
-void TcpAcceptor :: Listen(const std::string & sListenIP, const int iListenPort) {
+void TcpAcceptor::Listen(const std::string & sListenIP, const int iListenPort) {
   m_oSocket.listen(SocketAddress(sListenIP, (unsigned short)iListenPort));
 }
 
-void TcpAcceptor :: Stop() {
+void TcpAcceptor::Stop() {
   if (m_bIsStarted) {
     m_bIsEnd = true;
     join();
   }
 }
 
-void TcpAcceptor :: run() {
+void TcpAcceptor::run() {
   m_bIsStarted = true;
 
   PLHead("start accept...");
@@ -91,11 +91,11 @@ void TcpAcceptor :: run() {
   }
 }
 
-void TcpAcceptor :: AddEventLoop(EventLoop * poEventLoop) {
+void TcpAcceptor::AddEventLoop(EventLoop * poEventLoop) {
   m_vecEventLoop.push_back(poEventLoop);
 }
 
-void TcpAcceptor :: AddEvent(int iFD, SocketAddress oAddr) {
+void TcpAcceptor::AddEvent(int iFD, SocketAddress oAddr) {
   EventLoop * poMinActiveEventLoop = nullptr;
   int iMinActiveEventCount = 1 << 30;
 

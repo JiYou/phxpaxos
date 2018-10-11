@@ -24,64 +24,64 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-TcpRead :: TcpRead(NetWork * poNetWork)
+TcpRead::TcpRead(NetWork * poNetWork)
   : m_oEventLoop(poNetWork) {
 }
 
-TcpRead :: ~TcpRead() {
+TcpRead::~TcpRead() {
 }
 
-int TcpRead :: Init() {
+int TcpRead::Init() {
   return m_oEventLoop.Init(20480);
 }
 
-void TcpRead :: run() {
+void TcpRead::run() {
   m_oEventLoop.StartLoop();
 }
 
-void TcpRead :: Stop() {
+void TcpRead::Stop() {
   m_oEventLoop.Stop();
   join();
 
   PLHead("TcpReadThread [END]");
 }
 
-EventLoop * TcpRead :: GetEventLoop() {
+EventLoop * TcpRead::GetEventLoop() {
   return &m_oEventLoop;
 }
 
 ////////////////////////////////////////////////////////
 
-TcpWrite :: TcpWrite(NetWork * poNetWork)
+TcpWrite::TcpWrite(NetWork * poNetWork)
   : m_oTcpClient(&m_oEventLoop, poNetWork), m_oEventLoop(poNetWork) {
   m_oEventLoop.SetTcpClient(&m_oTcpClient);
 }
 
-TcpWrite :: ~TcpWrite() {
+TcpWrite::~TcpWrite() {
 }
 
-int TcpWrite :: Init() {
+int TcpWrite::Init() {
   return m_oEventLoop.Init(20480);
 }
 
-void TcpWrite :: run() {
+void TcpWrite::run() {
   m_oEventLoop.StartLoop();
 }
 
-void TcpWrite :: Stop() {
+void TcpWrite::Stop() {
   m_oEventLoop.Stop();
   join();
 
   PLHead("TcpWriteThread [END]");
 }
 
-int TcpWrite :: AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
+int TcpWrite::AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
   return m_oTcpClient.AddMessage(sIP, iPort, sMessage);
 }
 
 ////////////////////////////////////////////////////////
 
-TcpIOThread :: TcpIOThread(NetWork * poNetWork)
+TcpIOThread::TcpIOThread(NetWork * poNetWork)
   : m_poNetWork(poNetWork) {
   m_bIsStarted = false;
   assert(signal(SIGPIPE, SIG_IGN) != SIG_ERR);
@@ -90,7 +90,7 @@ TcpIOThread :: TcpIOThread(NetWork * poNetWork)
 
 }
 
-TcpIOThread :: ~TcpIOThread() {
+TcpIOThread::~TcpIOThread() {
   for (auto & poTcpRead : m_vecTcpRead) {
     delete poTcpRead;
   }
@@ -100,7 +100,7 @@ TcpIOThread :: ~TcpIOThread() {
   }
 }
 
-void TcpIOThread :: Stop() {
+void TcpIOThread::Stop() {
   if (m_bIsStarted) {
     m_oTcpAcceptor.Stop();
     for (auto & poTcpRead : m_vecTcpRead) {
@@ -115,7 +115,7 @@ void TcpIOThread :: Stop() {
   PLHead("TcpIOThread [END]");
 }
 
-int TcpIOThread :: Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
+int TcpIOThread::Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
   for (int i = 0; i < iIOThreadCount; i++) {
     TcpRead * poTcpRead = new TcpRead(m_poNetWork);
     assert(poTcpRead != nullptr);
@@ -147,7 +147,7 @@ int TcpIOThread :: Init(const std::string & sListenIp, const int iListenPort, co
   return 0;
 }
 
-void TcpIOThread :: Start() {
+void TcpIOThread::Start() {
   m_oTcpAcceptor.start();
   for (auto & poTcpWrite : m_vecTcpWrite) {
     poTcpWrite->start();
@@ -160,7 +160,7 @@ void TcpIOThread :: Start() {
   m_bIsStarted = true;
 }
 
-int TcpIOThread :: AddMessage(const int iGroupIdx, const std::string & sIP, const int iPort, const std::string & sMessage) {
+int TcpIOThread::AddMessage(const int iGroupIdx, const std::string & sIP, const int iPort, const std::string & sMessage) {
   int iIndex = iGroupIdx % (int)m_vecTcpWrite.size();
   return m_vecTcpWrite[iIndex]->AddMessage(sIP, iPort, sMessage);
 }

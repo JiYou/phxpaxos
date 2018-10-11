@@ -25,7 +25,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-Communicate :: Communicate(
+Communicate::Communicate(
   const Config * poConfig,
   const nodeid_t iMyNodeID,
   const int iUDPMaxSize,
@@ -33,10 +33,10 @@ Communicate :: Communicate(
   : m_poConfig((Config *)poConfig), m_poNetwork(poNetwork), m_iMyNodeID(iMyNodeID), m_iUDPMaxSize(iUDPMaxSize) {
 }
 
-Communicate :: ~Communicate() {
+Communicate::~Communicate() {
 }
 
-int Communicate :: Send(const int iGroupIdx, const nodeid_t iNodeID,
+int Communicate::Send(const int iGroupIdx, const nodeid_t iNodeID,
                         const NodeInfo & oNodeInfo, const std::string & sMessage, const int iSendType) {
   if ((int)sMessage.size() > MAX_VALUE_SIZE) {
     BP->GetNetworkBP()->SendRejectByTooLargeSize();
@@ -56,11 +56,11 @@ int Communicate :: Send(const int iGroupIdx, const nodeid_t iNodeID,
   }
 }
 
-int Communicate :: SendMessage(const int iGroupIdx, const nodeid_t iSendtoNodeID, const std::string & sMessage, const int iSendType) {
+int Communicate::SendMessage(const int iGroupIdx, const nodeid_t iSendtoNodeID, const std::string & sMessage, const int iSendType) {
   return Send(iGroupIdx, iSendtoNodeID, NodeInfo(iSendtoNodeID), sMessage, iSendType);
 }
 
-int Communicate :: BroadcastMessage(const int iGroupIdx, const std::string & sMessage, const int iSendType) {
+int Communicate::BroadcastMessage(const int iGroupIdx, const std::string & sMessage, const int iSendType) {
   const std::set<nodeid_t> & setNodeInfo = m_poConfig->GetSystemVSM()->GetMembershipMap();
 
   for (auto & it : setNodeInfo) {
@@ -72,7 +72,7 @@ int Communicate :: BroadcastMessage(const int iGroupIdx, const std::string & sMe
   return 0;
 }
 
-int Communicate :: BroadcastMessageFollower(const int iGroupIdx, const std::string & sMessage, const int iSendType) {
+int Communicate::BroadcastMessageFollower(const int iGroupIdx, const std::string & sMessage, const int iSendType) {
   const std::map<nodeid_t, uint64_t> & mapFollowerNodeInfo = m_poConfig->GetMyFollowerMap();
 
   for (auto & it : mapFollowerNodeInfo) {
@@ -86,7 +86,7 @@ int Communicate :: BroadcastMessageFollower(const int iGroupIdx, const std::stri
   return 0;
 }
 
-int Communicate :: BroadcastMessageTempNode(const int iGroupIdx, const std::string & sMessage, const int iSendType) {
+int Communicate::BroadcastMessageTempNode(const int iGroupIdx, const std::string & sMessage, const int iSendType) {
   const std::map<nodeid_t, uint64_t> & mapTempNode = m_poConfig->GetTmpNodeMap();
 
   for (auto & it : mapTempNode) {
@@ -100,7 +100,7 @@ int Communicate :: BroadcastMessageTempNode(const int iGroupIdx, const std::stri
   return 0;
 }
 
-void Communicate :: SetUDPMaxSize(const size_t iUDPMaxSize) {
+void Communicate::SetUDPMaxSize(const size_t iUDPMaxSize) {
   m_iUDPMaxSize = iUDPMaxSize;
 }
 

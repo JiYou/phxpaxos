@@ -27,25 +27,25 @@ namespace phxpaxos {
 
 #define DEFAULT_BUFFER_LEN 1048576
 
-BytesBuffer :: BytesBuffer()
+BytesBuffer::BytesBuffer()
   : m_pcBuffer(nullptr), m_iLen(DEFAULT_BUFFER_LEN) {
   m_pcBuffer = new char[m_iLen];
   assert(m_pcBuffer != nullptr);
 }
 
-BytesBuffer :: ~BytesBuffer() {
+BytesBuffer::~BytesBuffer() {
   delete []m_pcBuffer;
 }
 
-char * BytesBuffer :: GetPtr() {
+char * BytesBuffer::GetPtr() {
   return m_pcBuffer;
 }
 
-int BytesBuffer :: GetLen() {
+int BytesBuffer::GetLen() {
   return m_iLen;
 }
 
-void BytesBuffer :: Ready(const int iBufferLen) {
+void BytesBuffer::Ready(const int iBufferLen) {
   if (m_iLen < iBufferLen) {
     delete []m_pcBuffer;
     m_pcBuffer = nullptr;
