@@ -1,22 +1,22 @@
 /*
-Tencent is pleased to support the open source community by making 
+Tencent is pleased to support the open source community by making
 PhxPaxos available.
-Copyright (C) 2016 THL A29 Limited, a Tencent company. 
+Copyright (C) 2016 THL A29 Limited, a Tencent company.
 All rights reserved.
 
-Licensed under the BSD 3-Clause License (the "License"); you may 
-not use this file except in compliance with the License. You may 
+Licensed under the BSD 3-Clause License (the "License"); you may
+not use this file except in compliance with the License. You may
 obtain a copy of the License at
 
 https://opensource.org/licenses/BSD-3-Clause
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" basis, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-implied. See the License for the specific language governing 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
 permissions and limitations under the License.
 
-See the AUTHORS file for names of contributors. 
+See the AUTHORS file for names of contributors.
 */
 
 #pragma once
@@ -25,106 +25,104 @@ See the AUTHORS file for names of contributors.
 #include "commdef.h"
 #include "system_v_sm.h"
 
-namespace phxpaxos
-{
+namespace phxpaxos {
 
-class Config
-{
-public:
-    Config(
-        const LogStorage * poLogStorage,
-        const bool bLogSync,
-        const int iSyncInterval,
-        const bool bUseMembership,
-        const NodeInfo & oMyNode,
-        const NodeInfoList & vecNodeInfoList,
-        const FollowerNodeInfoList & vecFollowerNodeInfoList,
-        const int iMyGroupIdx,
-        const int iGroupCount,
-        MembershipChangeCallback pMembershipChangeCallback);
+class Config {
+ public:
+  Config(
+    const LogStorage * poLogStorage,
+    const bool bLogSync,
+    const int iSyncInterval,
+    const bool bUseMembership,
+    const NodeInfo & oMyNode,
+    const NodeInfoList & vecNodeInfoList,
+    const FollowerNodeInfoList & vecFollowerNodeInfoList,
+    const int iMyGroupIdx,
+    const int iGroupCount,
+    MembershipChangeCallback pMembershipChangeCallback);
 
-    ~Config();
+  ~Config();
 
-    int Init();
+  int Init();
 
-    const bool CheckConfig();
+  const bool CheckConfig();
 
-public:
-    SystemVSM * GetSystemVSM();
+ public:
+  SystemVSM * GetSystemVSM();
 
-public:
-    const uint64_t GetGid() const;
+ public:
+  const uint64_t GetGid() const;
 
-    const nodeid_t GetMyNodeID() const;
-    
-    const int GetNodeCount() const;
+  const nodeid_t GetMyNodeID() const;
 
-    const int GetMyGroupIdx() const;
+  const int GetNodeCount() const;
 
-    const int GetGroupCount() const;
+  const int GetMyGroupIdx() const;
 
-    const int GetMajorityCount() const;
+  const int GetGroupCount() const;
 
-    const bool GetIsUseMembership() const;
+  const int GetMajorityCount() const;
 
-public:
-    const int GetPrepareTimeoutMs() const;
+  const bool GetIsUseMembership() const;
 
-    const int GetAcceptTimeoutMs() const;
+ public:
+  const int GetPrepareTimeoutMs() const;
 
-    const uint64_t GetAskforLearnTimeoutMs() const;
+  const int GetAcceptTimeoutMs() const;
 
-public:
-    const bool IsValidNodeID(const nodeid_t iNodeID);
+  const uint64_t GetAskforLearnTimeoutMs() const;
 
-    const bool IsIMFollower() const;
+ public:
+  const bool IsValidNodeID(const nodeid_t iNodeID);
 
-    const nodeid_t GetFollowToNodeID() const;
+  const bool IsIMFollower() const;
 
-    const bool LogSync() const;
+  const nodeid_t GetFollowToNodeID() const;
 
-    const int SyncInterval() const;
+  const bool LogSync() const;
 
-    void SetLogSync(const bool bLogSync);
+  const int SyncInterval() const;
 
-public:
-    void SetMasterSM(InsideSM * poMasterSM);
+  void SetLogSync(const bool bLogSync);
 
-    InsideSM * GetMasterSM();
+ public:
+  void SetMasterSM(InsideSM * poMasterSM);
 
-public:
-    void AddTmpNodeOnlyForLearn(const nodeid_t iTmpNodeID);
+  InsideSM * GetMasterSM();
 
-    //this function only for communicate.
-    const std::map<nodeid_t, uint64_t> & GetTmpNodeMap();
+ public:
+  void AddTmpNodeOnlyForLearn(const nodeid_t iTmpNodeID);
 
-    void AddFollowerNode(const nodeid_t iMyFollowerNodeID);
+  //this function only for communicate.
+  const std::map<nodeid_t, uint64_t> & GetTmpNodeMap();
 
-    //this function only for communicate.
-    const std::map<nodeid_t, uint64_t> & GetMyFollowerMap();
+  void AddFollowerNode(const nodeid_t iMyFollowerNodeID);
 
-    const size_t GetMyFollowerCount();
+  //this function only for communicate.
+  const std::map<nodeid_t, uint64_t> & GetMyFollowerMap();
 
-private:
-    bool m_bLogSync;
-    int m_iSyncInterval;
-    bool m_bUseMembership;
+  const size_t GetMyFollowerCount();
 
-    nodeid_t m_iMyNodeID;
-    int m_iNodeCount;
-    int m_iMyGroupIdx;
-    int m_iGroupCount;
+ private:
+  bool m_bLogSync;
+  int m_iSyncInterval;
+  bool m_bUseMembership;
 
-    NodeInfoList m_vecNodeInfoList;
+  nodeid_t m_iMyNodeID;
+  int m_iNodeCount;
+  int m_iMyGroupIdx;
+  int m_iGroupCount;
 
-    bool m_bIsIMFollower;
-    nodeid_t m_iFollowToNodeID;
+  NodeInfoList m_vecNodeInfoList;
 
-    SystemVSM m_oSystemVSM;
-    InsideSM * m_poMasterSM;
+  bool m_bIsIMFollower;
+  nodeid_t m_iFollowToNodeID;
 
-    std::map<nodeid_t, uint64_t> m_mapTmpNodeOnlyForLearn;
-    std::map<nodeid_t, uint64_t> m_mapMyFollower;
+  SystemVSM m_oSystemVSM;
+  InsideSM * m_poMasterSM;
+
+  std::map<nodeid_t, uint64_t> m_mapTmpNodeOnlyForLearn;
+  std::map<nodeid_t, uint64_t> m_mapMyFollower;
 };
 
 }

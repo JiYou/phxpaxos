@@ -1,22 +1,22 @@
 /*
-Tencent is pleased to support the open source community by making 
+Tencent is pleased to support the open source community by making
 PhxPaxos available.
-Copyright (C) 2016 THL A29 Limited, a Tencent company. 
+Copyright (C) 2016 THL A29 Limited, a Tencent company.
 All rights reserved.
 
-Licensed under the BSD 3-Clause License (the "License"); you may 
-not use this file except in compliance with the License. You may 
+Licensed under the BSD 3-Clause License (the "License"); you may
+not use this file except in compliance with the License. You may
 obtain a copy of the License at
 
 https://opensource.org/licenses/BSD-3-Clause
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" basis, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-implied. See the License for the specific language governing 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
 permissions and limitations under the License.
 
-See the AUTHORS file for names of contributors. 
+See the AUTHORS file for names of contributors.
 */
 
 #pragma once
@@ -27,92 +27,102 @@ See the AUTHORS file for names of contributors.
 #include "inside_sm.h"
 #include <set>
 
-namespace phxpaxos
-{
+namespace phxpaxos {
 
 class MsgTransport;
 
-class SystemVSM : public InsideSM 
-{
-public:
-    SystemVSM(
-            const int iGroupIdx, 
-            const nodeid_t iMyNodeID,
-            const LogStorage * poLogStorage,
-            MembershipChangeCallback pMembershipChangeCallback);
-    ~SystemVSM();
+class SystemVSM : public InsideSM {
+ public:
+  SystemVSM(
+    const int iGroupIdx,
+    const nodeid_t iMyNodeID,
+    const LogStorage * poLogStorage,
+    MembershipChangeCallback pMembershipChangeCallback);
+  ~SystemVSM();
 
-    int Init();
+  int Init();
 
-    bool Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue, SMCtx * poSMCtx);
+  bool Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sValue, SMCtx * poSMCtx);
 
-    const int SMID() const {return SYSTEM_V_SMID;}
+  const int SMID() const {
+    return SYSTEM_V_SMID;
+  }
 
-public:
-    const uint64_t GetGid() const;
+ public:
+  const uint64_t GetGid() const;
 
-    void GetMembership(NodeInfoList & vecNodeInfoList, uint64_t & llVersion); 
+  void GetMembership(NodeInfoList & vecNodeInfoList, uint64_t & llVersion);
 
-    int CreateGid_OPValue(const uint64_t llGid, std::string & sOpValue);
-    
-    int Membership_OPValue(const NodeInfoList & vecNodeInfoList, const uint64_t llVersion, std::string & sOpValue);
+  int CreateGid_OPValue(const uint64_t llGid, std::string & sOpValue);
 
-public:
-    //membership
-    
-    void AddNodeIDList(const NodeInfoList & vecNodeInfoList);
+  int Membership_OPValue(const NodeInfoList & vecNodeInfoList, const uint64_t llVersion, std::string & sOpValue);
 
-    void RefleshNodeID();
+ public:
+  //membership
 
-    const int GetNodeCount() const;
+  void AddNodeIDList(const NodeInfoList & vecNodeInfoList);
 
-    const int GetMajorityCount() const;
+  void RefleshNodeID();
 
-    const bool IsValidNodeID(const nodeid_t iNodeID);
+  const int GetNodeCount() const;
 
-    const bool IsIMInMembership();
+  const int GetMajorityCount() const;
 
-public:
-    const uint64_t GetCheckpointInstanceID(const int iGroupIdx) const { return m_oSystemVariables.version(); }
+  const bool IsValidNodeID(const nodeid_t iNodeID);
 
-    bool ExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID, 
-            const std::string & sPaxosValue) { return true; }
+  const bool IsIMInMembership();
 
-    int GetCheckpointState(const int iGroupIdx, std::string & sDirPath, 
-            std::vector<std::string> & vecFileList) { return 0; }    
-    
-    int LoadCheckpointState(const int iGroupIdx, const std::string & sCheckpointTmpFileDirPath,
-            const std::vector<std::string> & vecFileList, const uint64_t llCheckpointInstanceID) { return 0; }
+ public:
+  const uint64_t GetCheckpointInstanceID(const int iGroupIdx) const {
+    return m_oSystemVariables.version();
+  }
 
-    int LockCheckpointState() { return 0; }
+  bool ExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID,
+                            const std::string & sPaxosValue) {
+    return true;
+  }
 
-    void UnLockCheckpointState() { }
+  int GetCheckpointState(const int iGroupIdx, std::string & sDirPath,
+                         std::vector<std::string> & vecFileList) {
+    return 0;
+  }
 
-public:
-    int GetCheckpointBuffer(std::string & sCPBuffer);
+  int LoadCheckpointState(const int iGroupIdx, const std::string & sCheckpointTmpFileDirPath,
+                          const std::vector<std::string> & vecFileList, const uint64_t llCheckpointInstanceID) {
+    return 0;
+  }
 
-    int UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChange);
+  int LockCheckpointState() {
+    return 0;
+  }
 
-public:
-    //for tools
-    void GetSystemVariables(SystemVariables & oVariables);
-    
-    int UpdateSystemVariables(const SystemVariables & oVariables);
+  void UnLockCheckpointState() { }
 
-public:
-    //this function only for communicate.
-    const std::set<nodeid_t> & GetMembershipMap();
+ public:
+  int GetCheckpointBuffer(std::string & sCPBuffer);
 
-private:
-    int m_iMyGroupIdx;
-    SystemVariables m_oSystemVariables;
-    SystemVariablesStore m_oSystemVStore;
+  int UpdateByCheckpoint(const std::string & sCPBuffer, bool & bChange);
 
-    std::set<nodeid_t> m_setNodeID;
+ public:
+  //for tools
+  void GetSystemVariables(SystemVariables & oVariables);
 
-    nodeid_t m_iMyNodeID;
+  int UpdateSystemVariables(const SystemVariables & oVariables);
 
-    MembershipChangeCallback m_pMembershipChangeCallback;
+ public:
+  //this function only for communicate.
+  const std::set<nodeid_t> & GetMembershipMap();
+
+ private:
+  int m_iMyGroupIdx;
+  SystemVariables m_oSystemVariables;
+  SystemVariablesStore m_oSystemVStore;
+
+  std::set<nodeid_t> m_setNodeID;
+
+  nodeid_t m_iMyNodeID;
+
+  MembershipChangeCallback m_pMembershipChangeCallback;
 };
-    
+
 }

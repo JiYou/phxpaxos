@@ -1,22 +1,22 @@
 /*
-Tencent is pleased to support the open source community by making 
+Tencent is pleased to support the open source community by making
 PhxPaxos available.
-Copyright (C) 2016 THL A29 Limited, a Tencent company. 
+Copyright (C) 2016 THL A29 Limited, a Tencent company.
 All rights reserved.
 
-Licensed under the BSD 3-Clause License (the "License"); you may 
-not use this file except in compliance with the License. You may 
+Licensed under the BSD 3-Clause License (the "License"); you may
+not use this file except in compliance with the License. You may
 obtain a copy of the License at
 
 https://opensource.org/licenses/BSD-3-Clause
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" basis, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-implied. See the License for the specific language governing 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
 permissions and limitations under the License.
 
-See the AUTHORS file for names of contributors. 
+See the AUTHORS file for names of contributors.
 */
 
 #pragma once
@@ -27,97 +27,92 @@ See the AUTHORS file for names of contributors.
 #include "commdef.h"
 #include "comm_include.h"
 
-namespace phxpaxos
-{
+namespace phxpaxos {
 
 class EventLoop;
 class NetWork;
 
-enum MessageEventType
-{
-    MessageEventType_RECV = 1,
-    MessageEventType_SEND = 2,
+enum MessageEventType {
+  MessageEventType_RECV = 1,
+  MessageEventType_SEND = 2,
 };
 
-enum MessageEventTimerType
-{
-    MessageEventTimerType_Reconnect = 1,
+enum MessageEventTimerType {
+  MessageEventTimerType_Reconnect = 1,
 };
 
-class MessageEvent : public Event
-{
-public:
-    MessageEvent(
-            const int Type,
-            const int fd, 
-            const SocketAddress & oAddr, 
-            EventLoop * poEventLoop,
-            NetWork * poNetWork);
-    ~MessageEvent();
+class MessageEvent : public Event {
+ public:
+  MessageEvent(
+    const int Type,
+    const int fd,
+    const SocketAddress & oAddr,
+    EventLoop * poEventLoop,
+    NetWork * poNetWork);
+  ~MessageEvent();
 
-    int AddMessage(const std::string & sMessage);
+  int AddMessage(const std::string & sMessage);
 
-    int GetSocketFd() const;
-    
-    const std::string & GetSocketHost();
+  int GetSocketFd() const;
 
-    int OnRead();
+  const std::string & GetSocketHost();
 
-    int OnWrite();
+  int OnRead();
 
-    void OnTimeout(const uint32_t iTimerID, const int iType);
+  int OnWrite();
 
-    void OnError(bool & bNeedDelete);
+  void OnTimeout(const uint32_t iTimerID, const int iType);
 
-    void OpenWrite();
+  void OnError(bool & bNeedDelete);
 
-    const bool IsActive();
+  void OpenWrite();
 
-private:
-    int ReadLeft();
+  const bool IsActive();
 
-    void ReadDone(BytesBuffer & oBytesBuffer, const int iLen);
-    
-    int WriteLeft();
+ private:
+  int ReadLeft();
 
-    void WriteDone();
+  void ReadDone(BytesBuffer & oBytesBuffer, const int iLen);
 
-    int DoOnWrite();
+  int WriteLeft();
 
-    void ReConnect();
+  void WriteDone();
 
-private:
-    Socket m_oSocket;    
-    SocketAddress m_oAddr;
-    std::string m_sHost;
-    NetWork * m_poNetWork;
-    int m_iType;
+  int DoOnWrite();
 
-private:
-    char m_sReadHeadBuffer[sizeof(int)];
-    int m_iLastReadHeadPos;
-    BytesBuffer m_oReadCacheBuffer;
-    int m_iLastReadPos;
-    int m_iLeftReadLen;
+  void ReConnect();
 
-    BytesBuffer m_oWriteCacheBuffer;
-    int m_iLastWritePos;
-    int m_iLeftWriteLen;
+ private:
+  Socket m_oSocket;
+  SocketAddress m_oAddr;
+  std::string m_sHost;
+  NetWork * m_poNetWork;
+  int m_iType;
 
-    struct QueueData
-    {
-        uint64_t llEnqueueAbsTime;
-        std::string * psValue;
-    };    
+ private:
+  char m_sReadHeadBuffer[sizeof(int)];
+  int m_iLastReadHeadPos;
+  BytesBuffer m_oReadCacheBuffer;
+  int m_iLastReadPos;
+  int m_iLeftReadLen;
 
-    std::queue<QueueData> m_oInQueue;
-    int m_iQueueMemSize;
-    std::mutex m_oMutex;
+  BytesBuffer m_oWriteCacheBuffer;
+  int m_iLastWritePos;
+  int m_iLeftWriteLen;
 
-    uint64_t m_llLastActiveTime;
+  struct QueueData {
+    uint64_t llEnqueueAbsTime;
+    std::string * psValue;
+  };
 
-private:
-    uint32_t m_iReconnectTimeoutID;
+  std::queue<QueueData> m_oInQueue;
+  int m_iQueueMemSize;
+  std::mutex m_oMutex;
+
+  uint64_t m_llLastActiveTime;
+
+ private:
+  uint32_t m_iReconnectTimeoutID;
 };
 
 }
