@@ -57,7 +57,8 @@ std::thread::id Thread::getId() const {
 }
 
 void Thread::sleep(int ms) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    usleep(ms*1000);
 }
 
 } 

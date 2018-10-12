@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM samuelololol/ubuntu-codeviz-base
 
 RUN apt-get update && apt-get install -y git vim build-essential automake wget libtool cmake python
 RUN cd /opt && git clone https://github.com/JiYou/phxpaxos.git && cd phxpaxos && \

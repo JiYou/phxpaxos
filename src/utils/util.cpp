@@ -35,21 +35,32 @@ using namespace std;
 
 const uint64_t Time :: GetTimestampMS() 
 {
-    auto now_time = chrono::system_clock::now();
-    uint64_t now = (chrono::duration_cast<chrono::milliseconds>(now_time.time_since_epoch())).count();
-    return now;
+    uint64_t nMillSec = 0;  
+    struct timeval tv;   
+    gettimeofday(&tv,NULL);  
+    nMillSec = (long long)tv.tv_sec * 1000;  
+    nMillSec += tv.tv_usec / 1000;
+    //auto now_time = chrono::system_clock::now();
+    //uint64_t now = (chrono::duration_cast<chrono::milliseconds>(now_time.time_since_epoch())).count();
+    return nMillSec;
 }
 
 const uint64_t Time :: GetSteadyClockMS() 
 {
-    auto now_time = chrono::steady_clock::now();
-    uint64_t now = (chrono::duration_cast<chrono::milliseconds>(now_time.time_since_epoch())).count();
-    return now;
+    uint64_t nMillSec = 0;  
+    struct timeval tv;   
+    gettimeofday(&tv,NULL);  
+    nMillSec = (long long)tv.tv_sec * 1000;  
+    nMillSec += tv.tv_usec / 1000;
+    //auto now_time = chrono::system_clock::now();
+    //uint64_t now = (chrono::duration_cast<chrono::milliseconds>(now_time.time_since_epoch())).count();
+    return nMillSec;
 }
 
 void Time :: MsSleep(const int iTimeMs)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(iTimeMs));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(iTimeMs));
+    usleep(iTimeMs*1000);
 }
 
 /////////////////////////////////////////////

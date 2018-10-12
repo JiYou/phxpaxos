@@ -31,10 +31,10 @@ else
 endif
 
 CXX=g++
-CXXFLAGS+=-std=c++11 $(OPT)
+CXXFLAGS+=-std=c++0x $(OPT)
 CPPFLAGS+=-I$(SRC_BASE_PATH) -I$(PROTOBUF_INCLUDE_PATH) -I$(LEVELDB_INCLUDE_PATH)
 CPPFLAGS+=-I$(GFLAGS_INCLUDE_PATH) -I$(GLOG_INCLUDE_PATH)
-CPPFLAGS+=-Wall -fPIC -m64  -Wno-unused-local-typedefs
+CPPFLAGS+=-Wall -fPIC -m64 # -Wno-unused-local-typedefs
 
 #LDFLAGS+=-shared
 #LDFLAGS+=-static
