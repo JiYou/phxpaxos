@@ -59,22 +59,43 @@ int PhxEchoServer::MakeLogStoragePath(std::string & sLogStoragePath) {
 int PhxEchoServer::RunPaxos() {
   Options oOptions;
 
+  // 这里只是生成一个路径，然后放到sLogStoragePath中。
+  // 这里生成的路径会在
+  // PNode::InitLogStorage中进行检查，如果没有设置
+  // 那么就会报错
   int ret = MakeLogStoragePath(oOptions.sLogStoragePath);
   if (ret != 0) {
     return ret;
   }
 
+  // 这里的iGroupCount表示的含义是说会有几个paxos group.
+  // 这里需要注意文中的paxos group的概念
+  // 一个会法的paxos group一般需要奇数个节点
+  // 一次表决形成一个实例即instance
+  // 
   //this groupcount means run paxos group count.
   //every paxos group is independent, there are no any communicate between any 2 paxos group.
   oOptions.iGroupCount = 1;
 
+  // 指明自己这个node
   oOptions.oMyNode = m_oMyNode;
+  // 指明node list
   oOptions.vecNodeInfoList = m_vecNodeList;
 
+  // Group的状态机信息
+  // 类似于状态机meta信息。
+  // 注意：是状态机信息，这是因为一个group可以挂载多个状态机
+  // 这里就是管理多个状态机。
   GroupSMInfo oSMInfo;
+  // 指回来的group index.
+  // 因为只有一个group
+  // 所以这里的idx是0
   oSMInfo.iGroupIdx = 0;
   //one paxos group can have multi state machine.
-  oSMInfo.vecSMList.push_back(&m_oEchoSM);
+  oSMInfo.vecSMList.push_back(&m_oEchoSM); // 把真正的状态机放到meta信息里面
+  // 把状态机meta再放到option里面
+  // 这时，option就相当于是meta信息的meta.
+  // 注意，这里是放到vecGroupSM InfoList中
   oOptions.vecGroupSMInfoList.push_back(oSMInfo);
 
   //use logger_google to print log
@@ -88,6 +109,7 @@ int PhxEchoServer::RunPaxos() {
   //set logger
   oOptions.pLogFunc = pLogFunc;
 
+  // 静态方法，用你自己实现的paxos node
   ret = Node::RunNode(oOptions, m_poPaxosNode);
   if (ret != 0) {
     printf("run paxos fail, ret %d\n", ret);

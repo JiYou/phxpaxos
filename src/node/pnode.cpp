@@ -63,24 +63,41 @@ PNode::~PNode() {
 }
 
 int PNode::InitLogStorage(const Options & oOptions, LogStorage *& poLogStorage) {
+  // 看一下是否有二次开发人员所使用的自定义存储
+  // 如果有，那么直接使用二次开发人员的自定义存储
   if (oOptions.poLogStorage != nullptr) {
     poLogStorage = oOptions.poLogStorage;
     PLImp("OK, use user logstorage");
     return 0;
   }
 
+  // 对于PhxEchoServer而言，是在
+  // PhxEchoServer::RunPaxos()函数的一开始
+  // 就对options.sLogStoragePath进行了设置
+  // 到这里再进行一轮检查
+  // 如果使用缺省的自定义的存储实现
+  // 那么这里的检查是必要的。
   if (oOptions.sLogStoragePath.size() == 0) {
     PLErr("LogStorage Path is null");
     return -2;
   }
 
+  // 初始化default log storage.
+  // 注意Init()函数的格式
+  // PNode::Init(选项，网络)
+  // 而这里只是传了storage需要的两个参数
+  // 从一致性的角度来讲，可能直接使用
+  // 统一的option参数更好。
+  // 因为PNode::Init()内部初始化好网络模块之后，
+  // 直接把PNode::pNetwork指向network class的实例即可。
+  // 看代码的时候，不要注意: m_oDefaultLogStorage poLogStorage
+  // 这两个变量，本质上讲，这两个指向的都是同一个storage instance.
   int ret = m_oDefaultLogStorage.Init(oOptions.sLogStoragePath, oOptions.iGroupCount);
   if (ret != 0) {
     PLErr("Init default logstorage fail, logpath %s ret %d",
           oOptions.sLogStoragePath.c_str(), ret);
     return ret;
   }
-
   poLogStorage = &m_oDefaultLogStorage;
 
   PLImp("OK, use default logstorage");
@@ -89,24 +106,30 @@ int PNode::InitLogStorage(const Options & oOptions, LogStorage *& poLogStorage) 
 }
 
 int PNode::InitNetWork(const Options & oOptions, NetWork *& poNetWork) {
+  // 如果用户设置了使用自定义的网络模块
+  // 那么这里需要更新一下，不用初始化了
+  // 直接使用指定的网络模块
   if (oOptions.poNetWork != nullptr) {
     poNetWork = oOptions.poNetWork;
     PLImp("OK, use user network");
     return 0;
   }
 
+  // 这里开始初始化缺省的网络
   int ret = m_oDefaultNetWork.Init(
-              oOptions.oMyNode.GetIP(), oOptions.oMyNode.GetPort(), oOptions.iIOThreadCount);
+              oOptions.oMyNode.GetIP(),
+              oOptions.oMyNode.GetPort(),
+              oOptions.iIOThreadCount);
+  // 如果初始化失败，那么返回出错码
   if (ret != 0) {
     PLErr("init default network fail, listenip %s listenport %d ret %d",
           oOptions.oMyNode.GetIP().c_str(), oOptions.oMyNode.GetPort(), ret);
     return ret;
   }
 
+  // 指向初始化成功的缺省网络模块
   poNetWork = &m_oDefaultNetWork;
-
   PLImp("OK, use default network");
-
   return 0;
 }
 

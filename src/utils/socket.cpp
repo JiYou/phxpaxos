@@ -512,10 +512,14 @@ ServerSocket::ServerSocket(const SocketAddress& addr) : SocketBase(addr.getFamil
 
 ServerSocket::~ServerSocket() {}
 
+// caller只传了一个参数进来，
+// virtual void listen(const SocketAddress& addr, int backlog = SOMAXCONN);
+// 这是因为第二个参数是一个默认值。这里设置的默认值是128
 void ServerSocket::listen(const SocketAddress& addr, int backlog) {
   SocketAddress::Addr localAddr;
   addr.getAddress(localAddr);
 
+  // 这里应该是处理原来还打开着的接口。
   if (_handle == -1 || _family != addr.getFamily()) {
     close();
     initHandle(addr.getFamily());

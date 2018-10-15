@@ -25,15 +25,24 @@ See the AUTHORS file for names of contributors.
 namespace phxpaxos {
 
 int Node::RunNode(const Options & oOptions, Node *& poNode) {
+  // InsideOptions::Instance()
+  // 是Singleton设计模式
+
+  // 这里根据传进来的参数，看一下是不是会有较大数据Case的情况
+  // 如果数据量太大，那么需要打开大buffer模式
   if (oOptions.bIsLargeValueMode) {
     InsideOptions::Instance()->SetAsLargeBufferMode();
   }
-
+  // 设置
   InsideOptions::Instance()->SetGroupCount(oOptions.iGroupCount);
 
+  // 先把原来的node置空
   poNode = nullptr;
+  // network也没有
   NetWork * poNetWork = nullptr;
 
+  // PhxPaxos会在程序运行的一些关键位置调用这些断点函数
+  // 开发者可以自行实现这些函数，比如可以用来监控或统计上报。
   Breakpoint::m_poBreakpoint = nullptr;
   BP->SetInstance(oOptions.poBreakpoint);
 

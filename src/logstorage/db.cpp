@@ -129,20 +129,26 @@ int Database::ClearAllLog() {
 }
 
 int Database::Init(const std::string & sDBPath, const int iMyGroupIdx) {
+  // 如果已经被初始化了，那么直接返回
+  // 这里是不是可以加上assert语句？
   if (m_bHasInit) {
     return 0;
   }
-
+  // 设置data base所指向的paxos group index.
   m_iMyGroupIdx = iMyGroupIdx;
-
+  // db的存储路径
   m_sDBPath = sDBPath;
 
+  // 这里开始设置level db.
   leveldb::Options oOptions;
   oOptions.create_if_missing = true;
+  // 这里使用了自定义的paxos comparator.
   oOptions.comparator = &m_oPaxosCmp;
+  // 有趣的是，这里让每个leveldb的write buffer size不一样，避免同一时刻都在进行compact.
   //every group have different buffer size to avoid all group compact at the same time.
   oOptions.write_buffer_size = 1024 * 1024 + iMyGroupIdx * 10 * 1024;
-
+  // 打开level db
+  // 如果不存在，那么就会创建这个level db.
   leveldb::Status oStatus = leveldb::DB::Open(oOptions, sDBPath, &m_poLevelDB);
 
   if (!oStatus.ok()) {
@@ -150,6 +156,13 @@ int Database::Init(const std::string & sDBPath, const int iMyGroupIdx) {
     return -1;
   }
 
+  // 前面的准备工作都已经完成，那么这里真正创建一个log store.
+  // 这里主要是初始化WAL LOG和level DB里面关于
+  // <instance id, file id, offset>
+  // - 拿到最新的信息
+  //    a. 从level db中取
+  //    b. 从本地文件中读
+  // - 把最新的信息更到level db
   m_poValueStore = new LogStore();
   assert(m_poValueStore != nullptr);
 
@@ -172,6 +185,10 @@ const std::string Database::GetDBPath() {
 
 int Database::GetMaxInstanceIDFileID(std::string & sFileID, uint64_t & llInstanceID) {
   uint64_t llMaxInstanceID = 0;
+  // 这里就是从levelDB中读取最后一个iterator
+  // 然后从iterator中取出key
+  // llInstanceID = GetInstanceIDFromKey(it->key().ToString());
+  // 然后设置llInstanceID
   int ret = GetMaxInstanceID(llMaxInstanceID);
   if (ret != 0 && ret != 1) {
     return ret;
@@ -182,8 +199,11 @@ int Database::GetMaxInstanceIDFileID(std::string & sFileID, uint64_t & llInstanc
     return 0;
   }
 
+  // 把MaxInstanceID表示成字符串的形式。
+  // 这里相当于直接memcpy
   string sKey = GenKey(llMaxInstanceID);
 
+  // 利用key得到FileID
   leveldb::Status oStatus = m_poLevelDB->Get(leveldb::ReadOptions(), sKey, &sFileID);
   if (!oStatus.ok()) {
     if (oStatus.IsNotFound()) {
@@ -405,11 +425,17 @@ int Database::GetMaxInstanceID(uint64_t & llInstanceID) {
   llInstanceID = MINCHOSEN_KEY;
 
   leveldb::Iterator * it = m_poLevelDB->NewIterator(leveldb::ReadOptions());
-
+  // 直接移动到最后一个key/value
   it->SeekToLast();
-
+  // 如果iterator是有效的
   while (it->Valid()) {
+    // 这里从key中解析出InstanceID
     llInstanceID = GetInstanceIDFromKey(it->key().ToString());
+    // 如果解析出的key是无效的
+    // 或者说是system variable
+    // 或者说是master variable
+    // 那么就向前移动。
+    // 直到找到有效的InstanceID
     if (llInstanceID == MINCHOSEN_KEY
         || llInstanceID == SYSTEMVARIABLES_KEY
         || llInstanceID == MASTERVARIABLES_KEY) {
@@ -426,14 +452,15 @@ int Database::GetMaxInstanceID(uint64_t & llInstanceID) {
 
 std::string Database::GenKey(const uint64_t llInstanceID) {
   string sKey;
+  // 直接memcpy到string里面。
   sKey.append((char *)&llInstanceID, sizeof(uint64_t));
   return sKey;
 }
 
 const uint64_t Database::GetInstanceIDFromKey(const std::string & sKey) {
+  // 字符串的开始64位就是InstanceID
   uint64_t llInstanceID = 0;
   memcpy(&llInstanceID, sKey.data(), sizeof(uint64_t));
-
   return llInstanceID;
 }
 

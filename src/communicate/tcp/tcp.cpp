@@ -115,13 +115,24 @@ void TcpIOThread::Stop() {
   PLHead("TcpIOThread [END]");
 }
 
-int TcpIOThread::Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
+int TcpIOThread::Init(const std::string & sListenIp,
+                      const int iListenPort,
+                      const int iIOThreadCount) {
+  // iIOThreadCount指定了创建线程的数目
+  // 无论是接收方，还是发送方，都需要有这么多线程。
   for (int i = 0; i < iIOThreadCount; i++) {
+    // 生成一个TcpRead对象
+    // TcpRead对象中会有一个EventLoop
+    // EventLoop会有一个对m_poNetWork的引用
     TcpRead * poTcpRead = new TcpRead(m_poNetWork);
     assert(poTcpRead != nullptr);
     m_vecTcpRead.push_back(poTcpRead);
+    // 把TcpRead对象中的EventLoop添加到
+    // m_vecEventLoop这个vector中
     m_oTcpAcceptor.AddEventLoop(poTcpRead->GetEventLoop());
 
+    // TcpWrite中也有一个EventLoop对象
+    // m_poNetWork也是用来初始化EventLoop对象的。
     TcpWrite * poTcpWrite = new TcpWrite(m_poNetWork);
     assert(poTcpWrite != nullptr);
     m_vecTcpWrite.push_back(poTcpWrite);

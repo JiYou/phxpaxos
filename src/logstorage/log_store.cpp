@@ -52,8 +52,18 @@ LogStore::~LogStore() {
   }
 }
 
+// 总结一下Init()函数：
+// 1. 创建sPath/vfile
+// 2. 设置info logger文件句柄
+// 3. 设置meta文件句柄，读出WAL LOG文件的序号，并且校验这个序号
+// 4. RebuildIndex 就是查出当前读写到了什么位置。
+// 5. RebuildIndex就是去拿最新的file id/offset,
+//    当拿到之后，第5步会膨胀这个文件到指定大小，然后移动指针到这个offset
 int LogStore::Init(const std::string & sPath, const int iMyGroupIdx, Database * poDatabase) {
+  // 因为在DB初始化的时候，已经会去检查了
+  // 所以这里直接设置group index.
   m_iMyGroupIdx = iMyGroupIdx;
+  // 创建目录并且生成/vfile
   m_sPath = sPath + "/" + "vfile";
   if (access(m_sPath.c_str(), F_OK) == -1) {
     if (mkdir(m_sPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
@@ -62,22 +72,33 @@ int LogStore::Init(const std::string & sPath, const int iMyGroupIdx, Database * 
     }
   }
 
+  // 这里生成sPah/vfile/LOG文件路径，
+  // 并且打开这个文件，生成相应的文件句柄
   m_oFileLogger.Init(m_sPath);
 
+  // 元数据文件, 类似于leveldb中的current文件
+  // 这个文件中的内容是当前哪个WAL LOG文件是有效的
+  // 只不过leveldb中的current指的是manifest文件
   string sMetaFilePath = m_sPath + "/meta";
-
+  // 这里设置meta file的路径，并且打开之。
   m_iMetaFd = open(sMetaFilePath.c_str(), O_CREAT | O_RDWR, S_IREAD | S_IWRITE);
   if (m_iMetaFd == -1) {
     PLG1Err("open meta file fail, filepath %s", sMetaFilePath.c_str());
     return -1;
   }
 
+  // 移动到文件头
+  // 读写位置移到文件开头时:lseek(int fildes, 0, SEEK_SET);
+  // 读写位置移到文件尾时:lseek(int fildes, 0, SEEK_END);
+  // 取得目前文件位置时:lseek(int fildes, 0, SEEK_CUR);
   off_t iSeekPos = lseek(m_iMetaFd, 0, SEEK_SET);
   if (iSeekPos == -1) {
     return -1;
   }
-
+  // 读一个整数出来。
   ssize_t iReadLen = read(m_iMetaFd, &m_iFileID, sizeof(int));
+  // 失败就从0开始
+  // 读出WAL LOG文件当前的ID
   if (iReadLen != (ssize_t)sizeof(int)) {
     if (iReadLen == 0) {
       m_iFileID = 0;
@@ -86,7 +107,7 @@ int LogStore::Init(const std::string & sPath, const int iMyGroupIdx, Database * 
       return -1;
     }
   }
-
+  // 读出校验码，这里是针对fileID的校验码
   uint32_t iMetaChecksum = 0;
   iReadLen = read(m_iMetaFd, &iMetaChecksum, sizeof(uint32_t));
   if (iReadLen == (ssize_t)sizeof(uint32_t)) {
@@ -97,29 +118,34 @@ int LogStore::Init(const std::string & sPath, const int iMyGroupIdx, Database * 
       return -2;
     }
   }
-
+  // 重建index
+  // 这里应该是修正当前wal log文件的写入位置
   int ret = RebuildIndex(poDatabase, m_iNowFileOffset);
   if (ret != 0) {
     PLG1Err("rebuild index fail, ret %d", ret);
     return -1;
   }
 
+  // m_iFileID指向最新的文件ID
   ret = OpenFile(m_iFileID, m_iFd);
   if (ret != 0) {
     return ret;
   }
-
+  // 这里办法比较简单粗暴，就是直接往这个文件里面灌0
+  // 写到 100M or 500M为止 
   ret = ExpandFile(m_iFd, m_iNowFileSize);
   if (ret != 0) {
     return ret;
   }
 
+  // 移动到正确位置
   m_iNowFileOffset = lseek(m_iFd, m_iNowFileOffset, SEEK_SET);
   if (m_iNowFileOffset == -1) {
     PLG1Err("seek to now file offset %d fail", m_iNowFileOffset);
     return -1;
   }
 
+  // 日志输出，不用管
   m_oFileLogger.Log("init write fileid %d now_w_offset %d filesize %d",
                     m_iFileID, m_iNowFileOffset, m_iNowFileSize);
 
@@ -480,6 +506,12 @@ int LogStore::RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
   string sLastFileID;
 
   uint64_t llNowInstanceID = 0;
+  // 这里从leveldb中取出max instance ID
+  // 以及这个max instance ID所对应的WAL LOG File ID
+  // 把取出的结果放到
+  // - sLastFileID -> 实际上这里包含fileID/offset,checksum三个值
+  // - llNowInstanceID
+  // 这两个变量里面
   int ret = poDatabase->GetMaxInstanceIDFileID(sLastFileID, llNowInstanceID);
   if (ret != 0) {
     return ret;
@@ -489,10 +521,13 @@ int LogStore::RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
   int iOffset = 0;
   uint32_t iCheckSum = 0;
 
+  // 从字符串中解析出file id, offset, checksum.
   if (sLastFileID.size() > 0) {
     ParseFileID(sLastFileID, iFileID, iOffset, iCheckSum);
   }
 
+  // 如果解析出来的file id比meta文件中的id还要大
+  // 那么这里应该是要报错
   if (iFileID > m_iFileID) {
     PLG1Err("LevelDB last fileid %d larger than meta now fileid %d, file error",
             iFileID, m_iFileID);
@@ -500,7 +535,8 @@ int LogStore::RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
   }
 
   PLG1Head("START fileid %d offset %d checksum %u", iFileID, iOffset, iCheckSum);
-
+  // 这里逐步向前递进
+  // 找到相应的最新的offset.
   for (int iNowFileID = iFileID; ; iNowFileID++) {
     ret = RebuildIndexForOneFile(iNowFileID, iOffset, poDatabase, iNowFileWriteOffset, llNowInstanceID);
     if (ret != 0 && ret != 1) {
@@ -522,11 +558,23 @@ int LogStore::RebuildIndex(Database * poDatabase, int & iNowFileWriteOffset) {
   return ret;
 }
 
-int LogStore::RebuildIndexForOneFile(const int iFileID, const int iOffset,
-                                       Database * poDatabase, int & iNowFileWriteOffset, uint64_t & llNowInstanceID) {
+// truncate()和ftruncate（）函数导致一个名称为path
+// 或者被文件描述符fd引用的常规文件被截断成一个大小精
+// 为length字节的文件。如果先前的文件大于这个大小，
+// 额外的数据丢失。如果先前的文件小于当前定义的大小，
+// 那么，这个文件将会被扩展，扩展的部分将补以null,也就是‘\0’。
+//  如果大小发生变化，那么这个st_ctime(访问时间)和st_mtime()
+// 修改时间将会被更新。使用ftruncate()，这个文件必须被
+// 打开用以写操作。使用truncate函数的文件必须能够被写。
+int LogStore::RebuildIndexForOneFile(const int iFileID,
+                                     const int iOffset,
+                                     Database * poDatabase,
+                                     int & iNowFileWriteOffset,
+                                     uint64_t & llNowInstanceID) {
+  // 这里根据文件的iFileID生成相应的路径
   char sFilePath[512] = {0};
   snprintf(sFilePath, sizeof(sFilePath), "%s/%d.f", m_sPath.c_str(), iFileID);
-
+  // 看看文件是否存在
   int ret = access(sFilePath, F_OK);
   if (ret == -1) {
     PLG1Debug("file not exist, filepath %s", sFilePath);
@@ -534,47 +582,60 @@ int LogStore::RebuildIndexForOneFile(const int iFileID, const int iOffset,
   }
 
   int iFd = -1;
+  // 打开文件
   ret = OpenFile(iFileID, iFd);
   if (ret != 0) {
     return ret;
   }
-
+  // 看看文件的长度
   int iFileLen = lseek(iFd, 0, SEEK_END);
+  // 如果文件的长度不对
   if (iFileLen == -1) {
     close(iFd);
     return -1;
   }
-
+  // 移动到offset位置
   off_t iSeekPos = lseek(iFd, iOffset, SEEK_SET);
   if (iSeekPos == -1) {
     close(iFd);
     return -1;
   }
-
+  // 当前的位置
   int iNowOffset = iOffset;
+  // 是否需要被截断
   bool bNeedTruncate = false;
 
   while (true) {
     int iLen = 0;
+    // 从offset开始读出一个int
     ssize_t iReadLen = read(iFd, (char *)&iLen, sizeof(int));
+    // 如果值为0，那么表示读到了文件的尾巴
     if (iReadLen == 0) {
       PLG1Head("File End, fileid %d offset %d", iFileID, iNowOffset);
       iNowFileWriteOffset = iNowOffset;
       break;
     }
-
+    // 如果读出来的长度与sizeof(int): 表示已经遇到末尾了
+    // 那么读到末尾的可能性：
+    // 1. 文件太小
+    // 不一样，那么需要truncate
+    // 这里可能会导致32位与64位不见兼容
+    // 最好是明确指明使用int32_t或者int64_t
     if (iReadLen != (ssize_t)sizeof(int)) {
       bNeedTruncate = true;
       PLG1Err("readlen %zd not qual to %zu, need truncate", iReadLen, sizeof(int));
       break;
     }
 
+    // 如果读出来的内容为0
+    // 那么退出
+    // iLen表示写入的数据的长度
     if (iLen == 0) {
       PLG1Head("File Data End, fileid %d offset %d", iFileID, iNowOffset);
       iNowFileWriteOffset = iNowOffset;
       break;
     }
-
+    // 如果写入的数据的长度比文件的长度还要长，那么肯定是出错了
     if (iLen > iFileLen || iLen < (int)sizeof(uint64_t)) {
       PLG1Err("File data len wrong, data len %d filelen %d",
               iLen, iFileLen);
@@ -582,6 +643,7 @@ int LogStore::RebuildIndexForOneFile(const int iFileID, const int iOffset,
       break;
     }
 
+    // 这里接着把iLen个byte的数据读出来
     m_oTmpBuffer.Ready(iLen);
     iReadLen = read(iFd, m_oTmpBuffer.GetPtr(), iLen);
     if (iReadLen != iLen) {
@@ -590,20 +652,39 @@ int LogStore::RebuildIndexForOneFile(const int iFileID, const int iOffset,
       break;
     }
 
-
+    // 从数据头里面取出intance id
     uint64_t llInstanceID = 0;
     memcpy(&llInstanceID, m_oTmpBuffer.GetPtr(), sizeof(uint64_t));
 
+    // 如果取出的instance id与前面leveldb中读出来的instance id
+    // 还小，那么肯定出问题了
+    // 因为这里取的是最新的file ID
+    // leveldb中记录的格式是：instance id -> <file_id, offset, checksum>
+    // 那么偏移到这个位置开始读的时候
+    // 肯定需要是读出来的instance id >= leveldb中读出业的instance id
     //InstanceID must be ascending order.
     if (llInstanceID < llNowInstanceID) {
+      // 这个时候出的错应该是属于逻辑错误!!
+      // 不truncate是为了重新trouble shooting?
       PLG1Err("File data wrong, read instanceid %lu smaller than now instanceid %lu",
               llInstanceID, llNowInstanceID);
       ret = -1;
       break;
     }
+    // 当更新当前的instance id
     llNowInstanceID = llInstanceID;
 
+    // 这里开始解析数据部分
+    // 也就是说wal log文件里面存放的是
+    // acceptor state data.
     AcceptorStateData oState;
+    // 如果解析的数据是无效的，那么直接把后面的内容
+    // truncate
+    // 所以wal log与level db的wal log设计是不一样的
+    // 在level db的设计中，只要某个条目不一样。
+    // 那么只需要跳过这个record就可以了。 后面的record还是可以继续工作
+    // 可能对于paxos来说，正确性的保证更加重要。所以这里直接扔掉/
+    // 并且后面的内容，万一没有，还可以从别的地方学习。
     bool bBufferValid = oState.ParseFromArray(m_oTmpBuffer.GetPtr() + sizeof(uint64_t), iLen - sizeof(uint64_t));
     if (!bBufferValid) {
       m_iNowFileOffset = iNowOffset;
@@ -612,25 +693,29 @@ int LogStore::RebuildIndexForOneFile(const int iFileID, const int iOffset,
       bNeedTruncate = true;
       break;
     }
-
+    // 这里检查check sum
     uint32_t iFileCheckSum = crc32(0, (const uint8_t *)m_oTmpBuffer.GetPtr(), iLen, CRC32SKIP);
 
     string sFileID;
+    // 这里重新生成<file id, offset, checksum> -> sFileID
     GenFileID(iFileID, iNowOffset, iFileCheckSum, sFileID);
-
+    // 把<instnace id, sFileID> 这个key/value存放到leveldb里面。
     ret = poDatabase->RebuildOneIndex(llInstanceID, sFileID);
+    // 如果出错，跳出去，但是并不会进行truncate.
     if (ret != 0) {
       break;
     }
 
     PLG1Imp("rebuild one index ok, fileid %d offset %d instanceid %lu checksum %u buffer size %zu",
             iFileID, iNowOffset, llInstanceID, iFileCheckSum, iLen - sizeof(uint64_t));
-
+    // 操作成功，那么继续向前移动
     iNowOffset += sizeof(int) + iLen;
-  }
+  } // end while (true);
 
   close(iFd);
 
+  // 是否需要截断?
+  // 如果需要，那么从这个位置开始，后面的内容都不要了。
   if (bNeedTruncate) {
     m_oFileLogger.Log("truncate fileid %d offset %d filesize %d",
                       iFileID, iNowOffset, iFileLen);

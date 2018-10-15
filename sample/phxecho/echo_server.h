@@ -45,7 +45,9 @@ class PhxEchoServer {
   phxpaxos::NodeInfo m_oMyNode;
   phxpaxos::NodeInfoList m_vecNodeList;
 
+  // 这里是真正的paxos node.
   phxpaxos::Node * m_poPaxosNode;
+  // phxpaxos 的状态机
   PhxEchoSM m_oEchoSM;
 };
 

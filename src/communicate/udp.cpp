@@ -53,20 +53,23 @@ void UDPRecv::Stop() {
 }
 
 int UDPRecv::Init(const int iPort) {
+  // 生成udp句柄
   if ((m_iSockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     return -1;
   }
-
+  // 指定地址
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
-
+  // 开始设置参数
   addr.sin_family = AF_INET;
   addr.sin_port = htons(iPort);
+  // 设置地址为ANY
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
   int enable = 1;
+  // 设置端口可重用
   setsockopt(m_iSockFD, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-
+  // 把端口绑定在addr上
   if (bind(m_iSockFD, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     return -1;
   }

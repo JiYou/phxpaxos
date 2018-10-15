@@ -37,6 +37,11 @@ void DFNetWork::StopNetWork() {
   m_oTcpIOThread.Stop();
 }
 
+// 缺省网络模块的初始化
+// 做了三个工作
+// - UDP发送服务
+// - UDP接收服务
+// - TCP服务
 int DFNetWork::Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
   int ret = m_oUDPSend.Init();
   if (ret != 0) {
