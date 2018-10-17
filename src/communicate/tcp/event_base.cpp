@@ -56,7 +56,8 @@ void Event::AddEvent(const int iEvents) {
   if (m_iEvents == iBeforeEvent) {
     return;
   }
-
+  // 这里通过
+  // epoll_ctl把事件添加进去
   m_poEventLoop->ModEvent(this, m_iEvents);
 }
 

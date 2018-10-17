@@ -48,6 +48,9 @@ class TcpAcceptor : public Thread {
 
  private:
   ServerSocket m_oSocket;
+  // 在DefaultNetwork::Init()->IOThread::Init()中会生成很多
+  // EventLoop对象
+  // 这里面存放的就是前面EventLoop对象。
   std::vector<EventLoop *> m_vecEventLoop;
 
  private:

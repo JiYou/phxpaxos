@@ -28,6 +28,13 @@ See the AUTHORS file for names of contributors.
 namespace phxpaxos {
 
 MasterStateMachine::MasterStateMachine(
+  // 常量指针
+  // 实际上就是指向log storage
+  // 通过log store访问leveldb
+  // 然后从leveldb中拿信息
+  // 一个疑问就是，即然是常量指针，那么leveldb如何能够
+  // get/put值呢？
+  // 这是因为在m_oMVStore里面，强制将指针转换成了非常量类型
   const LogStorage * poLogStorage,
   const nodeid_t iMyNodeID,
   const int iGroupIdx,
@@ -35,12 +42,12 @@ MasterStateMachine::MasterStateMachine(
   : m_oMVStore(poLogStorage), m_pMasterChangeCallback(pMasterChangeCallback) {
   m_iMyGroupIdx = iGroupIdx;
   m_iMyNodeID = iMyNodeID;
-
   m_iMasterNodeID = nullnode;
+  // 一开始设置一个最大值
   m_llMasterVersion = (uint64_t)-1;
+  // 这里的leaseTime并没有像master一样设置为10000
   m_iLeaseTime = 0;
   m_llAbsExpireTime = 0;
-
 }
 
 MasterStateMachine::~MasterStateMachine() {

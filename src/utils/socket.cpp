@@ -522,6 +522,9 @@ void ServerSocket::listen(const SocketAddress& addr, int backlog) {
   // 这里应该是处理原来还打开着的接口。
   if (_handle == -1 || _family != addr.getFamily()) {
     close();
+    // 实际上就是
+    // _handle = ::socket(family, SOCK_STREAM, 0);
+    // 生成TCP FD
     initHandle(addr.getFamily());
   }
 
@@ -529,17 +532,19 @@ void ServerSocket::listen(const SocketAddress& addr, int backlog) {
     throw SocketException("bad handle");
   }
 
+  // 如果是unix
   if (addr.getFamily() == AF_UNIX) {
     ::unlink(localAddr.un.sun_path);
   } else {
+    // 如果不是，那么设置reuse
     int reuse = 1;
     setOption(SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
   }
-
+  // 开始绑定
   if (::bind(_handle, &localAddr.addr, SocketAddress::getAddressLength(localAddr)) == -1) {
     throw SocketException("bind error");
   }
-
+  // 开始监听
   if (::listen(_handle, backlog) == -1) {
     throw SocketException("listen error");
   }

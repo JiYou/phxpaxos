@@ -137,11 +137,14 @@ int TcpIOThread::Init(const std::string & sListenIp,
     assert(poTcpWrite != nullptr);
     m_vecTcpWrite.push_back(poTcpWrite);
   }
-
+  
+  // 这个函数经过层层包裹，实际上要完成的功能就是
+  // 绑定并且开始监听TCP端口的经曲操作。
   m_oTcpAcceptor.Listen(sListenIp, iListenPort);
   int ret = -1;
 
   for (auto & poTcpRead : m_vecTcpRead) {
+    // 每个线程都会创建epoll_fd
     ret = poTcpRead->Init();
     if (ret != 0) {
       return ret;

@@ -26,14 +26,20 @@ See the AUTHORS file for names of contributors.
 namespace phxpaxos {
 
 MasterMgr::MasterMgr(
+  // 指向PNode
   const Node * poPaxosNode,
+  // 属于哪个PaxosGroup
   const int iGroupIdx,
+  // wal log
   const LogStorage * poLogStorage,
+  // 回调函数
   MasterChangeCallback pMasterChangeCallback)
   : m_oDefaultMasterSM(poLogStorage, poPaxosNode->GetMyNodeID(), iGroupIdx, pMasterChangeCallback) {
+  // 这个是什么时间单位？
   m_iLeaseTime = 10000;
-
+  // 指向的PaxosNode
   m_poPaxosNode = (Node *)poPaxosNode;
+  // 当前所在的group index
   m_iMyGroupIdx = iGroupIdx;
 
   m_bIsEnd = false;

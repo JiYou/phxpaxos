@@ -53,15 +53,17 @@ void EventLoop::SetTcpClient(TcpClient * poTcpClient) {
 }
 
 int EventLoop::Init(const int iEpollLength) {
+  // iEpollLength是需要监听的fd的数目
   m_iEpollFd = epoll_create(iEpollLength);
+  // 如果创建失败
   if (m_iEpollFd == -1) {
     PLErr("epoll_create fail, ret %d", m_iEpollFd);
     return -1;
   }
-
+  // Notify就是个pipe
   m_poNotify = new Notify(this);
   assert(m_poNotify != nullptr);
-
+  // 初始化linux pipe
   int ret = m_poNotify->Init();
   if (ret != 0) {
     return ret;
