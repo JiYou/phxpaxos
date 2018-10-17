@@ -230,8 +230,16 @@ int PNode::Init(const Options & oOptions, NetWork *& poNetWork) {
   }
 
   //step3 build masterlist
+  // 这段代码会为每个group建一个mastermgr
+  // 这里在初始化的时候，主要是把每个
+  // group index对应的master的store配置好。
+  // 实际上也就是去读levelDB,
+  // 从LevelDB中读出master node id
+  // 如果master id是别人，就设置master node = 其他人的ID，并且设置一个超时时间
+  // 否则认为是自己，清空超时时间
   for (int iGroupIdx = 0; iGroupIdx < oOptions.iGroupCount; iGroupIdx++) {
-    MasterMgr * poMaster = new MasterMgr(this, iGroupIdx, poLogStorage, oOptions.pMasterChangeCallback);
+    MasterMgr * poMaster = new MasterMgr(this,
+            iGroupIdx, poLogStorage, oOptions.pMasterChangeCallback);
     assert(poMaster != nullptr);
     m_vecMasterList.push_back(poMaster);
 
@@ -243,7 +251,13 @@ int PNode::Init(const Options & oOptions, NetWork *& poNetWork) {
 
   //step4 build grouplist
   for (int iGroupIdx = 0; iGroupIdx < oOptions.iGroupCount; iGroupIdx++) {
-    Group * poGroup = new Group(poLogStorage, poNetWork, m_vecMasterList[iGroupIdx]->GetMasterSM(), iGroupIdx, oOptions);
+    Group * poGroup = new Group(
+      poLogStorage,
+      poNetWork,
+      m_vecMasterList[iGroupIdx]->GetMasterSM(),
+      iGroupIdx,
+      oOptions
+    );
     assert(poGroup != nullptr);
     m_vecGroupList.push_back(poGroup);
   }

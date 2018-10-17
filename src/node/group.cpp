@@ -29,12 +29,32 @@ Group::Group(LogStorage * poLogStorage,
                InsideSM * poMasterSM,
                const int iGroupIdx,
                const Options & oOptions) :
-  m_oCommunicate(&m_oConfig, oOptions.oMyNode.GetNodeID(), oOptions.iUDPMaxSize, poNetWork),
-  m_oConfig(poLogStorage, oOptions.bSync, oOptions.iSyncInterval, oOptions.bUseMembership,
-            oOptions.oMyNode, oOptions.vecNodeInfoList, oOptions.vecFollowerNodeInfoList,
-            iGroupIdx, oOptions.iGroupCount, oOptions.pMembershipChangeCallback),
-  m_oInstance(&m_oConfig, poLogStorage, &m_oCommunicate, oOptions),
-  m_iInitRet(-1), m_poThread(nullptr) {
+  m_oCommunicate(
+    &m_oConfig,
+    oOptions.oMyNode.GetNodeID(),
+    oOptions.iUDPMaxSize, poNetWork
+  ),
+  m_oConfig(
+    poLogStorage,
+    oOptions.bSync,
+    oOptions.iSyncInterval,
+    oOptions.bUseMembership,
+    oOptions.oMyNode,
+    oOptions.vecNodeInfoList,
+    oOptions.vecFollowerNodeInfoList,
+    iGroupIdx,
+    oOptions.iGroupCount,
+    oOptions.pMembershipChangeCallback
+  ),
+  m_oInstance(
+    &m_oConfig,
+    poLogStorage,
+    &m_oCommunicate,
+    oOptions
+  ),
+  m_iInitRet(-1),
+  m_poThread(nullptr) {
+  // begin
   m_oConfig.SetMasterSM(poMasterSM);
 }
 

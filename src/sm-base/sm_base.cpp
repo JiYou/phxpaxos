@@ -35,9 +35,15 @@ SMFac::SMFac(const int iMyGroupIdx) : m_iMyGroupIdx(iMyGroupIdx) {
 SMFac::~SMFac() {
 }
 
-bool SMFac::Execute(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sPaxosValue, SMCtx * poSMCtx) {
+bool SMFac::Execute(const int iGroupIdx,
+                    const uint64_t llInstanceID,
+                    const std::string & sPaxosValue,
+                    SMCtx * poSMCtx) {
   if (sPaxosValue.size() < sizeof(int)) {
-    PLG1Err("Value wrong, instanceid %lu size %zu", llInstanceID, sPaxosValue.size());
+    PLG1Err("Value wrong, instanceid %lu size %zu",
+            llInstanceID,
+            sPaxosValue.size()
+    );
     //need do nothing, just skip
     return true;
   }

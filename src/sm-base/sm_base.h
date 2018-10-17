@@ -32,15 +32,27 @@ class BatchSMCtx {
   std::vector<SMCtx *> m_vecSMCtxList;
 };
 
+// 这是一个StateMachine集合
+// 从类名上来说，取名叫StateMachineSet
+// 可能更加好一点。
+// 先说一下为什么会有这个类。因为在phxpaxos的设计里面
+// 每个paxos group是可以挂载多个StateMachine的。
+// 所以SMFac对应的是一个paxos的情况。
+// 由于一个paxos group对应多个StateMachine
+// 所以这里用了一个vector来存放。
 class SMFac {
  public:
   SMFac(const int iMyGroupIdx);
   ~SMFac();
+  // 
+  bool Execute(const int iGroupIdx,
+               const uint64_t llInstanceID,
+               const std::string & sPaxosValue,
+               SMCtx * poSMCtx);
 
-  bool Execute(const int iGroupIdx, const uint64_t llInstanceID,
-               const std::string & sPaxosValue, SMCtx * poSMCtx);
-
-  bool ExecuteForCheckpoint(const int iGroupIdx, const uint64_t llInstanceID, const std::string & sPaxosValue);
+  bool ExecuteForCheckpoint(const int iGroupIdx,
+                            const uint64_t llInstanceID,
+                            const std::string & sPaxosValue);
 
   void PackPaxosValue(std::string & sPaxosValue, const int iSMID = 0);
 
