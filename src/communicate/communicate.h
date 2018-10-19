@@ -29,6 +29,9 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
+// 消息转输
+// 按理说，这里是没有必要再抽象一层了
+// 网络传输应该只需要一层网络抽象就可以了。
 class Communicate : public MsgTransport {
  public:
   Communicate(

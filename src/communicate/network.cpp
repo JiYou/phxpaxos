@@ -28,6 +28,7 @@ namespace phxpaxos {
 NetWork::NetWork() : m_poNode(nullptr) {
 }
 
+// 这个函数比较简单，只是简单地将消息交给PNode::OnRecieveMessage()来处理。
 int NetWork::OnReceiveMessage(const char * pcMessage, const int iMessageLen) {
   if (m_poNode != nullptr) {
     m_poNode->OnReceiveMessage(pcMessage, iMessageLen);

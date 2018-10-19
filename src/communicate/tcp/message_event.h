@@ -45,8 +45,11 @@ class MessageEvent : public Event {
  public:
   MessageEvent(
     const int Type,
+    // 注意fd
     const int fd,
+    // C语言的socket的包装
     const SocketAddress & oAddr,
+    // 绑定的EventLoop
     EventLoop * poEventLoop,
     NetWork * poNetWork);
   ~MessageEvent();
@@ -57,12 +60,14 @@ class MessageEvent : public Event {
 
   const std::string & GetSocketHost();
 
+  // 读消息的处理
   int OnRead();
 
+  // 写消息的处理
   int OnWrite();
 
+  // 超时与出错
   void OnTimeout(const uint32_t iTimerID, const int iType);
-
   void OnError(bool & bNeedDelete);
 
   void OpenWrite();

@@ -31,12 +31,19 @@ namespace phxpaxos {
 class EventLoop;
 class NetWork;
 
+// 也是Thread的子类
+// 实际上这个类就
+// 手里有一大把的Vector<EventLoop>
+// 当新来一个链接的时候
+// 就把这个accept链接拿出来。然后扔到
+// 链表数最少的EventLoop里面。
 class TcpAcceptor : public Thread {
  public:
   TcpAcceptor();
   ~TcpAcceptor();
 
-  void Listen(const std::string & sListenIP, const int iListenPort);
+  void Listen(const std::string & sListenIP,
+              const int iListenPort);
 
   void run();
 
@@ -51,6 +58,7 @@ class TcpAcceptor : public Thread {
   // 在DefaultNetwork::Init()->IOThread::Init()中会生成很多
   // EventLoop对象
   // 这里面存放的就是前面EventLoop对象。
+  // 每个Thread一个EventLoop.
   std::vector<EventLoop *> m_vecEventLoop;
 
  private:

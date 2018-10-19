@@ -51,6 +51,10 @@ void Event::JumpoutEpollWait() {
 }
 
 void Event::AddEvent(const int iEvents) {
+  // 在初始化的时候，m_iEvents = 0
+  // 所以，如果第一次过来指定了EPOLLIN
+  // 那么这里就会通过epoll添加进去
+  // 如果处理之后，标志位还是一样的，那么这里就不用再去修改了。
   int iBeforeEvent = m_iEvents;
   m_iEvents |= iEvents;
   if (m_iEvents == iBeforeEvent) {
@@ -58,10 +62,14 @@ void Event::AddEvent(const int iEvents) {
   }
   // 这里通过
   // epoll_ctl把事件添加进去
+  // 并且把fd与event添加到map中。
+  // 绕一圈再跑回来
+  // EventLoop::CreateEvent()会调用这个
   m_poEventLoop->ModEvent(this, m_iEvents);
 }
 
 void Event::RemoveEvent(const int iEvents) {
+  // 这里去掉相应的标志位
   int iBeforeEvent = m_iEvents;
   m_iEvents &= (~iEvents);
   if (m_iEvents == iBeforeEvent) {

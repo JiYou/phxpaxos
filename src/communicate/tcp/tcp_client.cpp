@@ -26,6 +26,9 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
+// 发送消息也会使用到Network引用？
+// TcpClient::CreateEvent中会使用。
+// 然后在相应的MessageEvent::ReadDone会用到这个缺省的网络。
 TcpClient::TcpClient(EventLoop * poEventLoop, NetWork * poNetWork)
   : m_poEventLoop(poEventLoop), m_poNetWork(poNetWork) {
   m_vecEvent.reserve(1000);
@@ -71,6 +74,9 @@ MessageEvent * TcpClient::CreateEvent(const uint64_t llNodeID, const std::string
   SocketAddress oAddr(sIP, iPort);
   oSocket.connect(oAddr);
 
+  // m_poNetWork 只会用到生成MessageEvent的时候
+  // MessageEvent::ReadDone()
+  // 里面会把读完的消息扔到DefaultNetwork->OnRecieveMessage()中进行处理
   MessageEvent * poEvent = new MessageEvent(MessageEventType_SEND, oSocket.detachSocketHandle(),
       oAddr, m_poEventLoop, m_poNetWork);
   assert(poEvent != nullptr);

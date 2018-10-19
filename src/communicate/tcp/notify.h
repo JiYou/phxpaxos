@@ -28,6 +28,9 @@ namespace phxpaxos {
 
 class EventLoop;
 
+// 基于Event的通知
+// 这里就是开两个fd，然后fd[0]放到epoll_ctl
+// 里面管起来。
 class Notify : public Event {
  public:
   Notify(EventLoop * poEventLoop);

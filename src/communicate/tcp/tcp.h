@@ -35,7 +35,7 @@ class TcpRead : public Thread {
 
   int Init();
 
-  void run();
+  void Run();
 
   void Stop();
 
@@ -58,10 +58,14 @@ class TcpWrite : public Thread {
 
   void Stop();
 
+  // 利用TcpClient将消息发送出去
+  // TcpClient发送消息的时候，会通过EventLoop将消息AddMessage
   int AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage);
 
  private:
-  TcpClient m_oTcpClient;
+  // TcpWrite就是一个发送消息方。所以需要一个TcpClient端来发送消息。
+  // 而TcpWrite主要是一个包装类，里面也是包含了一下EventLoop.
+  TcpClient m_oTcpClient; // ? 这个的作用是什么？
   EventLoop m_oEventLoop;
 };
 
@@ -79,8 +83,15 @@ class TcpIOThread {
   int AddMessage(const int iGroupIdx, const std::string & sIP, const int iPort, const std::string & sMessage);
 
  private:
+  // 当接收到消息之后，仍然需要通过Network->OnRecieveMessage()
+  // 来处理消息
+  // 所以这里也需要有一个Netowrk的指针
+  // 所以在构建TcpIOThread的时候，也是需要传入一个DefaultNetwork的指针
+  // 在DefaultNetwork的构造函数里面会TcpIOThread(this)来构造。
   NetWork * m_poNetWork;
+  // Acceptor专门用来处理系统发过来的accept请求。
   TcpAcceptor m_oTcpAcceptor;
+  // 分别处理TcpRead/TcpWrite
   std::vector<TcpRead *> m_vecTcpRead;
   std::vector<TcpWrite *> m_vecTcpWrite;
   bool m_bIsStarted;

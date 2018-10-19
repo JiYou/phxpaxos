@@ -61,7 +61,7 @@ class Event {
   void RemoveTimer(const uint32_t iTimerID);
 
  protected:
-  int m_iEvents;
+  int m_iEvents; // 这里用来记录fd历史上对应的event
   EventLoop * m_poEventLoop;
 
   bool m_bIsDestroy;

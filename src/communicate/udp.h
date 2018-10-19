@@ -32,8 +32,17 @@ class UDPRecv : public Thread {
   UDPRecv(DFNetWork * poDFNetWork);
   ~UDPRecv();
 
+  // 对于UCP而言，只需要知道自己接收的端口就可以了。
+  // 对于绑定的地址是ANY
+  // 基本步骤是：创建 fd = socket()
+  // 设置地址
+  // bind地址到fd
   int Init(const int iPort);
 
+  // 这个函数就是不断调用recvfrom
+  // while (true) {
+  //     recvfrom(fd, buffer, buffer_size, ) 
+  // }
   void run();
 
   void Stop();

@@ -25,6 +25,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
+// 这里实际上就是利用Network在发消息
 Communicate::Communicate(
   const Config * poConfig,
   const nodeid_t iMyNodeID,

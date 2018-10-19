@@ -65,6 +65,7 @@ const std::string & Notify::GetSocketHost() {
   return m_sHost;
 }
 
+// 写就是从fd[1]里面写
 void Notify::SendNotify() {
   ssize_t iWriteLen = write(m_iPipeFD[1], (void *)"a", 1);
   if (iWriteLen != 1) {
@@ -72,6 +73,7 @@ void Notify::SendNotify() {
   }
 }
 
+// 读也是从fd[0]里面读
 int Notify::OnRead() {
   char sTmp[2] = {0};
   int iReadLen = read(m_iPipeFD[0], sTmp, 1);

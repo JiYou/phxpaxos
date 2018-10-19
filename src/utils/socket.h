@@ -33,6 +33,9 @@ namespace phxpaxos {
 
 using std::string;
 
+// 所有的这些Socket抽象类，感觉有点抽象过度
+// 不太有必要的。
+// 一大堆的get/set，那就应该用struct.
 //////////////////////////////////////////////////////////////////SocketAddress
 
 class SocketAddress {
@@ -43,6 +46,12 @@ class SocketAddress {
     TYPE_OUTER = 3
   };
 
+  // 由于这个类型里面有三种类型
+  // 所以下面提供了非常多的addr类型
+  // 个人觉得是没有必要的。
+  // 只需要
+  // SocketAddress(SocketAddress::Addr &addr) { }
+  // GetAddress ... 什么的也只使用Addr类就可以了。
   union Addr {
     sockaddr addr;
     sockaddr_in in;
@@ -106,6 +115,9 @@ class SocketAddress {
 
 ///////////////////////////////////////////////////////////////////////Socket
 
+// 各种抽象出来的socket的操作类
+// 比如设置协议种类
+// 设置block/non-block
 class SocketBase {
  public:
   SocketBase();
@@ -197,6 +209,7 @@ class Socket : public SocketBase {
 
 ///////////////////////////////////////////////////////////////////////ServerSocket
 
+// 专门服务于Server的socket.
 class ServerSocket : public SocketBase {
  public:
   ServerSocket();

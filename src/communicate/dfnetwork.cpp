@@ -42,12 +42,22 @@ void DFNetWork::StopNetWork() {
 // - UDP发送服务
 // - UDP接收服务
 // - TCP服务
-int DFNetWork::Init(const std::string & sListenIp, const int iListenPort, const int iIOThreadCount) {
+// iIIOThreadCount是通过Options.iIOThreadCount来进行控制的
+// 与group index没有关系。
+int DFNetWork::Init(const std::string & sListenIp,
+                    const int iListenPort,
+                    const int iIOThreadCount) {
+  // 发送方的Init
+  // 就是建一个socket fd
+  // socket(AF_INET, SOCK_DGRAM, 0))
   int ret = m_oUDPSend.Init();
   if (ret != 0) {
     return ret;
   }
 
+  // 接收方还需要建socket
+  // 设置地址
+  // bind开始见听
   ret = m_oUDPRecv.Init(iListenPort);
   if (ret != 0) {
     return ret;
@@ -63,16 +73,27 @@ int DFNetWork::Init(const std::string & sListenIp, const int iListenPort, const 
 }
 
 void DFNetWork::RunNetWork() {
+  // 这三个类是Thread的子类
+  // Thread类中有一个Start函数。这个函数会调用
+  // 每个子类的Run()函数。
+  // 所以这里相当于是启动了这些独立的线程。
+  // 后面可以考虑一下如果用libco来处理可以怎么处理。
   m_oUDPSend.start();
   m_oUDPRecv.start();
   m_oTcpIOThread.Start();
 }
 
-int DFNetWork::SendMessageTCP(const int iGroupIdx, const std::string & sIp, const int iPort, const std::string & sMessage) {
+int DFNetWork::SendMessageTCP(const int iGroupIdx,
+                              const std::string & sIp,
+                              const int iPort,
+                              const std::string & sMessage) {
   return m_oTcpIOThread.AddMessage(iGroupIdx, sIp, iPort, sMessage);
 }
 
-int DFNetWork::SendMessageUDP(const int iGroupIdx, const std::string & sIp, const int iPort, const std::string & sMessage) {
+int DFNetWork::SendMessageUDP(const int iGroupIdx,
+                              const std::string & sIp,
+                              const int iPort,
+                              const std::string & sMessage) {
   return m_oUDPSend.AddMessage(sIp, iPort, sMessage);
 }
 

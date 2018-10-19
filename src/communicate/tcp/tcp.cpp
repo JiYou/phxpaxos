@@ -24,8 +24,14 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
+// TcpRead主要的事情都是交给EventLoop来处理了
+// 在构造函数中这里需要将接收到的消息交给DefaultNetwork处理。
+// TcpRead就是EventLoop的一个包装,本质上来说，也就是在初始化的时候
+// 设置了一个20480的初始值。
 TcpRead::TcpRead(NetWork * poNetWork)
   : m_oEventLoop(poNetWork) {
+  // 这里是TcpRead，不需要用TcpClient发消息
+  // 所以这里的EventLoop是没有TcpClient == nullptr
 }
 
 TcpRead::~TcpRead() {
@@ -53,7 +59,12 @@ EventLoop * TcpRead::GetEventLoop() {
 ////////////////////////////////////////////////////////
 
 TcpWrite::TcpWrite(NetWork * poNetWork)
+  // 这里将自己的eventLoop指针给了TcpClient.
+  // EventLoop里面会使用到pNetwork.
   : m_oTcpClient(&m_oEventLoop, poNetWork), m_oEventLoop(poNetWork) {
+  // EventLoop中有一个TcpClient指针，
+  // 如果设置了，那么在收到消息的时候，就会调用。
+  // 如果没有设置，那么收到消息就不会调用TcpClient->DealWithWrite()
   m_oEventLoop.SetTcpClient(&m_oTcpClient);
 }
 
@@ -78,6 +89,9 @@ void TcpWrite::Stop() {
 int TcpWrite::AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
   return m_oTcpClient.AddMessage(sIP, iPort, sMessage);
 }
+
+// EventLoop * TcpRead::GetEventLoop() 这里只有TcpRead有。但是TcpWrite没有。
+
 
 ////////////////////////////////////////////////////////
 

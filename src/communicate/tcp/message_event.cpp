@@ -368,6 +368,8 @@ void MessageEvent::OnError(bool & bNeedDelete) {
   }
 }
 
+// 当消息Event连接超时的时候，如果需要重新连接
+// 那么这里直接选择重链
 void MessageEvent::OnTimeout(const uint32_t iTimerID, const int iType) {
   if (iTimerID != m_iReconnectTimeoutID) {
     return;
@@ -386,10 +388,11 @@ void MessageEvent::ReConnect() {
   m_iLeftWriteLen = 0;
   m_iLastWritePos = 0;
 
-  m_oSocket.reset();
+  m_oSocket.reset(); // 把原来的socket_fd close, 然后再重新call socket();
   m_oSocket.setNonBlocking(true);
   m_oSocket.setNoDelay(true);
-  m_oSocket.connect(m_oAddr);
+  m_oSocket.connect(m_oAddr); // 重新连上去
+  // 这里设置要抓的是写的消息。
   AddEvent(EPOLLOUT);
 
   PLErr("start, ip %s", GetSocketHost().c_str());

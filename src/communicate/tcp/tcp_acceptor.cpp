@@ -61,6 +61,7 @@ void TcpAcceptor::run() {
     struct pollfd pfd;
     int ret;
 
+    // 为什么这里用poll而不是用epoll
     pfd.fd =  m_oSocket.getSocketHandle();
     pfd.events = POLLIN;
     ret = poll(&pfd, 1, 500);
@@ -69,6 +70,7 @@ void TcpAcceptor::run() {
       SocketAddress oAddr;
       int fd = -1;
       try {
+        // 接收到新链接
         fd = m_oSocket.acceptfd(&oAddr);
       } catch(...) {
         fd = -1;
@@ -80,6 +82,8 @@ void TcpAcceptor::run() {
         PLImp("accepted!, fd %d ip %s port %d",
               fd, oAddr.getHost().c_str(), oAddr.getPort());
 
+        // 调用自己的AddEvent函数
+        // 找个工作最轻松的线程，然后把链接扔过去。
         AddEvent(fd, oAddr);
       }
     }
@@ -99,6 +103,7 @@ void TcpAcceptor::AddEvent(int iFD, SocketAddress oAddr) {
   EventLoop * poMinActiveEventLoop = nullptr;
   int iMinActiveEventCount = 1 << 30;
 
+  // 每次找最小的出来
   for (auto & poEventLoop : m_vecEventLoop) {
     int iActiveCount = poEventLoop->GetActiveEventCount();
     if (iActiveCount < iMinActiveEventCount) {
