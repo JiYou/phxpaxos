@@ -146,22 +146,33 @@ bool Proposer::IsWorking() {
   return m_bIsPreparing || m_bIsAccepting;
 }
 
+// 这里开始准备propose新的提议
 int Proposer::NewValue(const std::string & sValue) {
   BP->GetProposerBP()->NewProposal(sValue);
 
+  // 如果当前这个propose的状态里面，值还没有确定。
+  // 那么就设置为调用者的值
+  // 否则就是使用propose状态里面的旧值。
   if (m_oProposerState.GetValue().size() == 0) {
     m_oProposerState.SetValue(sValue);
   }
-
+  // prepare timeout
   m_iLastPrepareTimeoutMs = START_PREPARE_TIMEOUTMS;
+  // accept timeout
   m_iLastAcceptTimeoutMs = START_ACCEPT_TIMEOUTMS;
 
+  // 如果可以跳过prepare
+  // 并且没有被其他的节点拒绝过
+  // 那么就直接走到accept阶段
+  // . 本节点之前已经执行过Prepare阶段，并且Prepare阶段的执行结果为Accept。
+  // 要满瞳这个条件才可以跳过prepare
   if (m_bCanSkipPrepare && !m_bWasRejectBySomeone) {
     BP->GetProposerBP()->NewProposalSkipPrepare();
 
     PLGHead("skip prepare, directly start accept");
     Accept();
   } else {
+    // 如果没有被人拒绝过，那么就没有必要自增编号
     //if not reject by someone, no need to increase ballot
     Prepare(m_bWasRejectBySomeone);
   }
@@ -254,10 +265,27 @@ void Proposer::Prepare(const bool bNeedNewBallot) {
   m_bCanSkipPrepare = false;
   m_bWasRejectBySomeone = false;
 
+  // 这里是把m_oProposerState里面的
+  // m_oHighestOtherPreAcceptBallot
+  // m_llProposalID nodeID都设置为0
+  // struct ProposerState {
+  //   uint64_t m_llProposalID;             // 后面自己要使用的编号
+  //   uint64_t m_llHighestOtherProposalID; // 已知的acceptor的最大编号
+  //   std::string m_sValue;
+  //   BallotNumber m_oHighestOtherPreAcceptBallot;
+  // }
+  // 因为这里要开始新的prepare
+  // 之前拿到的其他节点的结果都不能再使用了。
+  // 所以直接清空。
   m_oProposerState.ResetHighestOtherPreAcceptBallot();
   if (bNeedNewBallot) {
+    // uint64_t llMaxProposalID = std::max(m_llProposalID, m_llHighestOtherProposalID);
+    // m_llProposalID = llMaxProposalID + 1;
     m_oProposerState.NewPrepare();
   }
+  // 如果不生成新的balllot
+  // 那么m_oProposerState.m_llProposalID就没有任何更改
+
 
   PaxosMsg oPaxosMsg;
   oPaxosMsg.set_msgtype(MsgType_PaxosPrepare);
@@ -265,12 +293,16 @@ void Proposer::Prepare(const bool bNeedNewBallot) {
   oPaxosMsg.set_nodeid(m_poConfig->GetMyNodeID());
   oPaxosMsg.set_proposalid(m_oProposerState.GetProposalID());
 
+  // 接收到消息的各种状态直接清空
+  // 比如记录了哪些投了赞成票
+  // 哪些投了拒绝票
   m_oMsgCounter.StartNewRound();
 
+  // 这里生成一个定时器
   AddPrepareTimer();
 
   PLGHead("END OK");
-
+  // 开始广播消息给其他各个结点
   BroadcastMessage(oPaxosMsg);
 }
 
@@ -281,31 +313,54 @@ void Proposer::OnPrepareReply(const PaxosMsg & oPaxosMsg) {
 
   BP->GetProposerBP()->OnPrepareReply();
 
+  // 还处在preparing队段不？
+  // 当收到这个消息的时候，有可能已经走到下一步了
+  // 因为消息来得实在是太慢了。
+  // 所以这里直接丢弃这个消息。
   if (!m_bIsPreparing) {
     BP->GetProposerBP()->OnPrepareReplyButNotPreparing();
     //PLGErr("Not preparing, skip this msg");
     return;
   }
 
+  // 如果id也不是想要等来的id
+  // 丢弃之
   if (oPaxosMsg.proposalid() != m_oProposerState.GetProposalID()) {
     BP->GetProposerBP()->OnPrepareReplyNotSameProposalIDMsg();
     //PLGErr("ProposalID not same, skip this msg");
     return;
   }
 
+  // 合法的消息
+  // 接收之
   m_oMsgCounter.AddReceive(oPaxosMsg.nodeid());
 
+  // 如果收到的不是拒绝信息
+  // 也就是对方表示将对这个编号进行处理
   if (oPaxosMsg.rejectbypromiseid() == 0) {
+    // 取出其中的Ballot信息
     BallotNumber oBallot(oPaxosMsg.preacceptid(), oPaxosMsg.preacceptnodeid());
     PLGDebug("[Promise] PreAcceptedID %lu PreAcceptedNodeID %lu ValueSize %zu",
              oPaxosMsg.preacceptid(), oPaxosMsg.preacceptnodeid(), oPaxosMsg.value().size());
+    // 计数点头的人的数目
     m_oMsgCounter.AddPromiseOrAccept(oPaxosMsg.nodeid());
+    // 添加预Accept的值
+    // 记录将要达到一致的值
+    // 如查有的话
+    // 用来给下一步的Accept用
     m_oProposerState.AddPreAcceptValue(oBallot, oPaxosMsg.value());
   } else {
+    // 不好意思，被拒了
     PLGDebug("[Reject] RejectByPromiseID %lu", oPaxosMsg.rejectbypromiseid());
+    // 统计被拒绝的计数
     m_oMsgCounter.AddReject(oPaxosMsg.nodeid());
     m_bWasRejectBySomeone = true;
+    // 记录对方的最大的proposal ID
     m_oProposerState.SetOtherProposalID(oPaxosMsg.rejectbypromiseid());
+    // 注意这里拒绝信息可以用来帮助选择下一次的投票编号
+    // 这里回过头去看经典的算法
+    // 在经典的算法中是没有收到拒信这一个说法的。
+    // acceptor在收到一个比自己允诺的编号要小的ballot id的时候，是直接忽略。
   }
 
   if (m_oMsgCounter.IsPassedOnThisRound()) {

@@ -61,6 +61,9 @@ EventLoop * TcpRead::GetEventLoop() {
 TcpWrite::TcpWrite(NetWork * poNetWork)
   // 这里将自己的eventLoop指针给了TcpClient.
   // EventLoop里面会使用到pNetwork.
+  // !! 注意：m_oEventLoop(poNetWork)是用来初始化EventLoop的构造函数的
+  // 不是说让m_oEventLoop = poNetWork;
+  // TcpClient引用TcpWrite的EventLoop.
   : m_oTcpClient(&m_oEventLoop, poNetWork), m_oEventLoop(poNetWork) {
   // EventLoop中有一个TcpClient指针，
   // 如果设置了，那么在收到消息的时候，就会调用。
@@ -86,7 +89,9 @@ void TcpWrite::Stop() {
   PLHead("TcpWriteThread [END]");
 }
 
-int TcpWrite::AddMessage(const std::string & sIP, const int iPort, const std::string & sMessage) {
+int TcpWrite::AddMessage(const std::string & sIP,
+                         const int iPort,
+                         const std::string & sMessage) {
   return m_oTcpClient.AddMessage(sIP, iPort, sMessage);
 }
 
@@ -188,7 +193,10 @@ void TcpIOThread::Start() {
   m_bIsStarted = true;
 }
 
-int TcpIOThread::AddMessage(const int iGroupIdx, const std::string & sIP, const int iPort, const std::string & sMessage) {
+int TcpIOThread::AddMessage(const int iGroupIdx,
+                            const std::string & sIP,
+                            const int iPort,
+                            const std::string & sMessage) {
   int iIndex = iGroupIdx % (int)m_vecTcpWrite.size();
   return m_vecTcpWrite[iIndex]->AddMessage(sIP, iPort, sMessage);
 }

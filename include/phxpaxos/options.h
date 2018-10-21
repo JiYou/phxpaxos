@@ -77,6 +77,8 @@ typedef std::vector<FollowerNodeInfo> FollowerNodeInfoList;
 
 /////////////////////////////////////////////////
 
+// GroupStateMachineinfo
+// paxos group 状态机的信息
 class GroupSMInfo {
  public:
   GroupSMInfo();

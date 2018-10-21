@@ -26,6 +26,7 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
+// 日志
 enum class LogLevel {
   LogLevel_None = 0,
   LogLevel_Error = 1,

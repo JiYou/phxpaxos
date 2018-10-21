@@ -57,7 +57,6 @@ class TcpClient {
   std::map<uint64_t, MessageEvent *> m_mapEvent;
   std::vector<MessageEvent *> m_vecEvent;
   std::mutex m_oMutex;
-
 };
 
 }

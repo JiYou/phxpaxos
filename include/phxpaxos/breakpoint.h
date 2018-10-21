@@ -25,6 +25,8 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
+// BreakPoint是指在代码的关键地方，可以进行打桩
+// 二次开发者可以自己定义一些打桩操作。
 class ProposerBP {
  public:
   virtual ~ProposerBP() { }

@@ -27,13 +27,15 @@ See the AUTHORS file for names of contributors.
 
 namespace phxpaxos {
 
-MessageEvent::MessageEvent(
-  const int iType,
-  const int fd,
-  const SocketAddress & oAddr,
-  EventLoop * poEventLoop,
-  NetWork * poNetWork) :
-  Event(poEventLoop), m_oSocket(fd), m_oAddr(oAddr), m_poNetWork(poNetWork) {
+MessageEvent::MessageEvent(const int iType,
+                           const int fd,
+                           const SocketAddress & oAddr,
+                           EventLoop * poEventLoop,
+                           NetWork * poNetWork) :
+                             Event(poEventLoop),
+                             m_oSocket(fd),
+                             m_oAddr(oAddr),
+                             m_poNetWork(poNetWork) {
   m_iType = iType;
 
   m_iLeftReadLen = 0;

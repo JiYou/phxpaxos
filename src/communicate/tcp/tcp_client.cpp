@@ -81,6 +81,7 @@ MessageEvent * TcpClient::CreateEvent(const uint64_t llNodeID, const std::string
       oAddr, m_poEventLoop, m_poNetWork);
   assert(poEvent != nullptr);
 
+  // <fd,addr> -> messageEvent方便后面查找
   m_mapEvent[llNodeID] = poEvent;
   m_vecEvent.push_back(poEvent);
 

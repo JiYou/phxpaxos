@@ -192,14 +192,29 @@ int Acceptor::OnPrepare(const PaxosMsg & oPaxosMsg) {
 
   BP->GetAcceptorBP()->OnPrepare();
 
+  // 开始准备返回消息
   PaxosMsg oReplyPaxosMsg;
+  // 设置当前已经进行到哪个instance id了
   oReplyPaxosMsg.set_instanceid(GetInstanceID());
+  // 设置自己是哪个节点
   oReplyPaxosMsg.set_nodeid(m_poConfig->GetMyNodeID());
+  // 设置原始消息中的proposal id
+  // 这个是非常有必要的。假设当前节点处理特别慢。
+  // 而其他节点都比这个节点快。
+  // 那么，当这个节点的消息返回到Proposer节点的时候
+  // 可以proposal id已经走到很后面了。
+  // 这个时候Proposer就可以直接把这个消息扔掉
   oReplyPaxosMsg.set_proposalid(oPaxosMsg.proposalid());
+  // 消息的类型。
+  // 用来在接收方分流
+  // 也就是知道交给谁来处理
   oReplyPaxosMsg.set_msgtype(MsgType_PaxosPrepareReply);
-
+  // 取得提议方的编号，id
   BallotNumber oBallot(oPaxosMsg.proposalid(), oPaxosMsg.nodeid());
 
+  // 如果进来的编号 >= 我既将要要投票的编号
+  // 注意编号的比较方式: 采用了论文里面的<proposalID, nodeID>
+  // 唯一性比较大小的方式来处理
   if (oBallot >= m_oAcceptorState.GetPromiseBallot()) {
     PLGDebug("[Promise] State.PromiseID %lu State.PromiseNodeID %lu "
              "State.PreAcceptedID %lu State.PreAcceptedNodeID %lu",
@@ -207,22 +222,24 @@ int Acceptor::OnPrepare(const PaxosMsg & oPaxosMsg) {
              m_oAcceptorState.GetPromiseBallot().m_llNodeID,
              m_oAcceptorState.GetAcceptedBallot().m_llProposalID,
              m_oAcceptorState.GetAcceptedBallot().m_llNodeID);
-
+    // 返回我上次投票的结果
     oReplyPaxosMsg.set_preacceptid(m_oAcceptorState.GetAcceptedBallot().m_llProposalID);
     oReplyPaxosMsg.set_preacceptnodeid(m_oAcceptorState.GetAcceptedBallot().m_llNodeID);
 
+    // 设置一下值
+    // 如果以前投过票
     if (m_oAcceptorState.GetAcceptedBallot().m_llProposalID > 0) {
       oReplyPaxosMsg.set_value(m_oAcceptorState.GetAcceptedValue());
     }
-
+    // 设置第一阶段即将为某个编号投票
     m_oAcceptorState.SetPromiseBallot(oBallot);
-
+    // 把这个状态持久化下来。
+    // 写到paxos log里面
     int ret = m_oAcceptorState.Persist(GetInstanceID(), GetLastChecksum());
     if (ret != 0) {
       BP->GetAcceptorBP()->OnPreparePersistFail();
       PLGErr("Persist fail, Now.InstanceID %lu ret %d",
              GetInstanceID(), ret);
-
       return -1;
     }
 
@@ -233,7 +250,8 @@ int Acceptor::OnPrepare(const PaxosMsg & oPaxosMsg) {
     PLGDebug("[Reject] State.PromiseID %lu State.PromiseNodeID %lu",
              m_oAcceptorState.GetPromiseBallot().m_llProposalID,
              m_oAcceptorState.GetPromiseBallot().m_llNodeID);
-
+    // 否则发拒信
+    // 返回最大的proposal ID
     oReplyPaxosMsg.set_rejectbypromiseid(m_oAcceptorState.GetPromiseBallot().m_llProposalID);
   }
 
@@ -241,7 +259,7 @@ int Acceptor::OnPrepare(const PaxosMsg & oPaxosMsg) {
 
   PLGHead("END Now.InstanceID %lu ReplyNodeID %lu",
           GetInstanceID(), oPaxosMsg.nodeid());;
-
+  // 发送顺应消息
   SendMessage(iReplyNodeID, oReplyPaxosMsg);
 
   return 0;

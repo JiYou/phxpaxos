@@ -83,6 +83,7 @@ void DFNetWork::RunNetWork() {
   m_oTcpIOThread.Start();
 }
 
+// TCP发送的时候，参数里面会有group index.
 int DFNetWork::SendMessageTCP(const int iGroupIdx,
                               const std::string & sIp,
                               const int iPort,
@@ -90,6 +91,7 @@ int DFNetWork::SendMessageTCP(const int iGroupIdx,
   return m_oTcpIOThread.AddMessage(iGroupIdx, sIp, iPort, sMessage);
 }
 
+// UDP发送的时候，参数里面没有group index.
 int DFNetWork::SendMessageUDP(const int iGroupIdx,
                               const std::string & sIp,
                               const int iPort,

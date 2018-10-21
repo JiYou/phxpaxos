@@ -37,8 +37,11 @@ Communicate::Communicate(
 Communicate::~Communicate() {
 }
 
-int Communicate::Send(const int iGroupIdx, const nodeid_t iNodeID,
-                        const NodeInfo & oNodeInfo, const std::string & sMessage, const int iSendType) {
+int Communicate::Send(const int iGroupIdx,
+                      const nodeid_t iNodeID,
+                      const NodeInfo & oNodeInfo,
+                      const std::string & sMessage,
+                      const int iSendType) {
   if ((int)sMessage.size() > MAX_VALUE_SIZE) {
     BP->GetNetworkBP()->SendRejectByTooLargeSize();
     PLGErr("Message size too large %zu, max size %u, skip message",

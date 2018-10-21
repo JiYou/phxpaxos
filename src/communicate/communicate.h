@@ -41,16 +41,21 @@ class Communicate : public MsgTransport {
     NetWork * poNetwork);
   ~Communicate();
 
-  int SendMessage(const int iGroupIdx, const nodeid_t iSendtoNodeID, const std::string & sMessage,
+  int SendMessage(const int iGroupIdx,
+                  const nodeid_t iSendtoNodeID,
+                  const std::string & sMessage,
                   const int iSendType = Message_SendType_UDP);
 
-  int BroadcastMessage(const int iGroupIdx, const std::string & sMessage,
+  int BroadcastMessage(const int iGroupIdx,
+                       const std::string & sMessage,
                        const int iSendType = Message_SendType_UDP);
 
-  int BroadcastMessageFollower(const int iGroupIdx, const std::string & sMessage,
+  int BroadcastMessageFollower(const int iGroupIdx,
+                               const std::string & sMessage,
                                const int iSendType = Message_SendType_UDP);
 
-  int BroadcastMessageTempNode(const int iGroupIdx, const std::string & sMessage,
+  int BroadcastMessageTempNode(const int iGroupIdx,
+                               const std::string & sMessage,
                                const int iSendType = Message_SendType_UDP);
 
  public:

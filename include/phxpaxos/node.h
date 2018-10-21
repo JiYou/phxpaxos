@@ -75,11 +75,13 @@ class Node {
   //State machine.
 
   //This function will add state machine to all group.
+  // 奇怪的接口，会把这个状态机添加到所有的paxos group里面。
   virtual void AddStateMachine(StateMachine * poSM) = 0;
-
+  // 把状态机添加到指定的状态机接口上。
   virtual void AddStateMachine(const int iGroupIdx, StateMachine * poSM) = 0;
 
-  //Timeout control.
+  // Timeout control.
+  // Paxos算法的超时控制
   virtual void SetTimeoutMs(const int iTimeoutMs) = 0;
 
   //Checkpoint
@@ -87,6 +89,8 @@ class Node {
   //Set the number you want to keep paxoslog's count.
   //We will only delete paxoslog before checkpoint instanceid.
   //If llHoldCount < 300, we will set it to 300. Not suggest too small holdcount.
+  // 这里是指多少个日志之后，就要开始建checkpoint了
+  // 不建议把这个日志的条目开得太大。
   virtual void SetHoldPaxosLogCount(const uint64_t llHoldCount) = 0;
 
   //Replayer is to help sm make checkpoint.

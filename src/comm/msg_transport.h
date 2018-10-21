@@ -30,20 +30,27 @@ enum Message_SendType {
   Message_SendType_TCP = 1,
 };
 
+
+// 纯虚类: 主要是业务类
 class MsgTransport {
  public:
   virtual ~MsgTransport() {}
 
-  virtual int SendMessage(const int iGroupIdx, const nodeid_t iSendtoNodeID,
-                          const std::string & sBuffer, const int iSendType = Message_SendType_UDP) = 0;
+  virtual int SendMessage(const int iGroupIdx,
+                          const nodeid_t iSendtoNodeID,
+                          const std::string & sBuffer,
+                          const int iSendType = Message_SendType_UDP) = 0;
 
-  virtual int BroadcastMessage(const int iGroupIdx, const std::string & sBuffer,
+  virtual int BroadcastMessage(const int iGroupIdx,
+                               const std::string & sBuffer,
                                const int iSendType = Message_SendType_UDP) = 0;
 
-  virtual int BroadcastMessageFollower(const int iGroupIdx, const std::string & sBuffer,
+  virtual int BroadcastMessageFollower(const int iGroupIdx,
+                                       const std::string & sBuffer,
                                        const int iSendType = Message_SendType_UDP) = 0;
 
-  virtual int BroadcastMessageTempNode(const int iGroupIdx, const std::string & sBuffer,
+  virtual int BroadcastMessageTempNode(const int iGroupIdx,
+                                       const std::string & sBuffer,
                                        const int iSendType = Message_SendType_UDP) = 0;
 };
 

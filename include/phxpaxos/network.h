@@ -37,6 +37,7 @@ class Node;
 // - 发送消息
 // - 接收消息
 // 这里并没有提供抽象的工厂方法来创建Network
+//
 class NetWork {
  public:
   NetWork();

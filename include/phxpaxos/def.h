@@ -27,6 +27,8 @@ namespace phxpaxos {
 #define MASTER_V_SMID 100000001
 #define BATCH_PROPOSE_SMID 100000002
 
+// 还是觉得LevelDB的Status定义可能更加好理解一些
+// 虽然效率不是那么高
 enum PaxosTryCommitRet {
   PaxosTryCommitRet_OK = 0,
   PaxosTryCommitRet_Reject = -2,
@@ -39,6 +41,7 @@ enum PaxosTryCommitRet {
   PaxosTryCommitRet_TooManyThreadWaiting_Reject = 405,
 };
 
+// 这里定义一些出错码
 enum PaxosNodeFunctionRet {
   Paxos_SystemError = -1,
   Paxos_GroupIdxWrong = -5,

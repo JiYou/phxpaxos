@@ -127,7 +127,10 @@ void EventLoop::ModEvent(const Event * poEvent, const int iEvents) {
   // TODO: 这里直接MOD也是不对的。最好是需要比较一下
   // 是不是与原来的一样，如果与原来的一样，那么就不需要MOD
   // 直接返回就可以了。
-  int ret = epoll_ctl(m_iEpollFd, iEpollOpertion, poEvent->GetSocketFd(), &tEpollEvent);
+  int ret = epoll_ctl(m_iEpollFd,
+                      iEpollOpertion,
+                      poEvent->GetSocketFd(),
+                      &tEpollEvent);
   if (ret == -1) {
     PLErr("epoll_ctl fail, EpollFd %d EpollOpertion %d SocketFd %d EpollEvent %d",
           m_iEpollFd, iEpollOpertion, poEvent->GetSocketFd(), iEvents);
@@ -162,7 +165,10 @@ void EventLoop::RemoveEvent(const Event * poEvent) {
   tEpollEvent.events = 0;
   tEpollEvent.data.fd = poEvent->GetSocketFd();
 
-  int ret = epoll_ctl(m_iEpollFd, iEpollOpertion, poEvent->GetSocketFd(), &tEpollEvent);
+  int ret = epoll_ctl(m_iEpollFd,
+                      iEpollOpertion,
+                      poEvent->GetSocketFd(),
+                      &tEpollEvent);
   if (ret == -1) {
     PLErr("epoll_ctl fail, EpollFd %d EpollOpertion %d SocketFd %d",
           m_iEpollFd, iEpollOpertion, poEvent->GetSocketFd());
@@ -209,7 +215,10 @@ void EventLoop::Stop() {
 
 // OneLoop里面也没有用到iTimeoutMs这个参数，可以考虑删除掉
 void EventLoop::OneLoop(const int iTimeoutMs) {
-  int n = epoll_wait(m_iEpollFd, m_EpollEvents, MAX_EVENTS, 1);
+  int n = epoll_wait(m_iEpollFd,
+                     m_EpollEvents,
+                     MAX_EVENTS,
+                     1);
   if (n == -1) {
     if (errno != EINTR) {
       PLErr("epoll_wait fail, errno %d", errno);
