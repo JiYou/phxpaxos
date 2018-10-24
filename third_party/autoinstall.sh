@@ -147,11 +147,10 @@ function install_glog()
     # end check.
 
     go_back;
-    pwd
     cd $lib_name;
-    pwd
-    echo "CHECK cpp11"
-    ./autogen.sh
+    # delete old missing file.
+    rm -rf missing
+    aclocal && automake --add-missing
     exist_gflags_dir="../gflags";
     if [ -d $exist_gflags_dir ]; then
         # use local gflags

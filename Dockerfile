@@ -14,7 +14,6 @@ RUN cd /opt && git clone https://github.com/JiYou/phxpaxos.git && cd phxpaxos &&
     git checkout cpp11 && \
     git submodule update --init --recursive && \
     cd third_party && \
-    cd glog && aclocal && automake && automake --add-missing && \
     ./autoinstall.sh
 RUN cd /opt/phxpaxos && ./autoinstall.sh && make && make install
 RUN cd /opt/phxpaxos && cd plugin && make && make install
