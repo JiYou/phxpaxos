@@ -82,11 +82,9 @@ function install_leveldb()
 
 function check_protobuf_installed()
 {
-    echo "CHECK cpp11"
-    pwd
-    echo $1
-    echo $lib_name
-    cd $lib_name;
+    if [[ -e $lib_name && -d $lib_name ]]; then
+        cd $lib_name;
+    fi
     bin_dir=$(pwd)"/bin";
     include_dir=$(pwd)"/include";
 
