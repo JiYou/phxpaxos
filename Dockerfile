@@ -18,5 +18,5 @@ RUN cd /opt/phxpaxos && ./autoinstall.sh && make && make install
 RUN cd /opt/phxpaxos && cd plugin && make && make install
 RUN cd /opt/phxpaxos/ &&  cd third_party/ && \
     mkdir -p grpc/lib && \
-    cp -rf /usr/local/lib/libgrpc* ./
+    cp -rf /usr/local/lib/libgrpc* ./grpc/lib/
 RUN cd /opt/phxpaxos && cd sample && make
