@@ -11,6 +11,7 @@ RUN cd /usr &&  \
     chmod +x cmake-3.13.0-rc1-Linux-x86_64.sh && \
     ./cmake-3.13.0-rc1-Linux-x86_64.sh --prefix=/usr --skip-license
 RUN cd /opt && git clone https://github.com/JiYou/phxpaxos.git && cd phxpaxos && \
+    git checkout cpp11 && \
     git submodule update --init --recursive && \
     cd third_party && \
     ./autoinstall.sh

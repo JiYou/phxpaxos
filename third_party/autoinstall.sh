@@ -82,6 +82,7 @@ function install_leveldb()
 
 function check_protobuf_installed()
 {
+    pwd
     cd $lib_name;
     bin_dir=$(pwd)"/bin";
     include_dir=$(pwd)"/include";
