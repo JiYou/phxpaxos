@@ -12,6 +12,116 @@ Contact us: phxteam@tencent.com
 
 PhxPaxos [![Build Status](https://travis-ci.org/Tencent/phxpaxos.png)](https://travis-ci.org/Tencent/phxpaxos)
 
+# Compile
+
+To resolve the original code build issue, here are some changes have been make to phxpaxos.
+**For simplicity** if you just want to build, and do not want to read the docs below:
+
+```bash
+docker build -t=phxpaoxs .
+```
+
+would works.
+
+## Changes for build
+
+Here are some issues meet when build the source code. To record the changes and why need to do these changes.
+All these changes have been changed to the build-script and Dockerfile.
+
+
+So, you no need to do steps below to resolve them. Just read is OK.
+
+### 1. libgrpc libs
+
+It may raise build error:
+
+```bash
+g++: error: /opt/phxpaxos/third_party/grpc/lib/libgrpc++_unsecure.a: No such file or directory
+g++: error: /opt/phxpaxos/third_party/grpc/lib/libgrpc.a: No such file or directory
+make[1]: *** [phxkv_client_tools] Error 1
+```
+
+My solution: after the `grpc` is installed, then copy the libs of grpc `/usr/local/lib/libgrpc*` to the target folder.
+
+```bash
+cp -rf /usr/local/lib/libgrpc* ${source}/third_part/grpc/lib/
+```
+
+### 2. No rule to make target
+
+```bash
+Error 2:
+make[2]: *** No rule to make target `test_notifier_pool.o', needed by `test_notifier_pool'.  Stop.
+```
+
+Just remove the related in `Makefile`. Because can not find the `test_nmotifier_pool` source file.
+
+### 3. cd protobuf failed.
+
+```bash
+./autoinstall.sh: line 85: cd: protobuf: No such file or directory
+```
+
+add check condition in `autoinstall.sh`:
+
+```bash
+function check_protobuf_installed()
+{
+    if [[ -e $lib_name && -d $lib_name ]]; then
+        cd $lib_name;
+    fi
+    ...
+
+}
+```
+
+### 4. `--is-lightweight` option
+
+```bash
+aclocal && automake && automake --add-missing
+/opt/phxpaxos/third_party/glog/missing: Unknown `--is-lightweight' option
+Try `/opt/phxpaxos/third_party/glog/missing --help' for more information
+configure: WARNING: 'missing' script is too old or missing
+```
+
+solution is in `third_part/autoinstall.sh`
+
+```bash
+diff --git a/third_party/autoinstall.sh b/third_party/autoinstall.sh
+index 85931b8..3f4d400 100755
+--- a/third_party/autoinstall.sh
++++ b/third_party/autoinstall.sh
+@@ -147,11 +147,10 @@ function install_glog()
+     # end check.
+ 
+     go_back;
+-    pwd
+     cd $lib_name;
+-    pwd
+-    echo "CHECK cpp11"
+-    ./autogen.sh
++    # delete old missing file.
++    rm -rf missing
++    aclocal && automake --add-missing
+     exist_gflags_dir="../gflags";
+     if [ -d $exist_gflags_dir ]; then
+         # use local gflags
+```
+
+just use `automake --add-missing` to replace the old `missing` file.
+
+### 5. autogen not found
+
+```bash
+./autoinstall.sh: line 154: ./autogen.sh: No such file or directory
+```
+
+delete line `autoen.sh`.
+
+For detail read the git commit.
+
+
+
 # Features
   * Purely based on [Paxos Made Simple](http://research.microsoft.com/en-us/um/people/lamport/pubs/paxos-simple.pdf) by Lamport. 
   * Transfering message in a async mechanism architecture.
