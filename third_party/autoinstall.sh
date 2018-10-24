@@ -147,7 +147,10 @@ function install_glog()
     # end check.
 
     go_back;
+    pwd
     cd $lib_name;
+    pwd
+    echo "CHECK cpp11"
     ./autogen.sh
     exist_gflags_dir="../gflags";
     if [ -d $exist_gflags_dir ]; then
