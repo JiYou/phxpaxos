@@ -520,12 +520,21 @@ void Learner::OnProposerSendSuccess(const PaxosMsg & oPaxosMsg) {
           m_poAcceptor->GetAcceptorState()->GetAcceptedBallot().m_llNodeID,
           oPaxosMsg.nodeid());
 
+  // 这个比较容易理解，就是说如果收到的消息不是当前我要处理的instance id
+  // 那么直接忽略这个消息
+  // 这样的设计，带来的效果是
+  // 对于学习者而言，日志是不能出现空洞的。
+  // Q: 如果一个学习者落后很多的情况下，那么应该如何处理？
+  // Q: 如果一个节点上的log是很旧的，但是被选为了主节点。
+  //    主节点propose的提议被accepted，这时仍然是无法放到学习者这里？
   if (oPaxosMsg.instanceid() != GetInstanceID()) {
     //Instance id not same, that means not in the same instance, ignord.
     PLGDebug("InstanceID not same, skip msg");
     return;
   }
 
+  // paxos算法是保证了最终一致性的。也就是所有的节点最终都会投向同一个议题
+  // 所以，一旦达成了一致，那么这里应该是有ballot
   if (m_poAcceptor->GetAcceptorState()->GetAcceptedBallot().isnull()) {
     //Not accept any yet.
     BP->GetLearnerBP()->OnProposerSendSuccessNotAcceptYet();

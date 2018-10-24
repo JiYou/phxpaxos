@@ -40,6 +40,8 @@ void MsgCounter::StartNewRound() {
 }
 
 void MsgCounter::AddReceive(const nodeid_t iNodeID) {
+  // 如果还没有接收过
+  // 这里可能直接用hash更快一些
   if (m_setReceiveMsgNodeID.find(iNodeID) == m_setReceiveMsgNodeID.end()) {
     m_setReceiveMsgNodeID.insert(iNodeID);
   }

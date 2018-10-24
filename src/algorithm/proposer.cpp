@@ -156,6 +156,9 @@ int Proposer::NewValue(const std::string & sValue) {
   if (m_oProposerState.GetValue().size() == 0) {
     m_oProposerState.SetValue(sValue);
   }
+
+  // 虽然这里应该是走到Prepare的，但是这里有可能跳过。
+  // 所以这里还是设置了Accept超时
   // prepare timeout
   m_iLastPrepareTimeoutMs = START_PREPARE_TIMEOUTMS;
   // accept timeout
@@ -197,11 +200,15 @@ void Proposer::ExitAccept() {
 }
 
 void Proposer::AddPrepareTimer(const int iTimeoutMs) {
+  // 这里添加定时器
+  // 选把以前的定时器删除掉
   if (m_iPrepareTimerID > 0) {
     m_poIOLoop->RemoveTimer(m_iPrepareTimerID);
   }
 
+  // 如果超时的时间是大于0
   if (iTimeoutMs > 0) {
+    // 那么添加这个定时器
     m_poIOLoop->AddTimer(
       iTimeoutMs,
       Timer_Proposer_Prepare_Timeout,
@@ -209,6 +216,7 @@ void Proposer::AddPrepareTimer(const int iTimeoutMs) {
     return;
   }
 
+  // 否则添加一个默认的时间
   m_poIOLoop->AddTimer(
     m_iLastPrepareTimeoutMs,
     Timer_Proposer_Prepare_Timeout,
@@ -218,6 +226,7 @@ void Proposer::AddPrepareTimer(const int iTimeoutMs) {
 
   PLGHead("timeoutms %d", m_iLastPrepareTimeoutMs);
 
+  // 采用指数的方式来增加timeout时间
   m_iLastPrepareTimeoutMs *= 2;
   if (m_iLastPrepareTimeoutMs > MAX_PREPARE_TIMEOUTMS) {
     m_iLastPrepareTimeoutMs = MAX_PREPARE_TIMEOUTMS;
@@ -258,6 +267,7 @@ void Proposer::Prepare(const bool bNeedNewBallot) {
           m_oProposerState.GetValue().size());
 
   BP->GetProposerBP()->Prepare();
+  // 这里进行时间的打点，返回值是距离上次打点的时间差。
   m_oTimeStat.Point();
 
   ExitAccept();
@@ -295,7 +305,7 @@ void Proposer::Prepare(const bool bNeedNewBallot) {
 
   // 接收到消息的各种状态直接清空
   // 比如记录了哪些投了赞成票
-  // 哪些投了拒绝票
+  // 哪些投了拒绝票，这些以前的信息都要清空掉
   m_oMsgCounter.StartNewRound();
 
   // 这里生成一个定时器
@@ -306,6 +316,11 @@ void Proposer::Prepare(const bool bNeedNewBallot) {
   BroadcastMessage(oPaxosMsg);
 }
 
+// 注意：这里并没有收集所有的节点的反馈消息
+// 只是收到了一个消息。所以需要判断三种情况：
+// - 是否提议得到了通过?
+// - 是否提议被拒绝了
+// - 是否继续等待接收到后面的消息？
 void Proposer::OnPrepareReply(const PaxosMsg & oPaxosMsg) {
   PLGHead("START Msg.ProposalID %lu State.ProposalID %lu Msg.from_nodeid %lu RejectByPromiseID %lu",
           oPaxosMsg.proposalid(), m_oProposerState.GetProposalID(),
@@ -337,6 +352,7 @@ void Proposer::OnPrepareReply(const PaxosMsg & oPaxosMsg) {
 
   // 如果收到的不是拒绝信息
   // 也就是对方表示将对这个编号进行处理
+  // 如果是拒信，那么拒信里面有那个node的最大提议号
   if (oPaxosMsg.rejectbypromiseid() == 0) {
     // 取出其中的Ballot信息
     BallotNumber oBallot(oPaxosMsg.preacceptid(), oPaxosMsg.preacceptnodeid());
@@ -361,20 +377,46 @@ void Proposer::OnPrepareReply(const PaxosMsg & oPaxosMsg) {
     // 这里回过头去看经典的算法
     // 在经典的算法中是没有收到拒信这一个说法的。
     // acceptor在收到一个比自己允诺的编号要小的ballot id的时候，是直接忽略。
+    // 直接忽略是可以工作的
+    // 假设有A, B, C三个人，
+    // 那么当A已经走到200号，而B, C还在10号提议的时候。
+    // 如果发起方提出11号，那么A -> X, [B,C] -> OK
+    // 注意：此时如果[A, B, C]就11号提议进行投票，仍然不会出现冲突。
+    // 这是因为，后面的议题，需要选用最大编号的议题。
+    // 如果A在[11,200]号之间投了票，那么必然会选中这个议题
+    // 如果A没有在[11, 200]号之前投票，那么也就是说在11号上也没有投过票
+    // [B, C]在11号上进行投票，仍然是满足条件3的。
   }
 
+  // 如果要通过，那么必须要大多数人投了同意票。
+  // 如果在时间范围内收到了大多数人的投票。
   if (m_oMsgCounter.IsPassedOnThisRound()) {
     int iUseTimeMs = m_oTimeStat.Point();
     BP->GetProposerBP()->PreparePass(iUseTimeMs);
     PLGImp("[Pass] start accept, usetime %dms", iUseTimeMs);
+    // 如果收到大多数人对这个提议号的认可
     m_bCanSkipPrepare = true;
+    // 进入到accept阶段
     Accept();
-  } else if (m_oMsgCounter.IsRejectedOnThisRound()
+  }
+  // 如果悲剧了，反对的人占了大多数
+  // 或者说，大家都收到了消息
+  // 注意：如果赞同与拒绝形成了对半开，那么最后一个人的消息就需要等
+  //      所以这里在退出这一轮paxos的时候，设置的条件是需要收到
+  //      所有人的消息。
+  else if (m_oMsgCounter.IsRejectedOnThisRound()
              || m_oMsgCounter.IsAllReceiveOnThisRound()) {
     BP->GetProposerBP()->PrepareNotPass();
     PLGImp("[Not Pass] wait 30ms and restart prepare");
     AddPrepareTimer(OtherUtils::FastRand() % 30 + 10);
   }
+
+  // 如果既没有通过提议
+  // 也没有反对的人占大多数
+  // 也没有收到所有人的消息
+  // 那么就需要在这里等着接收消息
+  //  - 要么等到新消息来
+  //  - 要么等到超时
 
   PLGHead("END");
 }
@@ -387,6 +429,8 @@ void Proposer::OnExpiredPrepareReply(const PaxosMsg & oPaxosMsg) {
   }
 }
 
+// 如果经过了第一阶段，那么这里开始走第二阶段，
+// 发起accept请求
 void Proposer::Accept() {
   PLGHead("START ProposalID %lu ValueSize %zu ValueLen %zu",
           m_oProposerState.GetProposalID(), m_oProposerState.GetValue().size(), m_oProposerState.GetValue().size());
@@ -394,17 +438,29 @@ void Proposer::Accept() {
   BP->GetProposerBP()->Accept();
   m_oTimeStat.Point();
 
+  // 因为第一队段通过了，所以退出第一阶段。
+  // 就是把isPreparing = false;
+  // remove_prepare_timer
   ExitPrepare();
+  // 表示正在accepting.
   m_bIsAccepting = true;
 
+  /*开始构建accept消息*/
   PaxosMsg oPaxosMsg;
+  // 消息的类型
   oPaxosMsg.set_msgtype(MsgType_PaxosAccept);
+  // 当前的instance id
   oPaxosMsg.set_instanceid(GetInstanceID());
+  // 设置自己这个节点
   oPaxosMsg.set_nodeid(m_poConfig->GetMyNodeID());
+  // 设置提议ID
   oPaxosMsg.set_proposalid(m_oProposerState.GetProposalID());
+  // 设置前面得到的最大值
   oPaxosMsg.set_value(m_oProposerState.GetValue());
+  // 设置校验值
   oPaxosMsg.set_lastchecksum(GetLastChecksum());
 
+  // 开始新一轮的accept
   m_oMsgCounter.StartNewRound();
 
   AddAcceptTimer();
@@ -421,43 +477,63 @@ void Proposer::OnAcceptReply(const PaxosMsg & oPaxosMsg) {
 
   BP->GetProposerBP()->OnAcceptReply();
 
+  // 是否还处在Accept阶段
+  // 如果不是，那么这里需要直接就返回
   if (!m_bIsAccepting) {
     //PLGErr("Not proposing, skip this msg");
     BP->GetProposerBP()->OnAcceptReplyButNotAccepting();
     return;
   }
 
+  // 提议的ID
   if (oPaxosMsg.proposalid() != m_oProposerState.GetProposalID()) {
     //PLGErr("ProposalID not same, skip this msg");
     BP->GetProposerBP()->OnAcceptReplyNotSameProposalIDMsg();
     return;
   }
 
+  // 如果是这个消息的响应，那么添加到接收方里面。
   m_oMsgCounter.AddReceive(oPaxosMsg.nodeid());
 
+  // 如果这个消息是一个赞成消息
   if (oPaxosMsg.rejectbypromiseid() == 0) {
     PLGDebug("[Accept]");
     m_oMsgCounter.AddPromiseOrAccept(oPaxosMsg.nodeid());
-  } else {
+  }
+  // 如果这个消息是一个拒绝消息
+  else {
     PLGDebug("[Reject]");
+    // 添加到拒绝队列中
     m_oMsgCounter.AddReject(oPaxosMsg.nodeid());
-
+    // 设置拒约标记
     m_bWasRejectBySomeone = true;
-
+    // 设置下一次最大的proposal id
     m_oProposerState.SetOtherProposalID(oPaxosMsg.rejectbypromiseid());
   }
 
+  // 看一下是否通过
+  // 注意，这里只要是形成了大多数，那么就继续往下走
   if (m_oMsgCounter.IsPassedOnThisRound()) {
     int iUseTimeMs = m_oTimeStat.Point();
     BP->GetProposerBP()->AcceptPass(iUseTimeMs);
     PLGImp("[Pass] Start send learn, usetime %dms", iUseTimeMs);
+    // 通过了，
+    // is_accepting状态退出
+    // 删除timer
     ExitAccept();
     m_poLearner->ProposerSendSuccess(GetInstanceID(), m_oProposerState.GetProposalID());
-  } else if (m_oMsgCounter.IsRejectedOnThisRound()
+  }
+  // 肯定无法通过了
+  // 那么不用再等了
+  else if (m_oMsgCounter.IsRejectedOnThisRound()
              || m_oMsgCounter.IsAllReceiveOnThisRound()) {
     BP->GetProposerBP()->AcceptNotPass();
     PLGImp("[Not pass] wait 30ms and Restart prepare");
     AddAcceptTimer(OtherUtils::FastRand() % 30 + 10);
+  }
+
+  else {
+    /* no code here, just wait for next message*/
   }
 
   PLGHead("END");
@@ -474,6 +550,7 @@ void Proposer::OnExpiredAcceptReply(const PaxosMsg & oPaxosMsg) {
 void Proposer::OnPrepareTimeout() {
   PLGHead("OK");
 
+  // 如果在超时的这段时间里面 instanceid 已经发生了变化。那么这种超时也没有必要处理了。
   if (GetInstanceID() != m_llTimeoutInstanceID) {
     PLGErr("TimeoutInstanceID %lu not same to NowInstanceID %lu, skip",
            m_llTimeoutInstanceID, GetInstanceID());
@@ -482,6 +559,7 @@ void Proposer::OnPrepareTimeout() {
 
   BP->GetProposerBP()->PrepareTimeout();
 
+  // 如果还处在当前的instance id那么处理之
   Prepare(m_bWasRejectBySomeone);
 }
 

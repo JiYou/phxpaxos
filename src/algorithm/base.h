@@ -78,6 +78,8 @@ class BallotNumber {
   }
 
   uint64_t m_llProposalID;
+  // node id就是一个ip:port分别占用两个32位
+  // NodeInfo::MakeNodeID()
   nodeid_t m_llNodeID;
 };
 
@@ -86,6 +88,7 @@ class BallotNumber {
 class Instance;
 
 enum BroadcastMessage_Type {
+  // 自己这个节点先运行
   BroadcastMessage_Type_RunSelf_First = 1,
   BroadcastMessage_Type_RunSelf_Final = 2,
   BroadcastMessage_Type_RunSelf_None = 3,

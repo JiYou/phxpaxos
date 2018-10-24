@@ -35,6 +35,7 @@ AcceptorState::~AcceptorState() {
 }
 
 void AcceptorState::Init() {
+  // 注意ballot只是说编号<id, node_id>
   m_oAcceptedBallot.reset();
 
   m_sAcceptedValue = "";
@@ -265,20 +266,25 @@ int Acceptor::OnPrepare(const PaxosMsg & oPaxosMsg) {
   return 0;
 }
 
+// Acceptor接收到消息的时候的处理
 void Acceptor::OnAccept(const PaxosMsg & oPaxosMsg) {
   PLGHead("START Msg.InstanceID %lu Msg.from_nodeid %lu Msg.ProposalID %lu Msg.ValueLen %zu",
           oPaxosMsg.instanceid(), oPaxosMsg.nodeid(), oPaxosMsg.proposalid(), oPaxosMsg.value().size());
 
   BP->GetAcceptorBP()->OnAccept();
 
+  // 开始准备响应消息
   PaxosMsg oReplyPaxosMsg;
   oReplyPaxosMsg.set_instanceid(GetInstanceID());
   oReplyPaxosMsg.set_nodeid(m_poConfig->GetMyNodeID());
   oReplyPaxosMsg.set_proposalid(oPaxosMsg.proposalid());
   oReplyPaxosMsg.set_msgtype(MsgType_PaxosAcceptReply);
 
+  // 从进来的消息里面读出proposal id, node id
+  // 实际上就是提议的序号
   BallotNumber oBallot(oPaxosMsg.proposalid(), oPaxosMsg.nodeid());
 
+  // 如果是合法的提议
   if (oBallot >= m_oAcceptorState.GetPromiseBallot()) {
     PLGDebug("[Promise] State.PromiseID %lu State.PromiseNodeID %lu "
              "State.PreAcceptedID %lu State.PreAcceptedNodeID %lu",
@@ -287,10 +293,13 @@ void Acceptor::OnAccept(const PaxosMsg & oPaxosMsg) {
              m_oAcceptorState.GetAcceptedBallot().m_llProposalID,
              m_oAcceptorState.GetAcceptedBallot().m_llNodeID);
 
+    // minProposalID = AcceptedID = ballotID
+    // SetValue
     m_oAcceptorState.SetPromiseBallot(oBallot);
     m_oAcceptorState.SetAcceptedBallot(oBallot);
     m_oAcceptorState.SetAcceptedValue(oPaxosMsg.value());
 
+    // 处理好之后，要持久化
     int ret = m_oAcceptorState.Persist(GetInstanceID(), GetLastChecksum());
     if (ret != 0) {
       BP->GetAcceptorBP()->OnAcceptPersistFail();
@@ -308,15 +317,15 @@ void Acceptor::OnAccept(const PaxosMsg & oPaxosMsg) {
     PLGDebug("[Reject] State.PromiseID %lu State.PromiseNodeID %lu",
              m_oAcceptorState.GetPromiseBallot().m_llProposalID,
              m_oAcceptorState.GetPromiseBallot().m_llNodeID);
-
+    // 发拒信，返回最大的minPropsalID
     oReplyPaxosMsg.set_rejectbypromiseid(m_oAcceptorState.GetPromiseBallot().m_llProposalID);
   }
-
+  // 从消息中取向响应结点
   nodeid_t iReplyNodeID = oPaxosMsg.nodeid();
 
   PLGHead("END Now.InstanceID %lu ReplyNodeID %lu",
           GetInstanceID(), oPaxosMsg.nodeid());
-
+  // 发送消息
   SendMessage(iReplyNodeID, oReplyPaxosMsg);
 }
 

@@ -160,6 +160,8 @@ TimeStat::TimeStat() {
   m_llTime = Time::GetSteadyClockMS();
 }
 
+// 时间打点
+// 返回值是距离上次打点的时间。
 int TimeStat::Point() {
   uint64_t llNowTime = Time::GetSteadyClockMS();
   int llPassTime = 0;
