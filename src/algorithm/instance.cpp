@@ -474,14 +474,21 @@ int Instance::ReceiveMsgForProposer(const PaxosMsg & oPaxosMsg) {
   ///////////////////////////////////////////////////////////////
 
   if (oPaxosMsg.instanceid() != m_oProposer.GetInstanceID()) {
+    // 这里是处理上一个instance的消息
     if (oPaxosMsg.instanceid() + 1 == m_oProposer.GetInstanceID()) {
       //Exipred reply msg on last instance.
+      // 如果一个node的response总是比大多数的nodes要慢。
       //If the response of a node is always slower than the majority node,
+      // 那么这个node发出的消息总是会被ignore
+      // 即便这个消息是一个拒绝消息
       //then the message of the node is always ignored even if it is a reject reply.
+      // 在这种情况下，如果我们并不处理这种reject reply
       //In this case, if we do not deal with these reject reply, the node that
+      // 那个这个节点就会总是给出拒绝信息
       //gave reject reply will always give reject reply.
+      // 这会导致这个节点一直处在追赶的状态
       //This causes the node to remain in catch-up state.
-      //
+      // 基于这个原因，还是处理一下这种过期的消息
       //To avoid this problem, we need to deal with the expired reply.
       if (oPaxosMsg.msgtype() == MsgType_PaxosPrepareReply) {
         m_oProposer.OnExpiredPrepareReply(oPaxosMsg);

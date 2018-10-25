@@ -49,7 +49,7 @@ class AcceptorState {
   int Persist(const uint64_t llInstanceID, const uint32_t iLastChecksum);
   int Load(uint64_t & llInstanceID);
 
-//private:
+ //private:
   BallotNumber m_oPromiseBallot;
   BallotNumber m_oAcceptedBallot;
   std::string m_sAcceptedValue;
@@ -58,6 +58,8 @@ class AcceptorState {
   Config * m_poConfig;
   PaxosLog m_oPaxosLog;
 
+  // 这个是专门用来刷写到磁盘上
+  // 记录刷写的次数与频率。
   int m_iSyncTimes;
 };
 
@@ -72,14 +74,18 @@ class Acceptor : public Base {
     const LogStorage * poLogStorage);
   ~Acceptor();
 
+  // 这个初始化函数，主要是为了Base类在increate instance ID
+  // 之后做各种清理工作。
+  // 被Base::NewInstance()调用
   virtual void InitForNewPaxosInstance();
 
   int Init();
 
   AcceptorState * GetAcceptorState();
 
+  // 处理Prepare消息
   int OnPrepare(const PaxosMsg & oPaxosMsg);
-
+  // 处理Accept消息
   void OnAccept(const PaxosMsg & oPaxosMsg);
 
 //private:

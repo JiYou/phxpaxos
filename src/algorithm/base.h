@@ -94,22 +94,29 @@ enum BroadcastMessage_Type {
   BroadcastMessage_Type_RunSelf_None = 3,
 };
 
+// 总的来说，这个类是各种Proposer/Acceptor/Learner的父类
+// 主要负责的任务就是：负责处理
+// Instance ID
+// 各种message.
 class Base {
  public:
   Base(const Config * poConfig, const MsgTransport * poMsgTransport, const Instance * poInstance);
   virtual ~Base();
 
  public:
+  // 涉及到消息处理的地方，都是采用的是如下结构
+  // 消息先统一放到一个Queu里面。然后再从Queue里面一个一个地消费。
+  // 由于消息的执行是单线程的，并不是并发的。
+  // 所以这里的这些操作也都是无锁的。
+
+  // Instance ID的管理
   uint64_t GetInstanceID();
-
   void NewInstance();
-
   virtual void InitForNewPaxosInstance() = 0;
-
   void SetInstanceID(const uint64_t llInstanceID);
 
+  // 解包与封包函数
   int PackMsg(const PaxosMsg & oPaxosMsg, std::string & sBuffer);
-
   int PackCheckpointMsg(const CheckpointMsg & oCheckpointMsg, std::string & sBuffer);
 
  public:

@@ -69,7 +69,7 @@ void ProposerState::AddPreAcceptValue(
   if (oOtherPreAcceptBallot.isnull()) {
     return;
   }
-
+  // prepare阶段返回的编号 在这里面选择出最大的 
   if (oOtherPreAcceptBallot > m_oHighestOtherPreAcceptBallot) {
     m_oHighestOtherPreAcceptBallot = oOtherPreAcceptBallot;
     m_sValue = sOtherPreAcceptValue;
@@ -282,15 +282,17 @@ void Proposer::Prepare(const bool bNeedNewBallot) {
   //   uint64_t m_llProposalID;             // 后面自己要使用的编号
   //   uint64_t m_llHighestOtherProposalID; // 已知的acceptor的最大编号
   //   std::string m_sValue;
-  //   BallotNumber m_oHighestOtherPreAcceptBallot;
+  //   BallotNumber m_oHighestOtherPreAcceptBallot; // 记住prepare阶段返回的各个消息的最大值
   // }
   // 因为这里要开始新的prepare
   // 之前拿到的其他节点的结果都不能再使用了。
   // 所以直接清空。
   m_oProposerState.ResetHighestOtherPreAcceptBallot();
   if (bNeedNewBallot) {
-    // uint64_t llMaxProposalID = std::max(m_llProposalID, m_llHighestOtherProposalID);
-    // m_llProposalID = llMaxProposalID + 1;
+    // NewPrepare() = {
+    //   uint64_t llMaxProposalID = std::max(m_llProposalID, m_llHighestOtherProposalID);
+    //   m_llProposalID = llMaxProposalID + 1;
+    // }
     m_oProposerState.NewPrepare();
   }
   // 如果不生成新的balllot
@@ -421,10 +423,23 @@ void Proposer::OnPrepareReply(const PaxosMsg & oPaxosMsg) {
   PLGHead("END");
 }
 
+// 这里应该是说处理的是这种情况
+// [A, B, C] 三个节点
+// - A ，B 编号都还在10
+// - C的编号到了1000
+// 上一个instance C发了拒绝信息。
+// 那么即使proposer已经走到了下一个instance
+// 在收到这个拒绝信息的时候，也应该是需要处理一下的。
+// 以免，后面总是发10，然后被C拒绝。
 void Proposer::OnExpiredPrepareReply(const PaxosMsg & oPaxosMsg) {
+  // 如果收到的是过期的拒绝消息
+  // 即上一个instance的拒绝消息
   if (oPaxosMsg.rejectbypromiseid() != 0) {
     PLGDebug("[Expired Prepare Reply Reject] RejectByPromiseID %lu", oPaxosMsg.rejectbypromiseid());
+    // 那么这里需要把 reject flag = true
     m_bWasRejectBySomeone = true;
+    // 修改proposal id
+    // 如果这个消息发来的proposal id比其他节点大的话
     m_oProposerState.SetOtherProposalID(oPaxosMsg.rejectbypromiseid());
   }
 }

@@ -35,29 +35,34 @@ class ProposerState {
 
   void Init();
 
+  // 在最开始工作的时候，需要设置一个proposer id
   void SetStartProposalID(const uint64_t llProposalID);
 
+  // 生成一次新的提议，比如可能是因为某次提议没有通过
   void NewPrepare();
-
+  // 当prepare收到很多消息之后，要开始准备后面accept的值。
   void AddPreAcceptValue(const BallotNumber & oOtherPreAcceptBallot, const std::string & sOtherPreAcceptValue);
 
   /////////////////////////
-
+  // 一个简单的get/set函数
   const uint64_t GetProposalID();
-
   const std::string & GetValue();
-
   void SetValue(const std::string & sValue);
-
+  // 记住最大的proposal id.
   void SetOtherProposalID(const uint64_t llOtherProposalID);
 
+  // 重置第二阶段准备的accept议题
   void ResetHighestOtherPreAcceptBallot();
 
  public:
   uint64_t m_llProposalID;
+  // 如果消息被拒绝了，那么需要记住被拒绝消息里面
+  // 对方，acceptor能够接受的最大的编号。
+  // 注意与m_oHighestOtherPreAcceptBallot进行区别。
   uint64_t m_llHighestOtherProposalID;
   std::string m_sValue;
-
+  // 这里记住的是被acceptor同意的消息的最大的编号
+  // 也就是为了取得最大议题的value用的。
   BallotNumber m_oHighestOtherPreAcceptBallot;
 
   Config * m_poConfig;
@@ -91,12 +96,14 @@ class Proposer : public Base {
 
   void OnPrepareReply(const PaxosMsg & oPaxosMsg);
 
+  // 超时的处理
   void OnExpiredPrepareReply(const PaxosMsg & oPaxosMsg);
 
   void Accept();
 
   void OnAcceptReply(const PaxosMsg & oPaxosMsg);
 
+  // Accept超时的处理
   void OnExpiredAcceptReply(const PaxosMsg & oPaxosMsg);
 
   void OnPrepareTimeout();
